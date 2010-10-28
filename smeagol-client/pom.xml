@@ -68,7 +68,7 @@
   	<repository>
   		<id>java-net</id>
   		<name>Java.net Maven repository</name>
-  		<url>http://download.java.net/maven/2/com/sun/jersey</url>
+  		<url>http://download.java.net/maven/2</url>
   	</repository>
   </repositories>
   <dependencies>

@@ -8,8 +8,9 @@ import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 
-public class TagTests extends TestCase {
+public class TagTest extends TestCase {
 
+	@SuppressWarnings("unused")
 	private Logger logger = Logger.getLogger(getClass());
 
 	private static final String ID1 = "id1";
@@ -18,6 +19,7 @@ public class TagTests extends TestCase {
 	private static final String DESC2 = "description2";
 	private static final String JSON1 = "{\"id\":\""+ID1+"\",\"description\":\""+DESC1+"\"}";
 	private static final String JSON2 = "{\"id\":\""+ID2+"\",\"description\":\""+DESC2+"\"}";
+	private static final String JSON_ARRAY = "["+ JSON1 +","+ JSON2 +"]";
 	private Tag t1;
 	private Tag t2;
 
@@ -82,9 +84,9 @@ public class TagTests extends TestCase {
 		tags.add(t1);
 		tags.add(t2);
 		try {
-			logger.debug(Tag.toJSONArray(tags));
+			assertEquals(JSON_ARRAY, Tag.toJSONArray(tags));
 		} catch (JSONException e) {
-			logger.error(e.getLocalizedMessage());
+			fail(e.getLocalizedMessage());
 		}
 	}
 
