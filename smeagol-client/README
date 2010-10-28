@@ -1,0 +1,28 @@
+smeagol-client 2.0
+------------------
+
+Compilar el codi
+----------------
+
+ * Per compilar el codi o executar els tests cal executar:
+
+        mvn compile
+
+   o bé
+
+        mvn test
+
+ * El fitxer .jar es pot obtenir amb la comanda:
+
+        mvn package
+
+Generar la documentació
+-----------------------
+
+ * Executar la següent instrucció:
+
+        mvn site
+
+   La documentació es genera sota el subdirectori target/site.
+
+
