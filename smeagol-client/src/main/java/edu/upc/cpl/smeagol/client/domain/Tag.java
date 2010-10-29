@@ -109,19 +109,19 @@ public class Tag implements Comparable<Tag> {
 				.toString();
 	}
 
-	public static Tag fromJSON(String json) throws JSONException {
+	public static Tag fromJsonString(String json) throws JSONException {
 		JSONObject jo = new JSONObject(json);
 		String id = jo.getString("id");
 		String description = jo.getString("description");
 		return new Tag(id, description);
 	}
 
-	public String toJSON() throws JSONException {
+	public String toJsonString() throws JSONException {
 		return new JSONStringer().object().key("id").value(id).key(
 				"description").value(description).endObject().toString();
 	}
 
-	public static Collection<Tag> fromJSONArray(String json)
+	public static Collection<Tag> fromJsonArray(String json)
 			throws JSONException {
 		Collection<Tag> result = new TreeSet<Tag>();
 		JSONArray ja = new JSONArray(json);
@@ -134,7 +134,7 @@ public class Tag implements Comparable<Tag> {
 		return result;
 	}
 
-	public static String toJSONArray(Collection<Tag> tags) throws JSONException {
+	public static String toJsonArray(Collection<Tag> tags) throws JSONException {
 		JSONStringer js = new JSONStringer();
 		js.array();
 		for (Tag t : tags) {

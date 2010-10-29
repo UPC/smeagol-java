@@ -2,10 +2,13 @@ package edu.upc.cpl.smeagol.client.domain;
 
 import java.util.Collection;
 
+import edu.upc.cpl.smeagol.client.domain.Tag;
+
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.json.JSONException;
+import org.json.JSONStringer;
 
 public class Resource implements Comparable<Resource> {
 
@@ -76,23 +79,36 @@ public class Resource implements Comparable<Resource> {
 	public int hashCode() {
 		return new HashCodeBuilder().append(this.id).toHashCode();
 	}
-	
-	public String toJSON() throws JSONException {
+
+	public String toJsonString() throws JSONException {
+		JSONStringer js = new JSONStringer();
+		js.object().key("id").value(id).key("description").value(description)
+				.key("info");
+
+		if (!tags.isEmpty()) {
+			js.key("tags");
+			js.array();
+			for (Tag t : tags) {
+				js.value(t);
+			}
+			js.endArray();
+		}
+		js.endObject();
+		return js.toString();
+	}
+
+	public static Resource fromJsonString(String json) throws JSONException {
 		// TODO
 		return null;
 	}
-	
-	public static Resource fromJSON(String json) throws JSONException {
+
+	public Collection<Resource> fromJsonArray(String json) throws JSONException {
 		// TODO
 		return null;
 	}
-	
-	public Collection<Resource> fromJSONArray(String json) throws JSONException {
-		// TODO
-		return null;
-	}
-	
-	public static String toJSONArray(Collection<Resource> resources) throws JSONException {
+
+	public static String toJsonArray(Collection<Resource> resources)
+			throws JSONException {
 		// TODO
 		return null;
 	}
