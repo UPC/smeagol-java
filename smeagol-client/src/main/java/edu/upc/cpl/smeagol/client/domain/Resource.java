@@ -1,24 +1,30 @@
 package edu.upc.cpl.smeagol.client.domain;
 
+import java.util.ArrayList;
 import java.util.Collection;
-
-import edu.upc.cpl.smeagol.client.domain.Tag;
 
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONString;
 import org.json.JSONStringer;
 
-public class Resource implements Comparable<Resource> {
+public class Resource implements Comparable<Resource>, JSONString {
+
+	private Logger logger = Logger.getLogger(getClass());
 
 	public static final int MAX_DESCRIPTION_LEN = 128;
 	public static final int MAX_INFO_LEN = 255;
 
 	private int id;
 	private String description;
-	private byte[] info;
-	private Collection<Tag> tags;
+	private String info;
+	private Collection<Tag> tags = new ArrayList<Tag>();
 
 	public void setId(int id) {
 		this.id = id;
@@ -36,11 +42,11 @@ public class Resource implements Comparable<Resource> {
 		return description;
 	}
 
-	public void setInfo(byte[] info) {
+	public void setInfo(String info) {
 		this.info = info;
 	}
 
-	public byte[] getInfo() {
+	public String getInfo() {
 		return info;
 	}
 
@@ -72,7 +78,18 @@ public class Resource implements Comparable<Resource> {
 			return false;
 		}
 		Resource other = (Resource) obj;
-		return new EqualsBuilder().append(this.id, other.id).isEquals();
+
+		boolean tagEquals = false;
+		boolean attrEquals = new EqualsBuilder().append(this.id, other.id)
+				.append(this.description, other.description).append(this.info,
+						other.info).isEquals();
+		if (attrEquals) {
+			// tag lists must contain exactly same elements
+			tagEquals = this.getTags().equals(other.getTags())
+					|| (this.getTags().containsAll(other.getTags()) && other
+							.getTags().containsAll(this.getTags()));
+		}
+		return attrEquals && tagEquals;
 	}
 
 	@Override
@@ -80,36 +97,66 @@ public class Resource implements Comparable<Resource> {
 		return new HashCodeBuilder().append(this.id).toHashCode();
 	}
 
-	public String toJsonString() throws JSONException {
-		JSONStringer js = new JSONStringer();
-		js.object().key("id").value(id).key("description").value(description)
-				.key("info");
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this).append("id", id).append("description",
+				description).append("info", info).append("tags", tags)
+				.toString();
+	}
 
-		if (!tags.isEmpty()) {
+	public String toJSONString() {
+		JSONStringer js = new JSONStringer();
+		try {
+			js.object().key("id").value(new Integer(id)).key("description")
+					.value(description).key("info").value(info);
+			// add Resource tags into JSON string
 			js.key("tags");
 			js.array();
 			for (Tag t : tags) {
 				js.value(t);
 			}
 			js.endArray();
+			js.endObject();
+
+		} catch (JSONException e) {
+			logger.error(e.getLocalizedMessage());
 		}
-		js.endObject();
+
 		return js.toString();
 	}
 
-	public static Resource fromJsonString(String json) throws JSONException {
-		// TODO
-		return null;
+	public static Resource fromJSONString(String json) throws JSONException {
+		JSONObject jo = new JSONObject(json);
+		Resource r = new Resource();
+		r.setId(jo.getInt("id"));
+		r.setDescription(jo.getString("description"));
+		r.setInfo(jo.getString("info"));
+		JSONArray jsonTagArray = jo.getJSONArray("tags");
+		Collection<Tag> tags = Tag.fromJSONArray(jsonTagArray.toString());
+		r.setTags(tags);
+		return r;
 	}
 
-	public Collection<Resource> fromJsonArray(String json) throws JSONException {
-		// TODO
-		return null;
-	}
-
-	public static String toJsonArray(Collection<Resource> resources)
+	public static Collection<Resource> fromJSONArray(String json)
 			throws JSONException {
-		// TODO
-		return null;
+		Collection<Resource> result = new ArrayList<Resource>();
+		JSONArray ja = new JSONArray(json);
+		for (int i = 0; i < ja.length(); i++) {
+			result.add(Resource.fromJSONString(ja.getJSONObject(i).toString()));
+		}
+		return result;
 	}
+
+	public static String toJSONArray(Collection<Resource> resources)
+			throws JSONException {
+		JSONStringer js = new JSONStringer();
+		js.array();
+		JSONArray ja = new JSONArray();
+		for (Resource r : resources) {
+			ja.put(r);
+		}
+		js.endArray();
+		return ja.toString();
+	}
+
 }

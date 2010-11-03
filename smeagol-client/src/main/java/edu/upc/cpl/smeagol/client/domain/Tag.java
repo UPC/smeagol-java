@@ -1,7 +1,7 @@
 package edu.upc.cpl.smeagol.client.domain;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.TreeSet;
 
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONString;
 import org.json.JSONStringer;
 
 /**
@@ -19,8 +20,8 @@ import org.json.JSONStringer;
  * @author angel
  * 
  */
-public class Tag implements Comparable<Tag> {
-	protected Logger logger = Logger.getLogger(getClass());
+public class Tag implements Comparable<Tag>, JSONString {
+	private Logger logger = Logger.getLogger(getClass());
 
 	/**
 	 * Maximum length for Tag id.
@@ -105,25 +106,32 @@ public class Tag implements Comparable<Tag> {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append(id).append(description)
-				.toString();
+		return new ToStringBuilder(this).append("id", id).append("description",
+				description).toString();
 	}
 
-	public static Tag fromJsonString(String json) throws JSONException {
+	public static Tag fromJSONString(String json) throws JSONException {
 		JSONObject jo = new JSONObject(json);
 		String id = jo.getString("id");
 		String description = jo.getString("description");
 		return new Tag(id, description);
 	}
 
-	public String toJsonString() throws JSONException {
-		return new JSONStringer().object().key("id").value(id).key(
-				"description").value(description).endObject().toString();
+	public String toJSONString() {
+		String json;
+		try {
+			json = new JSONStringer().object().key("id").value(id).key(
+					"description").value(description).endObject().toString();
+		} catch (JSONException e) {
+			logger.error(e.getLocalizedMessage());
+			return "";
+		}
+		return json;
 	}
 
-	public static Collection<Tag> fromJsonArray(String json)
+	public static Collection<Tag> fromJSONArray(String json)
 			throws JSONException {
-		Collection<Tag> result = new TreeSet<Tag>();
+		Collection<Tag> result = new ArrayList<Tag>();
 		JSONArray ja = new JSONArray(json);
 		for (int i = 0; i < ja.length(); i++) {
 			JSONObject obj = ja.getJSONObject(i);
@@ -134,14 +142,11 @@ public class Tag implements Comparable<Tag> {
 		return result;
 	}
 
-	public static String toJsonArray(Collection<Tag> tags) throws JSONException {
-		JSONStringer js = new JSONStringer();
-		js.array();
+	public static String toJSONArray(Collection<Tag> tags) throws JSONException {
+		JSONArray ja = new JSONArray();
 		for (Tag t : tags) {
-			js.object().key("id").value(t.getId()).key("description").value(
-					t.getDescription()).endObject();
+			ja.put(t);
 		}
-		js.endArray();
-		return js.toString();
+		return ja.toString();
 	}
 }

@@ -49,18 +49,14 @@ public class TagTest extends TestCase {
 	}
 
 	public void testToJSON() {
-		try {
-			assertEquals(JSON1, t1.toJsonString());
-		} catch (JSONException e1) {
-			fail(e1.getLocalizedMessage());
-		}
+			assertEquals(JSON1, t1.toJSONString());
 	}
 
 	public void testFromJSON() {
 		String json = "{ \"id\" : \"" + ID1 + "\", \"description\" : \""
 				+ DESC1 + "\"}";
 		try {
-			Tag t = Tag.fromJsonString(json);
+			Tag t = Tag.fromJSONString(json);
 			assertEquals(t1, t);
 		} catch (JSONException e) {
 			fail(e.getLocalizedMessage());
@@ -70,7 +66,7 @@ public class TagTest extends TestCase {
 	public void testFromJSONArray() {
 		String jsonArr = "[" + JSON1 + "," + JSON2 + "]";
 		try {
-			Collection<Tag> t = Tag.fromJsonArray(jsonArr);
+			Collection<Tag> t = Tag.fromJSONArray(jsonArr);
 			assertTrue(t.contains(t1));
 			assertTrue(t.contains(t2));
 			assertEquals(2, t.size());
@@ -84,7 +80,7 @@ public class TagTest extends TestCase {
 		tags.add(t1);
 		tags.add(t2);
 		try {
-			assertEquals(JSON_ARRAY, Tag.toJsonArray(tags));
+			assertEquals(JSON_ARRAY, Tag.toJSONArray(tags));
 		} catch (JSONException e) {
 			fail(e.getLocalizedMessage());
 		}

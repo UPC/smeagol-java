@@ -19,7 +19,11 @@ Compilar el codi
 Generar la documentació
 -----------------------
 
- * Executar la següent instrucció:
+ * Executar la següent instrucció per generar el Javadoc de la API:
+
+        mvn javadoc:javadoc
+
+ * Executar la següent instrucció per generar informacio sobre el projecte:
 
         mvn site
 
