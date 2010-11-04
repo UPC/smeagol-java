@@ -9,7 +9,9 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONString;
 import org.json.JSONStringer;
 
@@ -27,7 +29,7 @@ public class Event implements Comparable<Event>, JSONString {
 	 * Maximum length for the "description" field
 	 */
 	public static final int MAX_DESCRIPTION_LEN = 50;
-	
+
 	/**
 	 * Maximum length for the "info" length
 	 */
@@ -134,7 +136,7 @@ public class Event implements Comparable<Event>, JSONString {
 		JSONStringer js = new JSONStringer();
 		try {
 			js.object().key("id").value(new Integer(id)).key("description")
-					.value(description).key("info").value(description);
+					.value(description).key("info").value(info);
 			js.key("tags");
 			js.array();
 			for (Tag t : tags) {
@@ -151,19 +153,34 @@ public class Event implements Comparable<Event>, JSONString {
 	}
 
 	public static Event fromJSONString(String json) throws JSONException {
-		// TODO
-		return null;
+		JSONObject jo = new JSONObject(json);
+		Event e = new Event();
+		e.setId(jo.getInt("id"));
+		e.setDescription(jo.getString("description"));
+		e.setInfo(jo.getString("info"));
+		JSONArray jsonTagArray = jo.getJSONArray("tags");
+		Collection<Tag> tags = Tag.fromJSONArray(jsonTagArray.toString());
+		e.setTags(tags);
+		return e;
 	}
 
 	public static Collection<Event> fromJSONArray(String json)
 			throws JSONException {
-		// TODO
-		return null;
+		JSONArray ja = new JSONArray(json);
+		Collection<Event> result = new ArrayList<Event>();
+		for (int i = 0; i < ja.length(); i++) {
+			Event e = Event.fromJSONString(ja.get(i).toString());
+			result.add(e);
+		}
+		return result;
 	}
 
 	public static String toJSONArray(Collection<Event> events) {
-		// TODO
-		return null;
+		JSONArray ja = new JSONArray();
+		for (Event e : events) {
+			ja.put(e);
+		}
+		return ja.toString();
 	}
 
 }
