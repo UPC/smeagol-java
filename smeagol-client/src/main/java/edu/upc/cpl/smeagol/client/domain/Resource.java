@@ -14,9 +14,17 @@ import org.json.JSONObject;
 import org.json.JSONString;
 import org.json.JSONStringer;
 
+/**
+ * Resources represent anything which can be booked, such as an object or
+ * service. Resources have an "id", a "description" and, possibly, some related
+ * "info". Resources may have a collection of <code>Tag</code>s.
+ * 
+ * @author angel
+ * 
+ */
 public class Resource implements Comparable<Resource>, JSONString {
 
-	private Logger logger = Logger.getLogger(getClass());
+	private static Logger logger = Logger.getLogger(Resource.class);
 
 	public static final int MAX_DESCRIPTION_LEN = 128;
 	public static final int MAX_INFO_LEN = 255;
@@ -81,8 +89,8 @@ public class Resource implements Comparable<Resource>, JSONString {
 
 		boolean tagEquals = false;
 		boolean attrEquals = new EqualsBuilder().append(this.id, other.id)
-				.append(this.description, other.description).append(this.info,
-						other.info).isEquals();
+				.append(this.description, other.description)
+				.append(this.info, other.info).isEquals();
 		if (attrEquals) {
 			// tag lists must contain exactly same elements
 			tagEquals = this.getTags().equals(other.getTags())
@@ -99,9 +107,9 @@ public class Resource implements Comparable<Resource>, JSONString {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("id", id).append("description",
-				description).append("info", info).append("tags", tags)
-				.toString();
+		return new ToStringBuilder(this).append("id", id)
+				.append("description", description).append("info", info)
+				.append("tags", tags).toString();
 	}
 
 	public String toJSONString() {
@@ -119,6 +127,7 @@ public class Resource implements Comparable<Resource>, JSONString {
 			js.endObject();
 
 		} catch (JSONException e) {
+			// this should never happen
 			logger.error(e.getLocalizedMessage());
 		}
 
@@ -147,15 +156,11 @@ public class Resource implements Comparable<Resource>, JSONString {
 		return result;
 	}
 
-	public static String toJSONArray(Collection<Resource> resources)
-			throws JSONException {
-		JSONStringer js = new JSONStringer();
-		js.array();
+	public static String toJSONArray(Collection<Resource> resources) {
 		JSONArray ja = new JSONArray();
 		for (Resource r : resources) {
 			ja.put(r);
 		}
-		js.endArray();
 		return ja.toString();
 	}
 

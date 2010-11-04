@@ -142,7 +142,7 @@ public class Tag implements Comparable<Tag>, JSONString {
 		return result;
 	}
 
-	public static String toJSONArray(Collection<Tag> tags) throws JSONException {
+	public static String toJSONArray(Collection<Tag> tags) {
 		JSONArray ja = new JSONArray();
 		for (Tag t : tags) {
 			ja.put(t);

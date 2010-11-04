@@ -97,12 +97,8 @@ public class ResourceTest extends TestCase {
 		Collection<Resource> c = new ArrayList<Resource>();
 		c.add(r1);
 		c.add(r2);
-		try {
-			String jsonArray = Resource.toJSONArray(c);
-			assertEquals(JSON_ARRAY, jsonArray);
-		} catch (JSONException e) {
-			fail(e.getLocalizedMessage());
-		}
+		String jsonArray = Resource.toJSONArray(c);
+		assertEquals(JSON_ARRAY, jsonArray);
 	}
 
 }

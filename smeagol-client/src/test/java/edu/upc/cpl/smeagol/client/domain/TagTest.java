@@ -17,9 +17,11 @@ public class TagTest extends TestCase {
 	private static final String ID2 = "id2";
 	private static final String DESC1 = "description1";
 	private static final String DESC2 = "description2";
-	private static final String JSON1 = "{\"id\":\""+ID1+"\",\"description\":\""+DESC1+"\"}";
-	private static final String JSON2 = "{\"id\":\""+ID2+"\",\"description\":\""+DESC2+"\"}";
-	private static final String JSON_ARRAY = "["+ JSON1 +","+ JSON2 +"]";
+	private static final String JSON1 = "{\"id\":\"" + ID1
+			+ "\",\"description\":\"" + DESC1 + "\"}";
+	private static final String JSON2 = "{\"id\":\"" + ID2
+			+ "\",\"description\":\"" + DESC2 + "\"}";
+	private static final String JSON_ARRAY = "[" + JSON1 + "," + JSON2 + "]";
 	private Tag t1;
 	private Tag t2;
 
@@ -49,7 +51,7 @@ public class TagTest extends TestCase {
 	}
 
 	public void testToJSON() {
-			assertEquals(JSON1, t1.toJSONString());
+		assertEquals(JSON1, t1.toJSONString());
 	}
 
 	public void testFromJSON() {
@@ -70,20 +72,16 @@ public class TagTest extends TestCase {
 			assertTrue(t.contains(t1));
 			assertTrue(t.contains(t2));
 			assertEquals(2, t.size());
-		} catch (JSONException e) { 
+		} catch (JSONException e) {
 			fail(e.getLocalizedMessage());
 		}
 	}
-	
+
 	public void testToJSONArray() {
 		Collection<Tag> tags = new ArrayList<Tag>();
 		tags.add(t1);
 		tags.add(t2);
-		try {
-			assertEquals(JSON_ARRAY, Tag.toJSONArray(tags));
-		} catch (JSONException e) {
-			fail(e.getLocalizedMessage());
-		}
+		assertEquals(JSON_ARRAY, Tag.toJSONArray(tags));
 	}
 
 }
