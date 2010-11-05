@@ -95,6 +95,12 @@
     	<type>jar</type>
     	<scope>compile</scope>
     </dependency>
+    <dependency>
+    	<groupId>com.sun.jersey</groupId>
+    	<artifactId>jersey-client</artifactId>
+    	<version>1.4</version>
+    	<scope>compile</scope>
+    </dependency>
   </dependencies>
   <distributionManagement>
   	<site>

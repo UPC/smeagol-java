@@ -4,6 +4,14 @@ smeagol-client 2.0
 Compilar el codi
 ----------------
 
+ * Descarregar la llibreria jersey-client:
+
+        http://download.java.net/maven/2/com/sun/jersey/jersey-client/1.4/jersey-client-1.4.jar
+
+ * Instal·lar la llibreria jersey-client al repositori Maven 2:
+
+        mvn install:install-file -DgroupId=com.sun.jersey -DartifactId=jersey-client -Dversion=1.4 -Dpackaging=bundle -Dfile=jersey-client-1.4.jar
+
  * Per compilar el codi o executar els tests cal executar:
 
         mvn compile
