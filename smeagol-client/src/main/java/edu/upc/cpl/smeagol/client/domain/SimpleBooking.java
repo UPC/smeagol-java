@@ -1,82 +1,67 @@
 package edu.upc.cpl.smeagol.client.domain;
 
-import org.apache.commons.lang.builder.CompareToBuilder;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class SimpleBooking implements Booking {
+/**
+ * The simplest possible booking is represented by a continuos time interval.
+ * <p>
+ * Internally, the class holds the representation of the interval.
+ * 
+ * @see org.joda.time.Interval
+ * 
+ * @author angel
+ * 
+ */
+public class SimpleBooking extends Booking {
 
-	private int id;
-	private DateTime dtStart;
-	private DateTime dtEnd;
+	private static Logger logger = Logger.getLogger(Booking.class);
 
-	public int getId() {
-		return id;
+	private Interval interval;
+
+	public SimpleBooking() {
 	}
 
-	public void setId(int id) {
-		this.id = id;
-	}
-
-	public void setDtStart(DateTime dtStart) {
-		this.dtStart = dtStart;
-	}
-
-	public DateTime getDtStart() {
-		return dtStart;
-	}
-
-	public void setDtEnd(DateTime dtEnd) {
-		this.dtEnd = dtEnd;
-	}
-
-	public DateTime getDtEnd() {
-		return dtEnd;
-	}
-
-	public int compareTo(Booking o) {
-		if (this == o) {
-			return 0;
-		}
-		if (!(o instanceof SimpleBooking)) {
-			return -1;
-		}
-		SimpleBooking other = (SimpleBooking) o;
-		return new CompareToBuilder().append(this.dtStart, other.dtStart)
-				.append(this.dtEnd, other.dtEnd).toComparison();
+	public SimpleBooking(Integer id, Interval interval) {
+		this.setId(id);
+		this.interval = interval;
 	}
 
 	@Override
-	public String toString() {
-		return new ToStringBuilder(this).append("id", id)
-				.append("dtStart", dtStart).append("dtEnd", dtEnd).toString();
+	public DateTime getStart() {
+		return this.interval.getStart();
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder().append(id).toHashCode();
+	public DateTime getEnd() {
+		return this.interval.getEnd();
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) {
-			return false;
-		}
-		if (this == obj) {
-			return true;
-		}
-		if (!this.getClass().equals(obj.getClass())) {
-			return false;
-		}
-		SimpleBooking other = (SimpleBooking) obj;
-		return new EqualsBuilder().append(this.id, other.id).isEquals();
-	}
-
 	public String toJSONString() {
-		// TODO Auto-generated method stub
-		return null;
+		JSONObject jo = new JSONObject();
+		try {
+			jo.put("id", getId());
+			jo.put("start", this.interval.getStart().toString());
+			jo.put("end", this.interval.getEnd().toString());
+		} catch (JSONException e) {
+			logger.error(e.getLocalizedMessage());
+		}
+		return jo.toString();
+	}
+
+	@Override
+	public Booking fromJSONString(String json) throws JSONException, IllegalArgumentException {
+		JSONObject jo = new JSONObject(json);
+		Integer id = jo.getInt("id");
+		DateTime start = new DateTime(jo.getString("start"));
+		DateTime end = new DateTime(jo.getString("end"));
+		Interval interval = new Interval(start, end);
+
+		return new SimpleBooking(id, interval);
 	}
 
 }

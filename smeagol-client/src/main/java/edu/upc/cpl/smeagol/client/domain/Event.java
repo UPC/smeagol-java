@@ -91,8 +91,7 @@ public class Event implements Comparable<Event>, JSONString {
 	}
 
 	public int compareTo(Event other) {
-		return new CompareToBuilder().append(this.description,
-				other.description).toComparison();
+		return new CompareToBuilder().append(this.description, other.description).toComparison();
 	}
 
 	@Override
@@ -109,13 +108,12 @@ public class Event implements Comparable<Event>, JSONString {
 		Event other = (Event) obj;
 
 		boolean equalTags = false;
-		boolean equalAttrs = new EqualsBuilder().append(this.id, other.id)
-				.append(this.description, other.description).isEquals();
+		boolean equalAttrs = new EqualsBuilder().append(this.id, other.id).append(this.description, other.description)
+				.isEquals();
 		if (equalAttrs) {
 			// tag lists should be equal, element by element (ignoring order)
 			equalTags = (this.tags == other.tags)
-					|| (this.tags.containsAll(other.tags) && other.tags
-							.containsAll(this.tags));
+					|| (this.tags.containsAll(other.tags) && other.tags.containsAll(this.tags));
 		}
 		return equalAttrs && equalTags;
 	}
@@ -127,16 +125,14 @@ public class Event implements Comparable<Event>, JSONString {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("id", id)
-				.append("description", description).append("info", info)
+		return new ToStringBuilder(this).append("id", id).append("description", description).append("info", info)
 				.append("tags", tags).toString();
 	}
 
 	public String toJSONString() {
 		JSONStringer js = new JSONStringer();
 		try {
-			js.object().key("id").value(new Integer(id)).key("description")
-					.value(description).key("info").value(info);
+			js.object().key("id").value(new Integer(id)).key("description").value(description).key("info").value(info);
 			js.key("tags");
 			js.array();
 			for (Tag t : tags) {
@@ -164,8 +160,7 @@ public class Event implements Comparable<Event>, JSONString {
 		return e;
 	}
 
-	public static Collection<Event> fromJSONArray(String json)
-			throws JSONException {
+	public static Collection<Event> fromJSONArray(String json) throws JSONException {
 		JSONArray ja = new JSONArray(json);
 		Collection<Event> result = new ArrayList<Event>();
 		for (int i = 0; i < ja.length(); i++) {
