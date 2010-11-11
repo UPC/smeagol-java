@@ -48,8 +48,8 @@ public abstract class Booking implements Comparable<Booking>, JSONSerializable<B
 	 */
 	public int compareTo(Booking b) {
 		logger.debug("compareTo " + this.toString() + " versus " + b.toString());
-		return new CompareToBuilder().append(this.getStart(), b.getStart()).append(this.getEnd(), b.getEnd())
-				.toComparison();
+		return new CompareToBuilder().appendSuper(this.getStart().compareTo(b.getStart()))
+				.appendSuper(this.getEnd().compareTo(b.getEnd())).toComparison();
 	}
 
 	@Override
