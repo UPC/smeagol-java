@@ -1,10 +1,14 @@
 package edu.upc.cpl.smeagol.client.domain;
 
+import java.lang.reflect.Type;
+import java.util.Collection;
+
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * The simplest possible booking is represented by a continuos time interval.
@@ -17,8 +21,9 @@ import org.json.JSONObject;
  * 
  */
 public class SimpleBooking extends Booking {
-
-	private static Logger logger = Logger.getLogger(Booking.class);
+	@SuppressWarnings("unused")
+	private static transient Logger logger = Logger.getLogger(Booking.class);
+	private static transient Gson gson = new Gson();
 
 	private Interval interval;
 
@@ -40,28 +45,22 @@ public class SimpleBooking extends Booking {
 		return this.interval.getEnd();
 	}
 
-	@Override
-	public String toJSONString() {
-		JSONObject jo = new JSONObject();
-		try {
-			jo.put("id", getId());
-			jo.put("start", this.interval.getStart().toString());
-			jo.put("end", this.interval.getEnd().toString());
-		} catch (JSONException e) {
-			logger.error(e.getLocalizedMessage());
-		}
-		return jo.toString();
+	public String serialize() {
+		return gson.toJson(this);
 	}
 
-	@Override
-	public Booking fromJSONString(String json) throws JSONException, IllegalArgumentException {
-		JSONObject jo = new JSONObject(json);
-		Integer id = jo.getInt("id");
-		DateTime start = new DateTime(jo.getString("start"));
-		DateTime end = new DateTime(jo.getString("end"));
-		Interval interval = new Interval(start, end);
+	public static String serialize(Collection<Booking> c) {
+		return gson.toJson(c);
+	}
 
-		return new SimpleBooking(id, interval);
+	public static Booking deserialize(String json) {
+		return gson.fromJson(json, SimpleBooking.class);
+	}
+
+	public static Collection<Booking> deserializeCollection(String json) {
+		Type collectionType = new TypeToken<Collection<SimpleBooking>>() {
+		}.getType();
+		return gson.fromJson(json, collectionType);
 	}
 
 }

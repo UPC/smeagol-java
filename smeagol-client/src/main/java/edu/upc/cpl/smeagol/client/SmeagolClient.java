@@ -3,15 +3,11 @@ package edu.upc.cpl.smeagol.client;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.ws.rs.core.MediaType;
 
-import org.json.JSONException;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
+import com.google.gson.JsonParseException;
 
 import edu.upc.cpl.smeagol.client.domain.Tag;
 
@@ -40,7 +36,7 @@ public class SmeagolClient {
 	 * 
 	 * @param url
 	 *            the base url of the Sméagol server. For example:
-	 *            http://www.example.com:1234/
+	 *            http://www.example.com:3000/
 	 * @throws MalformedURLException
 	 *             if the provided url is not a valid URL
 	 */
@@ -64,15 +60,15 @@ public class SmeagolClient {
 	 * Retrieve all tags defined in server.
 	 * 
 	 * @return a collection with all the tags defined on the server
-	 * @throws JSONException
+	 * @throws JsonParseException
 	 *             if the server response is not a invalid representation of a
 	 *             tag list. This should only happen when there's not an Smeagol
 	 *             v2 server listening on the URL provided to the constructor.
 	 */
-	public Collection<Tag> getTags() throws JSONException {
+	public Collection<Tag> getTags() throws JsonParseException {
 		String tagJsonArray = tag.accept(MediaType.APPLICATION_JSON_TYPE).get(
 				String.class);
-		return Tag.fromJSONArray(tagJsonArray);
+		return Tag.deserializeCollection(tagJsonArray);
 	}
 
 	/**
@@ -81,11 +77,11 @@ public class SmeagolClient {
 	 * @param id
 	 *            the id of the tag to retrieve.
 	 * @return the tag
-	 * @throws JSONException
+	 * @throws JsonParseException
 	 */
-	public Tag getTag(String id) throws JSONException {
+	public Tag getTag(String id) throws JsonParseException {
 		String json = tag.path(id).accept(MediaType.APPLICATION_JSON_TYPE).get(
 				String.class);
-		return Tag.fromJSONString(json);
+		return Tag.deserialize(json);
 	}
 }

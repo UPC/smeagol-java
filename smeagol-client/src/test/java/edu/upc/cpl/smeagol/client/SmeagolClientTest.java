@@ -5,7 +5,6 @@ import java.util.Collection;
 import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,26 +23,18 @@ public class SmeagolClientTest extends TestCase {
 
 	@Test
 	public void testGetTags() {
-		try {
-			Collection<Tag> tags = client.getTags();
-			assertTrue(tags.size() > 0);
-			for (Tag t : tags) {
-				logger.debug(t.toString());
-			}
-		} catch (JSONException e) {
-			fail(e.getLocalizedMessage());
+		Collection<Tag> tags = client.getTags();
+		assertTrue(tags.size() > 0);
+		for (Tag t : tags) {
+			logger.debug(t.toString());
 		}
 	}
 
 	@Test
 	public void testGetTag() {
-		try {
-			Tag t = client.getTag("isabel");
-			assertTrue(t != null);
-			logger.debug(t.toString());
-		} catch (JSONException e) {
-			fail(e.getLocalizedMessage());
-		}
+		Tag t = client.getTag("isabel");
+		assertTrue(t != null);
+		logger.debug(t.toString());
 	}
 
 }

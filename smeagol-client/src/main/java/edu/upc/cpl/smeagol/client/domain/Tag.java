@@ -1,6 +1,6 @@
 package edu.upc.cpl.smeagol.client.domain;
 
-import java.util.ArrayList;
+import java.lang.reflect.Type;
 import java.util.Collection;
 
 import org.apache.commons.lang.builder.CompareToBuilder;
@@ -8,11 +8,10 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONString;
-import org.json.JSONStringer;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Tags are used to add semantic information to resources, events and bookings.
@@ -20,21 +19,26 @@ import org.json.JSONStringer;
  * @author angel
  * 
  */
-public class Tag implements Comparable<Tag>, JSONString {
-	private Logger logger = Logger.getLogger(getClass());
+public class Tag implements Comparable<Tag> {
+	@SuppressWarnings("unused")
+	private transient Logger logger = Logger.getLogger(getClass());
+	private transient static Gson gson = new Gson();
 
 	/**
 	 * Maximum length for Tag id.
 	 */
-	public static final int MAX_ID_LEN = 64;
+	public transient static final int MAX_ID_LEN = 64;
 
 	/**
 	 * Maximum length for Tag description.
 	 */
-	public static final int MAX_DESCRIPTION_LEN = 255;
+	public transient static final int MAX_DESCRIPTION_LEN = 255;
 
-	private String id = "";
-	private String description = "";
+	private String id;
+	private String description;
+
+	public Tag() {
+	}
 
 	/**
 	 * Create a tag without an empty description.
@@ -59,6 +63,10 @@ public class Tag implements Comparable<Tag>, JSONString {
 	public Tag(String id, String description) {
 		this.id = id;
 		this.description = description;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getId() {
@@ -110,43 +118,23 @@ public class Tag implements Comparable<Tag>, JSONString {
 				description).toString();
 	}
 
-	public static Tag fromJSONString(String json) throws JSONException {
-		JSONObject jo = new JSONObject(json);
-		String id = jo.getString("id");
-		String description = jo.getString("description");
-		return new Tag(id, description);
+	public String serialize() {
+		return gson.toJson(this);
 	}
 
-	public String toJSONString() {
-		String json;
-		try {
-			json = new JSONStringer().object().key("id").value(id).key(
-					"description").value(description).endObject().toString();
-		} catch (JSONException e) {
-			logger.error(e.getLocalizedMessage());
-			return "";
-		}
-		return json;
+	public static String serialize(Collection<Tag> c) {
+		return gson.toJson(c);
 	}
 
-	public static Collection<Tag> fromJSONArray(String json)
-			throws JSONException {
-		Collection<Tag> result = new ArrayList<Tag>();
-		JSONArray ja = new JSONArray(json);
-		for (int i = 0; i < ja.length(); i++) {
-			JSONObject obj = ja.getJSONObject(i);
-			String id = obj.getString("id");
-			String desc = obj.getString("description");
-			result.add(new Tag(id, desc));
-		}
-		return result;
+	public static Tag deserialize(String json) throws JsonParseException {
+		return gson.fromJson(json, Tag.class);
 	}
 
-	public static String toJSONArray(Collection<Tag> tags) {
-		JSONArray ja = new JSONArray();
-		for (Tag t : tags) {
-			ja.put(t);
-		}
-		return ja.toString();
+	public static Collection<Tag> deserializeCollection(String json)
+			throws JsonParseException {
+		Type tagCollection = new TypeToken<Collection<Tag>>() {
+		}.getType();
+		return gson.fromJson(json, tagCollection);
 	}
+
 }

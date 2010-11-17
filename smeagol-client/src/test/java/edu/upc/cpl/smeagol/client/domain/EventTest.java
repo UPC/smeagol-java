@@ -5,8 +5,6 @@ import java.util.Collection;
 
 import junit.framework.TestCase;
 
-import org.json.JSONException;
-import org.json.JSONStringer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,10 +38,9 @@ public class EventTest extends TestCase {
 		TAG_LIST.add(T2);
 		e1.setTags(TAG_LIST);
 
-		E1_JSON = new JSONStringer().object().key("id").value(ID1)
-				.key("description").value(DESC1).key("info").value(INFO1)
-				.key("tags").array().value(T1).value(T2).endArray().endObject()
-				.toString();
+		E1_JSON = "{\"id\":" + ID1 + ",\"description\":\"" + DESC1
+				+ "\",\"info\":\"" + INFO1 + "\",\"tags\":"
+				+ Tag.serialize(TAG_LIST) + "}";
 
 		e2 = new Event();
 		e2.setId(ID2);
@@ -51,9 +48,9 @@ public class EventTest extends TestCase {
 		e2.setInfo(INFO2);
 		e2.setTags(EMPTY_TAG_LIST);
 
-		E2_JSON = new JSONStringer().object().key("id").value(ID2)
-				.key("description").value(DESC2).key("info").value(INFO2)
-				.key("tags").array().endArray().endObject().toString();
+		E2_JSON = "{\"id\":" + ID2 + ",\"description\":\"" + DESC2
+				+ "\",\"info\":\"" + INFO2 + "\",\"tags\":"
+				+ Tag.serialize(EMPTY_TAG_LIST) + "}";
 
 		/*
 		 * e1 and e1Copy will have the same attributes and tags, so
@@ -85,45 +82,38 @@ public class EventTest extends TestCase {
 	}
 
 	@Test
-	public void testToJSONString() {
-		assertEquals(E1_JSON, e1.toJSONString());
-		assertEquals(E1_JSON, e1Copy.toJSONString());
-		assertEquals(E2_JSON, e2.toJSONString());
+	public void testSerialize() {
+		assertEquals(E1_JSON, e1.serialize());
+		assertEquals(E1_JSON, e1Copy.serialize());
+		assertEquals(E2_JSON, e2.serialize());
 	}
 
 	@Test
-	public void testFromJSONString() {
+	public void testDeserialize() {
 		Event event1, event2;
-		try {
-			event1 = Event.fromJSONString(E1_JSON);
-			assertEquals(e1, event1);
-			event2 = Event.fromJSONString(E2_JSON);
-			assertEquals(e2, event2);
-		} catch (JSONException e) {
-			fail(e.getLocalizedMessage());
-		}
+		event1 = Event.deserialize(E1_JSON);
+		assertEquals(e1, event1);
+		event2 = Event.deserialize(E2_JSON);
+		assertEquals(e2, event2);
+
 	}
 
 	@Test
-	public void testFromJSONArray() {
+	public void testDeserializeCollection() {
 		String JSON_ARRAY = "[" + E1_JSON + "," + E2_JSON + "]";
-		try {
-			Collection<Event> events = Event.fromJSONArray(JSON_ARRAY);
-			assertEquals(2, events.size());
-			assertTrue(events.contains(e1));
-			assertTrue(events.contains(e2));
-		} catch (JSONException e) {
-			fail(e.getLocalizedMessage());
-		}
+		Collection<Event> events = Event.deserializeCollection(JSON_ARRAY);
+		assertEquals(2, events.size());
+		assertTrue(events.contains(e1));
+		assertTrue(events.contains(e2));
 	}
 
 	@Test
-	public void testToJSONArray() {
+	public void testSerializeCollection() {
 		String JSON_ARRAY = "[" + E1_JSON + "," + E2_JSON + "]";
 		Collection<Event> events = new ArrayList<Event>();
 		events.add(e1);
 		events.add(e2);
-		assertEquals(JSON_ARRAY, Event.toJSONArray(events));
+		assertEquals(JSON_ARRAY, Event.serialize(events));
 	}
 
 	@Test

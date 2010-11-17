@@ -5,8 +5,6 @@ import java.util.Collection;
 
 import junit.framework.TestCase;
 
-import org.json.JSONException;
-
 public class ResourceTest extends TestCase {
 	private static final int ID1 = 1;
 	private static final int ID2 = 2;
@@ -39,10 +37,10 @@ public class ResourceTest extends TestCase {
 		r2.setTags(EMPTY_TAG_LIST);
 		R1_AS_JSON = "{\"id\":" + ID1 + ",\"description\":\"" + DESC1
 				+ "\",\"info\":\"" + INFO1 + "\",\"tags\":"
-				+ Tag.toJSONArray(tags) + "}";
+				+ Tag.serialize(tags) + "}";
 		R2_AS_JSON = "{\"id\":" + ID2 + ",\"description\":\"" + DESC2
 				+ "\",\"info\":\"" + INFO2 + "\",\"tags\":"
-				+ Tag.toJSONArray(EMPTY_TAG_LIST) + "}";
+				+ Tag.serialize(EMPTY_TAG_LIST) + "}";
 		JSON_ARRAY = "[" + R1_AS_JSON + "," + R2_AS_JSON + "]";
 	}
 
@@ -66,38 +64,31 @@ public class ResourceTest extends TestCase {
 		assertEquals(r1.getTags(), other.getTags());
 	}
 
-	public void testToJSONString() {
-		assertEquals(R1_AS_JSON, r1.toJSONString());
+	public void testSerialize() {
+		assertEquals(R1_AS_JSON, r1.serialize());
 	}
 
-	public void testFromJSONString() {
+	public void testDeserialize() {
 		Resource r;
-		try {
-			r = Resource.fromJSONString(R1_AS_JSON);
-			assertEquals(r1, r);
-			r = Resource.fromJSONString(R2_AS_JSON);
-			assertEquals(r2, r);
-		} catch (JSONException e) {
-			fail(e.getLocalizedMessage());
-		}
+		r = Resource.deserialize(R1_AS_JSON);
+		assertEquals(r1, r);
+		r = Resource.deserialize(R2_AS_JSON);
+		assertEquals(r2, r);
 	}
 
-	public void testFromJSONArray() {
-		try {
-			Collection<Resource> resources = Resource.fromJSONArray(JSON_ARRAY);
-			assertEquals(2, resources.size());
-			assertTrue(resources.contains(r1));
-			assertTrue(resources.contains(r2));
-		} catch (JSONException e) {
-			fail(e.getLocalizedMessage());
-		}
+	public void testDeserializeCollection() {
+		Collection<Resource> resources = Resource
+				.deserializeCollection(JSON_ARRAY);
+		assertEquals(2, resources.size());
+		assertTrue(resources.contains(r1));
+		assertTrue(resources.contains(r2));
 	}
 
-	public void testToJSONArray() {
+	public void testSerializeCollection() {
 		Collection<Resource> c = new ArrayList<Resource>();
 		c.add(r1);
 		c.add(r2);
-		String jsonArray = Resource.toJSONArray(c);
+		String jsonArray = Resource.serialize(c);
 		assertEquals(JSON_ARRAY, jsonArray);
 	}
 

@@ -6,7 +6,6 @@ import java.util.Collection;
 import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
-import org.json.JSONException;
 
 public class TagTest extends TestCase {
 
@@ -50,38 +49,31 @@ public class TagTest extends TestCase {
 		assertEquals(t1, t2);
 	}
 
-	public void testToJSON() {
-		assertEquals(JSON1, t1.toJSONString());
+	public void testSerialize() {
+		
+		assertEquals(JSON1, t1.serialize());
 	}
 
-	public void testFromJSON() {
+	public void testDeserialize() {
 		String json = "{ \"id\" : \"" + ID1 + "\", \"description\" : \""
 				+ DESC1 + "\"}";
-		try {
-			Tag t = Tag.fromJSONString(json);
-			assertEquals(t1, t);
-		} catch (JSONException e) {
-			fail(e.getLocalizedMessage());
-		}
+		Tag t = Tag.deserialize(json);
+		assertEquals(t1, t);
 	}
 
-	public void testFromJSONArray() {
+	public void testDeserializeCollection() {
 		String jsonArr = "[" + JSON1 + "," + JSON2 + "]";
-		try {
-			Collection<Tag> t = Tag.fromJSONArray(jsonArr);
-			assertTrue(t.contains(t1));
-			assertTrue(t.contains(t2));
-			assertEquals(2, t.size());
-		} catch (JSONException e) {
-			fail(e.getLocalizedMessage());
-		}
+		Collection<Tag> t = Tag.deserializeCollection(jsonArr);
+		assertEquals(2, t.size());
+		assertTrue(t.contains(t1));
+		assertTrue(t.contains(t2));
 	}
 
-	public void testToJSONArray() {
+	public void testSerializeCollection() {
 		Collection<Tag> tags = new ArrayList<Tag>();
 		tags.add(t1);
 		tags.add(t2);
-		assertEquals(JSON_ARRAY, Tag.toJSONArray(tags));
+		assertEquals(JSON_ARRAY, Tag.serialize(tags));
 	}
 
 }
