@@ -3,11 +3,11 @@ package edu.upc.cpl.smeagol.client.domain;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.datatype.Duration;
 
 import org.joda.time.DateTime;
-import org.joda.time.Interval;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,8 +16,20 @@ import com.google.gson.reflect.TypeToken;
 import edu.upc.cpl.smeagol.client.ical.DayOfWeek;
 import edu.upc.cpl.smeagol.client.ical.Frequency;
 import edu.upc.cpl.smeagol.json.DayOfWeekListConverter;
-import edu.upc.cpl.smeagol.json.ShortListConverter;
+import edu.upc.cpl.smeagol.json.ShortSetConverter;
 
+/**
+ * This class defines a booking affected by a recurrence, as defined by RFC
+ * 2445.
+ * <p>
+ * Please keep in mind that Sméagol Server API v2.0 implements only a subset of
+ * this standard. Please refer to <a
+ * href="http://tools.ietf.org/html/rfc2445">RFC 2445</a>, section 4.3.10, to
+ * get a detailed description of valid recurrence attribute values.
+ * 
+ * @author angel
+ * 
+ */
 public class RecurringBooking extends Booking {
 
 	private static transient Gson gson = new Gson();
@@ -33,76 +45,93 @@ public class RecurringBooking extends Booking {
 		Type listOfShortType = new TypeToken<List<Short>>() {
 		}.getType();
 		gb.registerTypeAdapter(listOfDayOfWeekType, new DayOfWeekListConverter());
-		gb.registerTypeAdapter(listOfShortType, new ShortListConverter());
+		gb.registerTypeAdapter(listOfShortType, new ShortSetConverter());
 		gson = gb.create();
 	}
 
-	private List<DayOfWeek> by_day;
-	private List<Short> by_day_month; // valid values: [-1 .. -31, 1 .. 31]
-	private List<Short> by_hour; // valid values: [0 .. 23]
-	private List<Short> by_minute; // valid values: [0 .. 59]
-	private List<String> by_month; // valid values: [1 .. 12]
-	private DateTime dtEnd;
-	private DateTime dtStart;
+	private Set<DayOfWeek> by_day;
+	private Set<Short> by_day_month; // valid values: [-1 .. -31, 1 .. 31]
+	private Set<Short> by_hour; // valid values: [0 .. 23]
+	private Set<Short> by_minute; // valid values: [0 .. 59]
+	private Set<String> by_month; // valid values: [1 .. 12]
+	private DateTime dtend;
+	private DateTime dtstart;
 	private Duration duration;
 	private Frequency frequency;
-	private Interval interval; // TODO: is it an Interval?
+	private Short interval;
 	private DateTime until;
 
-	public List<DayOfWeek> getBy_day() {
+	public Set<DayOfWeek> getByDay() {
 		return by_day;
 	}
 
-	public void setBy_day(List<DayOfWeek> by_day) {
-		this.by_day = by_day;
+	/**
+	 * Set the days of the week which are affected by the recurrence. Valid
+	 * values are defined by the {@link DayOfWeek} enumeration.
+	 * 
+	 * @param byDay
+	 *            a list of <code>DayOfWeek</code> elements
+	 */
+	public void setByDay(Set<DayOfWeek> byDay) {
+		this.by_day = byDay;
 	}
 
-	public List<Short> getBy_day_month() {
+	public Set<Short> getByDayOfMonth() {
 		return by_day_month;
 	}
 
-	public void setBy_day_month(List<Short> by_day_month) {
+	/**
+	 * Set the days of the month which are affected by the recurrence. Valid
+	 * values are integers in the ranges [-1 .. -31] or [1 .. 31].
+	 * <p>
+	 * Negative values start counting backwards from the last day of the month
+	 * (i.e., "1" means "first day of the month", whereas "-1" means
+	 * "last day of the month").
+	 * 
+	 * @param by_day_month
+	 */
+	public void setByDayOfMonth(Set<Short> by_day_month) {
 		this.by_day_month = by_day_month;
 	}
 
-	public List<Short> getBy_hour() {
+	public Set<Short> getByHour() {
 		return by_hour;
 	}
 
-	public void setBy_hour(List<Short> by_hour) {
-		this.by_hour = by_hour;
+	public void setByHour(Set<Short> byHour) {
+		this.by_hour = byHour;
 	}
 
-	public List<Short> getBy_minute() {
+	public Set<Short> getByMinute() {
 		return by_minute;
 	}
 
-	public void setBy_minute(List<Short> by_minute) {
-		this.by_minute = by_minute;
+	public void setByMinute(Set<Short> byMinute) {
+		this.by_minute = byMinute;
 	}
 
-	public List<String> getBy_month() {
+	public Set<String> getByMonth() {
 		return by_month;
 	}
 
-	public void setBy_month(List<String> by_month) {
-		this.by_month = by_month;
+	public void setByMonth(Set<String> byMonth) {
+		this.by_month = byMonth;
 	}
 
 	public DateTime getDtEnd() {
-		return dtEnd;
+		return dtend;
 	}
 
 	public void setDtEnd(DateTime dtEnd) {
-		this.dtEnd = dtEnd;
+		this.dtend = dtEnd;
 	}
 
 	public DateTime getDtStart() {
-		return dtStart;
+		return dtstart;
 	}
 
 	public void setDtStart(DateTime dtStart) {
-		this.dtStart = dtStart;
+		this.dtstart = dtStart;
 	}
 
 	public Duration getDuration() {
@@ -121,11 +150,11 @@ public class RecurringBooking extends Booking {
 		this.frequency = frequency;
 	}
 
-	public Interval getInterval() {
+	public Short getInterval() {
 		return interval;
 	}
 
-	public void setInterval(Interval interval) {
+	public void setInterval(Short interval) {
 		this.interval = interval;
 	}
 

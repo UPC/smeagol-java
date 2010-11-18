@@ -1,8 +1,8 @@
 package edu.upc.cpl.smeagol.json;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -23,16 +23,18 @@ import com.google.gson.JsonSerializer;
  * 
  * @author angel
  * 
- */public class ShortListConverter implements JsonSerializer<List<Short>>, JsonDeserializer<List<Short>> {
+ */public class ShortSetConverter implements JsonSerializer<Set<Short>>, JsonDeserializer<Set<Short>> {
 
-	public JsonElement serialize(List<Short> src, Type typeOfSrc, JsonSerializationContext context) {
+	public JsonElement serialize(Set<Short> src, Type typeOfSrc, JsonSerializationContext context) {
 		return new JsonPrimitive(StringUtils.join(src, ","));
 	}
 
-	public List<Short> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+	public Set<Short> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
 			throws JsonParseException {
-		List<Short> result = new ArrayList<Short>();
+		
+		Set<Short> result = new TreeSet<Short>();
 		String[] values = StringUtils.split(json.getAsString(), ",");
+		
 		for (String v : values) {
 			try {
 				result.add(new Short(v));
@@ -40,6 +42,7 @@ import com.google.gson.JsonSerializer;
 				throw new JsonParseException("Invalid Short value found on deserialization");
 			}
 		}
+		
 		return result;
 	}
 

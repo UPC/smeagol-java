@@ -1,9 +1,10 @@
 package edu.upc.cpl.smeagol.json;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.gson.JsonDeserializationContext;
@@ -26,20 +27,34 @@ import edu.upc.cpl.smeagol.client.ical.DayOfWeek;
  * @author angel
  * 
  */
-public class DayOfWeekListConverter implements JsonSerializer<List<DayOfWeek>>, JsonDeserializer<List<DayOfWeek>> {
+public class DayOfWeekListConverter implements JsonSerializer<Set<DayOfWeek>>, JsonDeserializer<Set<DayOfWeek>> {
 
-	public JsonElement serialize(List<DayOfWeek> src, Type typeOfSrc, JsonSerializationContext context) {
-		List<String> labels = new ArrayList<String>();
+	public JsonElement serialize(Set<DayOfWeek> src, Type typeOfSrc, JsonSerializationContext context) {
+
+		if (CollectionUtils.isEmpty(src)) {
+			return null;
+		}
+
+		Set<String> labels = new TreeSet<String>();
+
 		for (DayOfWeek d : src) {
 			labels.add(d.getLabel());
 		}
+
 		return new JsonPrimitive(StringUtils.join(labels, ","));
 	}
 
-	public List<DayOfWeek> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+	public Set<DayOfWeek> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
 			throws JsonParseException {
-		List<DayOfWeek> result = new ArrayList<DayOfWeek>();
-		String[] labels = StringUtils.split(json.getAsString(), ",");
+
+		String jsonAsString = json.getAsString();
+		if (StringUtils.isEmpty(jsonAsString)) {
+			return null;
+		}
+
+		Set<DayOfWeek> result = new TreeSet<DayOfWeek>();
+		String[] labels = StringUtils.split(jsonAsString, ",");
+
 		for (String l : labels) {
 			try {
 				DayOfWeek d = DayOfWeek.newFromLabel(l.trim());
@@ -48,6 +63,7 @@ public class DayOfWeekListConverter implements JsonSerializer<List<DayOfWeek>>, 
 				throw new JsonParseException("Invalid DayOfWeek found on deserialization of " + json.getAsString());
 			}
 		}
+
 		return result;
 	}
 
