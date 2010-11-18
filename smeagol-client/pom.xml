@@ -89,13 +89,6 @@
     	<scope>compile</scope>
     </dependency>
     <dependency>
-    	<groupId>com.sun.jersey</groupId>
-    	<artifactId>jersey-client</artifactId>
-    	<version>1.4</version>
-    	<type>bundle</type>
-    	<scope>compile</scope>
-    </dependency>
-    <dependency>
     	<groupId>com.google.code.gson</groupId>
     	<artifactId>gson</artifactId>
     	<version>1.4</version>
@@ -106,6 +99,13 @@
     	<groupId>commons-collections</groupId>
     	<artifactId>commons-collections</artifactId>
     	<version>3.2.1</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
+    <dependency>
+    	<groupId>com.sun.jersey.contribs</groupId>
+    	<artifactId>jersey-apache-client</artifactId>
+    	<version>1.4</version>
     	<type>jar</type>
     	<scope>compile</scope>
     </dependency>

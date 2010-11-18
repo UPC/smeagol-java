@@ -8,6 +8,8 @@ import java.util.Collection;
 import javax.ws.rs.core.MediaType;
 
 import com.google.gson.JsonParseException;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 
 import edu.upc.cpl.smeagol.client.domain.Tag;
 

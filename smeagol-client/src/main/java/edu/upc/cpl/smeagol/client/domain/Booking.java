@@ -1,7 +1,5 @@
 package edu.upc.cpl.smeagol.client.domain;
 
-import java.util.Collection;
-
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
