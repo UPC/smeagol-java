@@ -10,34 +10,44 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import edu.upc.cpl.smeagol.client.ical.DayOfWeek;
 import edu.upc.cpl.smeagol.client.ical.Frequency;
+import edu.upc.cpl.smeagol.json.DayOfWeekListConverter;
+import edu.upc.cpl.smeagol.json.ShortListConverter;
 
 public class RecurringBooking extends Booking {
 
 	private static transient Gson gson = new Gson();
 
+	/**
+	 * provide custom serializers/deserializers for several attributes
+	 */
+	static {
+		GsonBuilder gb = new GsonBuilder();
+
+		Type listOfDayOfWeekType = new TypeToken<List<DayOfWeek>>() {
+		}.getType();
+		Type listOfShortType = new TypeToken<List<Short>>() {
+		}.getType();
+		gb.registerTypeAdapter(listOfDayOfWeekType, new DayOfWeekListConverter());
+		gb.registerTypeAdapter(listOfShortType, new ShortListConverter());
+		gson = gb.create();
+	}
+
 	private List<DayOfWeek> by_day;
-	private List<Short> by_day_month; // valors vàlids: [-1 .. -31, 1 .. 31]
-	private List<Short> by_hour; // valors vàlids: [0 .. 23]
-	private List<Short> by_minute; // valors vàlids: [0 .. 59]
-	private List<String> by_month; // valors vàlids: [1 .. 12]
+	private List<Short> by_day_month; // valid values: [-1 .. -31, 1 .. 31]
+	private List<Short> by_hour; // valid values: [0 .. 23]
+	private List<Short> by_minute; // valid values: [0 .. 59]
+	private List<String> by_month; // valid values: [1 .. 12]
 	private DateTime dtEnd;
 	private DateTime dtStart;
 	private Duration duration;
 	private Frequency frequency;
-	private Interval interval;
+	private Interval interval; // TODO: is it an Interval?
 	private DateTime until;
-
-	public static Gson getGson() {
-		return gson;
-	}
-
-	public static void setGson(Gson gson) {
-		RecurringBooking.gson = gson;
-	}
 
 	public List<DayOfWeek> getBy_day() {
 		return by_day;
