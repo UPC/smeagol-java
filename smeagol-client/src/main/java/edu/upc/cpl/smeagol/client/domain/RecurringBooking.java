@@ -5,9 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.datatype.Duration;
-
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -53,12 +52,12 @@ public class RecurringBooking extends Booking {
 	private Set<Short> by_day_month; // valid values: [-1 .. -31, 1 .. 31]
 	private Set<Short> by_hour; // valid values: [0 .. 23]
 	private Set<Short> by_minute; // valid values: [0 .. 59]
-	private Set<String> by_month; // valid values: [1 .. 12]
+	private Set<Short> by_month; // valid values: [1 .. 12]
 	private DateTime dtend;
-	private DateTime dtstart;
+	private DateTime dtstart = new DateTime();
 	private Duration duration;
 	private Frequency frequency;
-	private Short interval;
+	private Short interval = 1;
 	private DateTime until;
 
 	public Set<DayOfWeek> getByDay() {
@@ -66,11 +65,10 @@ public class RecurringBooking extends Booking {
 	}
 
 	/**
-	 * Set the days of the week which are affected by the recurrence. Valid
-	 * values are defined by the {@link DayOfWeek} enumeration.
+	 * Set the days of the week which are affected by the recurrence.
 	 * 
 	 * @param byDay
-	 *            a list of <code>DayOfWeek</code> elements
+	 *            a list of {@link DayOfWeek} values
 	 */
 	public void setByDay(Set<DayOfWeek> byDay) {
 		this.by_day = byDay;
@@ -81,23 +79,29 @@ public class RecurringBooking extends Booking {
 	}
 
 	/**
-	 * Set the days of the month which are affected by the recurrence. Valid
-	 * values are integers in the ranges [-1 .. -31] or [1 .. 31].
+	 * Set the days of the month which are affected by the recurrence.
 	 * <p>
 	 * Negative values start counting backwards from the last day of the month
 	 * (i.e., "1" means "first day of the month", whereas "-1" means
 	 * "last day of the month").
 	 * 
-	 * @param by_day_month
+	 * @param byDayOfMonth
+	 *            set of integer values in the ranges [-1 .. 31] or [1 .. 31].
 	 */
-	public void setByDayOfMonth(Set<Short> by_day_month) {
-		this.by_day_month = by_day_month;
+	public void setByDayOfMonth(Set<Short> byDayOfMonth) {
+		this.by_day_month = byDayOfMonth;
 	}
 
 	public Set<Short> getByHour() {
 		return by_hour;
 	}
 
+	/**
+	 * Set the hours of the day which are affected by the recurrence.
+	 * 
+	 * @param byHour
+	 *            set of integer values in the range [0 .. 23]
+	 */
 	public void setByHour(Set<Short> byHour) {
 		this.by_hour = byHour;
 	}
@@ -106,15 +110,27 @@ public class RecurringBooking extends Booking {
 		return by_minute;
 	}
 
+	/**
+	 * Set the minutes of the hour which are affected by the recurrence.
+	 * 
+	 * @param byMinute
+	 *            set of integer values in the range [0 .. 59]
+	 */
 	public void setByMinute(Set<Short> byMinute) {
 		this.by_minute = byMinute;
 	}
 
-	public Set<String> getByMonth() {
+	public Set<Short> getByMonth() {
 		return by_month;
 	}
 
-	public void setByMonth(Set<String> byMonth) {
+	/**
+	 * Set the months affected by the recurrence.
+	 * 
+	 * @param byMonth
+	 *            set of integer values in the range [1 .. 12]
+	 */
+	public void setByMonth(Set<Short> byMonth) {
 		this.by_month = byMonth;
 	}
 
@@ -138,6 +154,12 @@ public class RecurringBooking extends Booking {
 		return duration;
 	}
 
+	/**
+	 * Sets the duration of the booking.
+	 * 
+	 * @param duration
+	 *            see {@link org.joda.time.Duration}
+	 */
 	public void setDuration(Duration duration) {
 		this.duration = duration;
 	}
@@ -146,6 +168,18 @@ public class RecurringBooking extends Booking {
 		return frequency;
 	}
 
+	/**
+	 * Sets the frequency of the booking. Its used in combination with
+	 * <code>byDay</code>, <code>byDayOfMonth</code>, <code>byHour</code> or
+	 * <code>byMinute</code> attributes.
+	 * <p>
+	 * For example, within a <code>frequency = Frequency.MONTHLY</code> booking,
+	 * a <code>byDay = DayOfWeek.MONDAY</code> value represents <em>all Mondays
+	 * within the month</em>.
+	 * 
+	 * @param see
+	 *            {@see Frequency}
+	 */
 	public void setFrequency(Frequency frequency) {
 		this.frequency = frequency;
 	}
@@ -154,6 +188,11 @@ public class RecurringBooking extends Booking {
 		return interval;
 	}
 
+	/**
+	 * Set how often the recurrence rule repeats.
+	 * 
+	 * @param interval
+	 */
 	public void setInterval(Short interval) {
 		this.interval = interval;
 	}
@@ -162,6 +201,12 @@ public class RecurringBooking extends Booking {
 		return until;
 	}
 
+	/**
+	 * Set the date/time when the recurrence ends. May be set to
+	 * <code>null</code> to define an infinite recurrence.
+	 * 
+	 * @param until
+	 */
 	public void setUntil(DateTime until) {
 		this.until = until;
 	}
