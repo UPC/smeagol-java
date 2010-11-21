@@ -4,21 +4,9 @@ smeagol-client 2.0
 Requisits
 ---------
 
+ * JDK5 o superior (serveix OpenJDK)
  * Maven 2
- * Llibreria jersey-client.
  
-Preparatius
------------
-
-1) Instal·lar la llibreria jersey-client al repositori local Maven. 
-Executar les comandes següents:
-
-    wget http://download.java.net/maven/2/com/sun/jersey/jersey-client/1.4/jersey-client-1.4.jar
-
-    mvn install:install-file -DgroupId=com.sun.jersey \
-        -DartifactId=jersey-client -Dversion=1.4 -Dpackaging=bundle \
-        -Dfile=jersey-client-1.4.jar
-
 Compilar el codi
 ----------------
 
