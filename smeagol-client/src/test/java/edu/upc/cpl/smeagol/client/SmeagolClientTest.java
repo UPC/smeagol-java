@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.upc.cpl.smeagol.client.domain.Tag;
+import edu.upc.cpl.smeagol.client.exception.NotFoundException;
 
 public class SmeagolClientTest extends TestCase {
 
@@ -18,23 +19,25 @@ public class SmeagolClientTest extends TestCase {
 
 	@Before
 	public void setUp() throws Exception {
-		client = new SmeagolClient("http://abydos.ac.upc.edu:3000");
+		client = new SmeagolClient("http://localhost:3000");
 	}
 
 	@Test
 	public void testGetTags() {
 		Collection<Tag> tags = client.getTags();
 		assertTrue(tags.size() > 0);
-		for (Tag t : tags) {
-			logger.debug(t.toString());
-		}
 	}
 
 	@Test
 	public void testGetTag() {
-		Tag t = client.getTag("isabel");
-		assertTrue(t != null);
-		logger.debug(t.toString());
+		Tag t;
+		try {
+			t = client.getTag("videoconferencia");
+			assertTrue(t != null);
+			logger.debug(t.toString());
+		} catch (NotFoundException e) {
+			logger.error(e.getLocalizedMessage());
+		}
 	}
 
 }

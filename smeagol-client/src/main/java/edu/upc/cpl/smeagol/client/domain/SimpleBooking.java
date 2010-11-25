@@ -63,4 +63,9 @@ public class SimpleBooking extends Booking {
 		return gson.fromJson(json, collectionType);
 	}
 
+	@Override
+	public int compareTo(Booking b) {
+		return super.compareTo(b);
+	}
+
 }

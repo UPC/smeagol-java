@@ -83,7 +83,7 @@ public class SimpleBookingTest extends TestCase {
 	}
 
 	@Test
-	public void testToJSONArray() {
+	public void testSerializeCollection() {
 		Collection<Booking> bookings = new ArrayList<Booking>();
 		bookings.add(B1);
 		bookings.add(B2);

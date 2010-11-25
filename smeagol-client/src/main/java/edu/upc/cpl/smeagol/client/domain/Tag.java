@@ -3,6 +3,7 @@ package edu.upc.cpl.smeagol.client.domain;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -20,9 +21,14 @@ import com.google.gson.reflect.TypeToken;
  * 
  */
 public class Tag implements Comparable<Tag> {
+
 	@SuppressWarnings("unused")
 	private transient Logger logger = Logger.getLogger(getClass());
 	private transient static Gson gson = new Gson();
+
+	// FIXME: attribute name for "id" should be "id", not "name"
+	public transient static final String ID_ATTR_NAME = "name";
+	public transient static final String DESCRIPTION_ATTR_NAME = "description";
 
 	/**
 	 * Maximum length for Tag id.
@@ -44,9 +50,14 @@ public class Tag implements Comparable<Tag> {
 	 * Create a tag without an empty description.
 	 * 
 	 * @param id
-	 *            the tag's identifier. Should be a
+	 *            the tag's identifier, not null, not empty.
+	 * @throws IllegalArgumentException
+	 *             if the provided id is null or an empty string ("").
 	 */
 	public Tag(String id) throws IllegalArgumentException {
+		if (StringUtils.isEmpty(id)) {
+			throw new IllegalArgumentException();
+		}
 		this.id = id;
 	}
 
@@ -60,7 +71,10 @@ public class Tag implements Comparable<Tag> {
 	 * @param description
 	 *            A description for the new tag.
 	 */
-	public Tag(String id, String description) {
+	public Tag(String id, String description) throws IllegalArgumentException {
+		if (StringUtils.isEmpty(id)) {
+			throw new IllegalArgumentException();
+		}
 		this.id = id;
 		this.description = description;
 	}
@@ -85,8 +99,7 @@ public class Tag implements Comparable<Tag> {
 	 * Natural order between tags is defined by id, description.
 	 */
 	public int compareTo(Tag o) {
-		return new CompareToBuilder().append(this.id, o.id).append(
-				this.description, o.description).toComparison();
+		return new CompareToBuilder().append(this.id, o.id).append(this.description, o.description).toComparison();
 	}
 
 	@Override
@@ -102,20 +115,17 @@ public class Tag implements Comparable<Tag> {
 		}
 		Tag t = (Tag) obj;
 
-		return new EqualsBuilder().append(this.id, t.id).append(
-				this.description, t.description).isEquals();
+		return new EqualsBuilder().append(this.id, t.id).append(this.description, t.description).isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder().append(id).append(description)
-				.toHashCode();
+		return new HashCodeBuilder().append(id).append(description).toHashCode();
 	}
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("id", id).append("description",
-				description).toString();
+		return new ToStringBuilder(this).append("id", id).append("description", description).toString();
 	}
 
 	public String serialize() {
@@ -130,8 +140,7 @@ public class Tag implements Comparable<Tag> {
 		return gson.fromJson(json, Tag.class);
 	}
 
-	public static Collection<Tag> deserializeCollection(String json)
-			throws JsonParseException {
+	public static Collection<Tag> deserializeCollection(String json) throws JsonParseException {
 		Type tagCollection = new TypeToken<Collection<Tag>>() {
 		}.getType();
 		return gson.fromJson(json, tagCollection);
