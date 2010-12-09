@@ -35,15 +35,13 @@ public abstract class Booking implements Comparable<Booking> {
 	 * Defines natural order between bookings.
 	 */
 	public int compareTo(Booking b) {
-		return new CompareToBuilder().appendSuper(
-				this.getStart().compareTo(b.getStart())).appendSuper(
-				this.getEnd().compareTo(b.getEnd())).toComparison();
+		return new CompareToBuilder().appendSuper(this.getStart().compareTo(b.getStart()))
+				.appendSuper(this.getEnd().compareTo(b.getEnd())).toComparison();
 	}
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("start", this.getStart())
-				.append("end", this.getEnd()).toString();
+		return new ToStringBuilder(this).append("id", getId()).toString();
 	}
 
 	@Override
@@ -58,9 +56,8 @@ public abstract class Booking implements Comparable<Booking> {
 			return false;
 		}
 		SimpleBooking other = (SimpleBooking) o;
-		return new EqualsBuilder().append(this.id, other.getId()).append(
-				this.getStart(), other.getStart()).append(this.getEnd(),
-				other.getEnd()).isEquals();
+		return new EqualsBuilder().append(this.id, other.getId()).append(this.getStart(), other.getStart())
+				.append(this.getEnd(), other.getEnd()).isEquals();
 	}
 
 	@Override

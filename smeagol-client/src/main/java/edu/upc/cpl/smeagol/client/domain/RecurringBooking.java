@@ -14,6 +14,7 @@ import com.google.gson.reflect.TypeToken;
 
 import edu.upc.cpl.smeagol.client.ical.DayOfWeek;
 import edu.upc.cpl.smeagol.client.ical.Frequency;
+import edu.upc.cpl.smeagol.json.DateTimeConverter;
 import edu.upc.cpl.smeagol.json.DayOfWeekListConverter;
 import edu.upc.cpl.smeagol.json.ShortSetConverter;
 
@@ -45,6 +46,7 @@ public class RecurringBooking extends Booking {
 		}.getType();
 		gb.registerTypeAdapter(listOfDayOfWeekType, new DayOfWeekListConverter());
 		gb.registerTypeAdapter(listOfShortType, new ShortSetConverter());
+		gb.registerTypeAdapter(DateTime.class, new DateTimeConverter());
 		gson = gb.create();
 	}
 
@@ -189,7 +191,10 @@ public class RecurringBooking extends Booking {
 	}
 
 	/**
-	 * Set how often the recurrence rule repeats.
+	 * Used in combination with <code>setFrequency</code>, defines how often the
+	 * recurrence rule repeats. For example, within a <code>frequency</code>
+	 * value of <code>Frequency.WEEKLY</code>, an interval of 2 states that the
+	 * recurrence repeats every 2 weeks.
 	 * 
 	 * @param interval
 	 */
@@ -202,10 +207,11 @@ public class RecurringBooking extends Booking {
 	}
 
 	/**
-	 * Set the date/time when the recurrence ends. May be set to
+	 * Set the date/time when the recurrence ends. Can be set to
 	 * <code>null</code> to define an infinite recurrence.
 	 * 
 	 * @param until
+	 *            the <code>DateTime</code> where the recurrence ends.
 	 */
 	public void setUntil(DateTime until) {
 		this.until = until;

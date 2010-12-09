@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -16,23 +17,19 @@ public class SimpleBookingTest extends TestCase {
 	private static Logger logger = Logger.getLogger(SimpleBookingTest.class);
 
 	private static Integer ID_1 = 1;
-	private static final DateTime START_1 = new DateTime(2010, 11, 1, 8, 0, 0,
-			0);
-	private static final DateTime END_1 = new DateTime(2010, 11, 1, 10, 30, 0,
-			0);
+	private static final DateTime START_1 = new DateTime(2010, 11, 1, 8, 0, 0, 0);
+	private static final DateTime END_1 = new DateTime(2010, 11, 1, 10, 30, 0, 0);
 	private static Integer ID_2 = 2;
-	private static final DateTime START_2 = new DateTime(2010, 11, 1, 8, 0, 0,
-			0);
-	private static final DateTime END_2 = new DateTime(2010, 11, 1, 10, 30, 0,
-			0);
+	private static final DateTime START_2 = new DateTime(2010, 12, 1, 8, 0, 0, 0);
+	private static final DateTime END_2 = new DateTime(2010, 12, 1, 10, 30, 0, 0);
 	private static final Interval INTERVAL_1 = new Interval(START_1, END_1);
 	private static final Interval INTERVAL_2 = new Interval(START_2, END_2);
 	private SimpleBooking B1;
 	private SimpleBooking B2;
-	private String B1_AS_JSON = "{\"id\":" + ID_1 + ",\"start\":\""
-			+ START_1.toString() + "\",\"end\":\"" + END_1 + "\"}";
-	private String B2_AS_JSON = "{\"id\":" + ID_2 + ",\"start\":\""
-			+ START_2.toString() + "\",\"end\":\"" + END_2 + "\"}";
+	private String B1_AS_JSON = "{\"id\":" + ID_1 + ",\"start\":\"" + START_1.toString() + "\",\"end\":\"" + END_1
+			+ "\"}";
+	private String B2_AS_JSON = "{\"id\":" + ID_2 + ",\"start\":\"" + START_2.toString() + "\",\"end\":\"" + END_2
+			+ "\"}";
 	private String JSON_ARRAY = "[" + B1_AS_JSON + "," + B2_AS_JSON + "]";
 
 	@Before
@@ -53,7 +50,10 @@ public class SimpleBookingTest extends TestCase {
 
 	@Test
 	public void testSerialize() {
-		assertEquals(B1_AS_JSON, B1.serialize());
+		String b1AsJson = B1.serialize();
+		assertTrue(StringUtils.contains(b1AsJson, "\"id\":" + B1.getId()));
+		assertTrue(StringUtils.contains(b1AsJson, "\"start\":\"" + B1.getStart() + "\""));
+		assertTrue(StringUtils.contains(b1AsJson, "\"end\":\"" + B1.getEnd() + "\""));
 	}
 
 	@Test
@@ -75,11 +75,10 @@ public class SimpleBookingTest extends TestCase {
 
 	@Test
 	public void testDeserializeCollection() {
-		Collection<Booking> bookings = SimpleBooking
-				.deserializeCollection(JSON_ARRAY);
+		Collection<Booking> bookings = SimpleBooking.deserializeCollection(JSON_ARRAY);
 		assertEquals(2, bookings.size());
-		assertTrue(bookings.contains(B1));
-		assertTrue(bookings.contains(B2));
+		assertTrue("Deserialization contains B1", bookings.contains(B1));
+		assertTrue("Deserialization contains B2", bookings.contains(B2));
 	}
 
 	@Test
@@ -88,6 +87,8 @@ public class SimpleBookingTest extends TestCase {
 		bookings.add(B1);
 		bookings.add(B2);
 		String json = SimpleBooking.serialize(bookings);
-		assertEquals(JSON_ARRAY, json);
+		Collection<Booking> deserialized = SimpleBooking.deserializeCollection(json);
+		assertTrue("Serialization contains B1", deserialized.contains(B1));
+		assertTrue("Serialization contains B2", deserialized.contains(B2));
 	}
 }
