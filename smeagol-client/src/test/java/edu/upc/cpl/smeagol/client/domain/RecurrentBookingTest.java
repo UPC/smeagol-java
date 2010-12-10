@@ -17,7 +17,7 @@ public class RecurrentBookingTest {
 	}
 
 	@Test
-	public void testSerializeCollectionOfRecurringBooking() {
+	public void testSerializeCollection() {
 		fail("Not yet implemented");
 	}
 
