@@ -30,7 +30,7 @@ import edu.upc.cpl.smeagol.json.ShortSetConverter;
  * @author angel
  * 
  */
-public class RecurringBooking extends Booking {
+public class RecurrentBooking extends Booking {
 
 	private static transient Gson gson = new Gson();
 
@@ -233,16 +233,16 @@ public class RecurringBooking extends Booking {
 		return gson.toJson(this);
 	}
 
-	public static String serialize(Collection<RecurringBooking> c) {
+	public static String serialize(Collection<RecurrentBooking> c) {
 		return gson.toJson(c);
 	}
 
-	public static RecurringBooking deserialize(String json) {
-		return gson.fromJson(json, RecurringBooking.class);
+	public static RecurrentBooking deserialize(String json) {
+		return gson.fromJson(json, RecurrentBooking.class);
 	}
 
-	public static Collection<RecurringBooking> deserializeCollection(String json) {
-		Type collectionType = new TypeToken<Collection<RecurringBooking>>() {
+	public static Collection<RecurrentBooking> deserializeCollection(String json) {
+		Type collectionType = new TypeToken<Collection<RecurrentBooking>>() {
 		}.getType();
 		return gson.fromJson(json, collectionType);
 	}
