@@ -97,10 +97,7 @@ public class SmeagolClient {
 		}
 
 		String json = response.getEntity(String.class);
-		// FIXME: server shoult not return a collection, but an object
-		// return Tag.deserialize(json);
-		List<Tag> tags = (List<Tag>) Tag.deserializeCollection(json);
-		return tags.get(0);
+		return Tag.deserialize(json);
 	}
 
 	/**

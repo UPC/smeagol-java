@@ -11,6 +11,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
@@ -41,6 +42,8 @@ public class Event implements Comparable<Event> {
 	private String description;
 	private String info;
 	private Collection<Tag> tags = new ArrayList<Tag>();
+	private DateTime starts;
+	private DateTime ends;
 
 	public Event() {
 	}
@@ -78,21 +81,23 @@ public class Event implements Comparable<Event> {
 	}
 
 	/**
-	 * @return the DateTime at which the event starts, defined as the minimum
-	 *         start DateTime of the bookings belonging to the event.
+	 * Set the interval at which the event occurs.
+	 * @param interval
 	 */
-	public DateTime getStarts() {
-		// TODO
-		return null;
+	public void setInterval(Interval interval) {
+		if (interval != null) {
+			this.starts = interval.getStart();
+			this.ends = interval.getEnd();
+		}
 	}
 
 	/**
-	 * @return the date at which the event ends, defined as the maximum ending
-	 *         DateTime of the bookings belonging to the event.
+	 * Get the interval at which the event occurs.
+	 * 
+	 * @return
 	 */
-	public DateTime getEnds() {
-		// TODO
-		return null;
+	public Interval getInterval() {
+		return new Interval(starts, ends);
 	}
 
 	public int compareTo(Event other) {

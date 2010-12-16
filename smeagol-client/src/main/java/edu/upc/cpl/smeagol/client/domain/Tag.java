@@ -26,8 +26,7 @@ public class Tag implements Comparable<Tag> {
 	private transient Logger logger = Logger.getLogger(getClass());
 	private transient static Gson gson = new Gson();
 
-	// FIXME: attribute name for "id" should be "id", not "name"
-	public transient static final String ID_ATTR_NAME = "name";
+	public transient static final String ID_ATTR_NAME = "id";
 	public transient static final String DESCRIPTION_ATTR_NAME = "description";
 
 	/**
