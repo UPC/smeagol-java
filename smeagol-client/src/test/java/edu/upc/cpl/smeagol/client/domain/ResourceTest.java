@@ -6,8 +6,8 @@ import java.util.Collection;
 import junit.framework.TestCase;
 
 public class ResourceTest extends TestCase {
-	private static final int ID1 = 1;
-	private static final int ID2 = 2;
+	private static final long ID1 = 1;
+	private static final long ID2 = 2;
 	private static final String DESC1 = "description1";
 	private static final String DESC2 = "description2";
 	private static final String INFO1 = "chachi1";

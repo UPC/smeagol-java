@@ -31,7 +31,7 @@ public class Resource implements Comparable<Resource> {
 	public static transient final int MAX_DESCRIPTION_LEN = 128;
 	public static transient final int MAX_INFO_LEN = 255;
 
-	private int id;
+	private Long id;
 	private String description;
 	private String info;
 	private Collection<Tag> tags = new ArrayList<Tag>();
@@ -39,11 +39,11 @@ public class Resource implements Comparable<Resource> {
 	public Resource() {
 	}
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 

@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.Interval;
 
 import com.google.gson.Gson;
@@ -39,26 +40,38 @@ public class SimpleBooking extends Booking {
 		gson = gb.create();
 	}
 
-	private DateTime start;
-	private DateTime end;
+	private DateTime dtstart;
+	private DateTime dtend;
 
 	public SimpleBooking() {
 	}
 
-	public SimpleBooking(Integer id, Interval interval) {
-		this.setId(id);
-		this.start = interval.getStart();
-		this.end = interval.getEnd();
+	public SimpleBooking(Long idResource, Long idEvent, Interval interval) {
+		this.setIdResource(idResource);
+		this.setIdEvent(idEvent);
+		this.dtstart = interval.getStart();
+		this.dtend = interval.getEnd();
+	}
+
+	public SimpleBooking(Long idResource, Long idEvent, DateTime start, Duration duration) {
+		this.setIdResource(idResource);
+		this.setIdEvent(idEvent);
+		this.dtstart = start;
+		this.dtend = start.plus(duration);
 	}
 
 	@Override
-	public DateTime getStart() {
-		return this.start;
+	public DateTime getDtStart() {
+		return this.dtstart;
 	}
 
 	@Override
-	public DateTime getEnd() {
-		return this.end;
+	public DateTime getDtEnd() {
+		return this.dtend;
+	}
+
+	public Duration getDuration() {
+		return new Duration(dtstart, dtend);
 	}
 
 	public String serialize() {
@@ -86,8 +99,8 @@ public class SimpleBooking extends Booking {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).appendSuper(super.toString()).append("start", getStart())
-				.append("end", getEnd()).toString();
+		return new ToStringBuilder(this).appendSuper(super.toString()).append("start", getDtStart())
+				.append("end", getDtEnd()).toString();
 	}
 
 }

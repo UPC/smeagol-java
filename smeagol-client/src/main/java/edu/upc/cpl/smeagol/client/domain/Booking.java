@@ -9,39 +9,58 @@ import org.joda.time.DateTime;
 /**
  * This is the base class of the Booking family. This class defines the minimum
  * behaviour to be implemented by a booking. It barely states that bookings have
- * an id, a natural order defined by some <code>start</code> and
- * <code>end</code> instants.
+ * an id, a reference to the related resource and event, and a natural order
+ * defined by some <code>start</code> and <code>end</code> instants.
  * 
  * @author angel
  * 
  */
 public abstract class Booking implements Comparable<Booking> {
 
-	private Integer id;
+	private Long id;
+	private Long id_resource;
+	private Long id_event;
 
-	public Integer getId() {
+	public Long getId() {
 		return this.id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
-	public abstract DateTime getStart();
+	public Long getIdResource() {
+		return id_resource;
+	}
 
-	public abstract DateTime getEnd();
+	public void setIdResource(Long id) {
+		this.id_resource = id;
+	}
+
+	public Long getIdEvent() {
+		return id_event;
+	}
+
+	public void setIdEvent(Long id) {
+		this.id_event = id;
+	}
+
+	public abstract DateTime getDtStart();
+
+	public abstract DateTime getDtEnd();
 
 	/**
 	 * Defines natural order between bookings.
 	 */
 	public int compareTo(Booking b) {
-		return new CompareToBuilder().appendSuper(this.getStart().compareTo(b.getStart()))
-				.appendSuper(this.getEnd().compareTo(b.getEnd())).toComparison();
+		return new CompareToBuilder().appendSuper(this.getDtStart().compareTo(b.getDtStart()))
+				.appendSuper(this.getDtEnd().compareTo(b.getDtEnd())).toComparison();
 	}
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("id", getId()).toString();
+		return new ToStringBuilder(this).append("id", getId()).append("id_resource", getIdResource())
+				.append("id_event", getIdEvent()).toString();
 	}
 
 	@Override
@@ -56,8 +75,7 @@ public abstract class Booking implements Comparable<Booking> {
 			return false;
 		}
 		SimpleBooking other = (SimpleBooking) o;
-		return new EqualsBuilder().append(this.id, other.getId()).append(this.getStart(), other.getStart())
-				.append(this.getEnd(), other.getEnd()).isEquals();
+		return new EqualsBuilder().append(this.getId(), other.getId()).isEquals();
 	}
 
 	@Override

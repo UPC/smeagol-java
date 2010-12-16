@@ -5,21 +5,23 @@ import java.util.Collection;
 
 import junit.framework.TestCase;
 
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Before;
 import org.junit.Test;
 
 public class EventTest extends TestCase {
 
-	private static final int ID1 = 1;
-	private static final int ID2 = 2;
+	private static final long ID1 = 1;
+	private static final long ID2 = 2;
 	private static final String DESC1 = "description1";
 	private static final String DESC2 = "description2";
 	private static final String INFO1 = "info1";
 	private static final String INFO2 = "info2";
-	private static final Collection<Tag> EMPTY_TAG_LIST = new ArrayList<Tag>();
-	private static Collection<Tag> TAG_LIST;
-	private static final Tag T1 = new Tag("tagId1", "tagDesc1");
-	private static final Tag T2 = new Tag("tagId2", "tagDesc2");
+	private static final DateTime STARTS1 = new DateTime("2010-12-01T08:00:00");
+	private static final DateTime ENDS1 = new DateTime("2010-12-10T19:00:00");
+	private static final DateTime STARTS2 = new DateTime("2011-01-01T08:00:00");
+	private static final DateTime ENDS2 = new DateTime("2011-01-31T19:00:00");
 	private Event e1;
 	private Event e2;
 	private Event e1Copy;
@@ -33,24 +35,19 @@ public class EventTest extends TestCase {
 		e1.setId(ID1);
 		e1.setDescription(DESC1);
 		e1.setInfo(INFO1);
-		TAG_LIST = new ArrayList<Tag>();
-		TAG_LIST.add(T1);
-		TAG_LIST.add(T2);
-		e1.setTags(TAG_LIST);
+		e1.setInterval(new Interval(STARTS1, ENDS1));
 
-		E1_JSON = "{\"id\":" + ID1 + ",\"description\":\"" + DESC1
-				+ "\",\"info\":\"" + INFO1 + "\",\"tags\":"
-				+ Tag.serialize(TAG_LIST) + "}";
+		E1_JSON = "{\"id\":" + ID1 + ",\"description\":\"" + DESC1 + "\",\"info\":\"" + INFO1 + "\",\"starts\":\""
+				+ STARTS1 + "\",\"ends\":\"" + ENDS1 + "\"}";
 
 		e2 = new Event();
 		e2.setId(ID2);
 		e2.setDescription(DESC2);
 		e2.setInfo(INFO2);
-		e2.setTags(EMPTY_TAG_LIST);
+		e2.setInterval(new Interval(STARTS2, ENDS2));
 
-		E2_JSON = "{\"id\":" + ID2 + ",\"description\":\"" + DESC2
-				+ "\",\"info\":\"" + INFO2 + "\",\"tags\":"
-				+ Tag.serialize(EMPTY_TAG_LIST) + "}";
+		E2_JSON = "{\"id\":" + ID2 + ",\"description\":\"" + DESC2 + "\",\"info\":\"" + INFO2 + "\",\"starts\":\""
+				+ STARTS2 + "\",\"ends\":\"" + ENDS2 + "\"}";
 
 		/*
 		 * e1 and e1Copy will have the same attributes and tags, so
@@ -60,10 +57,7 @@ public class EventTest extends TestCase {
 		e1Copy.setId(ID1);
 		e1Copy.setDescription(DESC1);
 		e1Copy.setInfo(INFO1);
-		Collection<Tag> tags = new ArrayList<Tag>();
-		tags.add(new Tag("tagId1", "tagDesc1"));
-		tags.add(new Tag("tagId2", "tagDesc2"));
-		e1Copy.setTags(tags);
+		e1Copy.setInterval(new Interval(STARTS1, ENDS1));
 	}
 
 	@Test
@@ -95,7 +89,6 @@ public class EventTest extends TestCase {
 		assertEquals(e1, event1);
 		event2 = Event.deserialize(E2_JSON);
 		assertEquals(e2, event2);
-
 	}
 
 	@Test
@@ -117,15 +110,8 @@ public class EventTest extends TestCase {
 	}
 
 	@Test
-	public void testGetStarts() {
-		// TODO Auto-generated method stub
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetEnds() {
-		// TODO Auto-generated method stub
-		fail("Not yet implemented");
+	public void tesGetInterval() {
+		assertEquals(STARTS1, e1.getInterval());
 	}
 
 }

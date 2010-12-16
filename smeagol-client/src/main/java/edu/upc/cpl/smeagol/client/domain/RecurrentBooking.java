@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+import org.joda.time.Interval;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -22,10 +23,12 @@ import edu.upc.cpl.smeagol.json.ShortSetConverter;
  * This class defines a booking affected by a recurrence, as defined by RFC
  * 2445.
  * <p>
- * Please keep in mind that Sméagol Server API v2.0 implements only a subset of
- * this standard. Please refer to <a
+ * Please keep in mind that Sméagol Server API v2.0 implements <strong>only a
+ * subset</strong> of this standard. Please refer to <a
  * href="http://tools.ietf.org/html/rfc2445">RFC 2445</a>, section 4.3.10, to
  * get a detailed description of valid recurrence attribute values.
+ * <p>
+ * TODO: Add details about which features of the RFC subset are implemented.
  * 
  * @author angel
  * 
@@ -50,17 +53,62 @@ public class RecurrentBooking extends Booking {
 		gson = gb.create();
 	}
 
+	private DateTime dtstart = new DateTime(); // default dtstart is "now"
+	private DateTime dtend;
+	private Frequency frequency;
+	private Duration duration;
+	private Short interval = 1; // default repeat: "every 1"
+	private DateTime until;
+	private Set<Short> by_minute; // valid values: [0 .. 59]
+	private Set<Short> by_hour; // valid values: [0 .. 23]
 	private Set<DayOfWeek> by_day;
 	private Set<Short> by_day_month; // valid values: [-1 .. -31, 1 .. 31]
-	private Set<Short> by_hour; // valid values: [0 .. 23]
-	private Set<Short> by_minute; // valid values: [0 .. 59]
 	private Set<Short> by_month; // valid values: [1 .. 12]
-	private DateTime dtend;
-	private DateTime dtstart = new DateTime();
-	private Duration duration;
-	private Frequency frequency;
-	private Short interval = 1;
-	private DateTime until;
+
+	/**
+	 * Default non-argument constructor.
+	 */
+	public RecurrentBooking() {
+	}
+
+	/**
+	 * Create a booking for the specified interval.
+	 * 
+	 * @param idResource
+	 *            the resource to be booked
+	 * @param idEvent
+	 *            the event related to the booking
+	 * @param interval
+	 *            the start and end <code>DateTime</code>s of the booking
+	 * 
+	 */
+	public RecurrentBooking(Long idResource, Long idEvent, Interval interval) {
+		this.setIdResource(idResource);
+		this.setIdEvent(idEvent);
+		this.setDtStart(interval.getStart());
+		this.setDtEnd(interval.getEnd());
+	}
+
+	/**
+	 * Create a booking for an interval, specified by the start
+	 * <code>DateTime</code> and a <code>Duration</code>.
+	 * 
+	 * @param idResource
+	 * @param idEvent
+	 * @param dtstart
+	 * @param duration
+	 */
+	public RecurrentBooking(long idResource, long idEvent, DateTime start, Duration duration) {
+		this.setIdResource(idResource);
+		this.setIdEvent(idEvent);
+		this.setDtStart(start);
+		this.setDtEnd(start.plus(duration));
+	}
+
+	public RecurrentBooking(long idResource, long idEvent, DateTime start, DateTime until, Duration duration,
+			int interval) {
+		// TODO
+	}
 
 	public Set<DayOfWeek> getByDay() {
 		return by_day;
@@ -215,18 +263,6 @@ public class RecurrentBooking extends Booking {
 	 */
 	public void setUntil(DateTime until) {
 		this.until = until;
-	}
-
-	@Override
-	public DateTime getStart() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public DateTime getEnd() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	public String serialize() {

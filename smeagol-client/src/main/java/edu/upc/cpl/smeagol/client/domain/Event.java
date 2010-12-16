@@ -1,10 +1,8 @@
 package edu.upc.cpl.smeagol.client.domain;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -14,8 +12,11 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
+
+import edu.upc.cpl.smeagol.json.DateTimeConverter;
 
 /**
  * Events are objects which can hold a number of Bookings.
@@ -27,6 +28,16 @@ public class Event implements Comparable<Event> {
 	@SuppressWarnings("unused")
 	private static transient Logger logger = Logger.getLogger(Event.class);
 	private static transient Gson gson = new Gson();
+	
+	/**
+	 * provide custom serializers/deserializers for several attributes
+	 */
+	static {
+		GsonBuilder gb = new GsonBuilder();
+
+		gb.registerTypeAdapter(DateTime.class, new DateTimeConverter());
+		gson = gb.create();
+	}
 
 	/**
 	 * Maximum length for the "description" field
@@ -38,21 +49,20 @@ public class Event implements Comparable<Event> {
 	 */
 	public static transient int MAX_INFO_LEN = 20;
 
-	private Integer id;
+	private Long id;
 	private String description;
 	private String info;
-	private Collection<Tag> tags = new ArrayList<Tag>();
 	private DateTime starts;
 	private DateTime ends;
 
 	public Event() {
 	}
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -72,16 +82,9 @@ public class Event implements Comparable<Event> {
 		this.info = info;
 	}
 
-	public Collection<Tag> getTags() {
-		return tags;
-	}
-
-	public void setTags(Collection<Tag> tags) {
-		this.tags = tags;
-	}
-
 	/**
 	 * Set the interval at which the event occurs.
+	 * 
 	 * @param interval
 	 */
 	public void setInterval(Interval interval) {
@@ -101,8 +104,7 @@ public class Event implements Comparable<Event> {
 	}
 
 	public int compareTo(Event other) {
-		return new CompareToBuilder().append(this.description,
-				other.description).toComparison();
+		return new CompareToBuilder().append(this.description, other.description).toComparison();
 	}
 
 	@Override
@@ -118,11 +120,8 @@ public class Event implements Comparable<Event> {
 		}
 		Event other = (Event) obj;
 
-		boolean equalAttrs = new EqualsBuilder().append(this.id, other.id)
-				.append(this.description, other.description).isEquals();
-
-		return equalAttrs
-				&& CollectionUtils.isEqualCollection(this.tags, other.tags);
+		return new EqualsBuilder().append(this.id, other.id).append(this.description, other.description)
+				.isEquals();
 	}
 
 	@Override
@@ -132,8 +131,7 @@ public class Event implements Comparable<Event> {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("id", id).append("description",
-				description).append("info", info).append("tags", tags)
+		return new ToStringBuilder(this).append("id", id).append("description", description).append("info", info)
 				.toString();
 	}
 
@@ -149,8 +147,7 @@ public class Event implements Comparable<Event> {
 		return gson.fromJson(json, Event.class);
 	}
 
-	public static Collection<Event> deserializeCollection(String json)
-			throws JsonParseException {
+	public static Collection<Event> deserializeCollection(String json) throws JsonParseException {
 		Type collectionType = new TypeToken<Collection<Event>>() {
 		}.getType();
 		return gson.fromJson(json, collectionType);
