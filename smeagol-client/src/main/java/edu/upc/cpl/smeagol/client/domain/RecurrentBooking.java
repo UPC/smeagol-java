@@ -5,9 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.validator.GenericValidator;
 import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.Interval;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -21,11 +20,11 @@ import edu.upc.cpl.smeagol.json.ShortSetConverter;
 
 /**
  * This class defines a booking affected by a recurrence, as defined by RFC
- * 2445.
+ * 5545.
  * <p>
- * Please keep in mind that Sméagol Server API v2.0 implements <strong>only a
+ * Keep in mind that Sméagol Server API v2.0 implements <strong>only a
  * subset</strong> of this standard. Please refer to <a
- * href="http://tools.ietf.org/html/rfc2445">RFC 2445</a>, section 4.3.10, to
+ * href="http://tools.ietf.org/html/rfc5545">RFC 5545</a>, section 3.3.10, to
  * get a detailed description of valid recurrence attribute values.
  * <p>
  * TODO: Add details about which features of the RFC subset are implemented.
@@ -37,7 +36,7 @@ public class RecurrentBooking extends Booking {
 
 	private static transient Gson gson = new Gson();
 
-	/**
+	/*
 	 * provide custom serializers/deserializers for several attributes
 	 */
 	static {
@@ -53,61 +52,101 @@ public class RecurrentBooking extends Booking {
 		gson = gb.create();
 	}
 
-	private DateTime dtstart = new DateTime(); // default dtstart is "now"
-	private DateTime dtend;
+	/**
+	 * Default dtstart is "now"
+	 */
+	private DateTime dtstart = new DateTime();
+	/**
+	 * Default dtend is "dtstart + 1 hour"
+	 */
+	private DateTime dtend = dtstart.plusHours(1);
 	private Frequency frequency;
-	private Duration duration;
 	private Short interval = 1; // default repeat: "every 1"
 	private DateTime until;
-	private Set<Short> by_minute; // valid values: [0 .. 59]
-	private Set<Short> by_hour; // valid values: [0 .. 23]
 	private Set<DayOfWeek> by_day;
 	private Set<Short> by_day_month; // valid values: [-1 .. -31, 1 .. 31]
 	private Set<Short> by_month; // valid values: [1 .. 12]
 
 	/**
-	 * Default non-argument constructor.
+	 * Default non-argument constructor. Protected because users should not be
+	 * allowed to call it directly.
 	 */
-	public RecurrentBooking() {
+	protected RecurrentBooking() {
 	}
 
 	/**
-	 * Create a booking for the specified interval.
+	 * Returns a booking which repeats on a daily basis. For example, to define
+	 * a booking for a resource identified by <code>resId</code> for an event
+	 * identified by <code>evId</code>, every day from <code>8:00am</code> to
+	 * <code>10:00am</code>, starting on <code>2010-02-01</code> during the next
+	 * <code>3</code> monts:
+	 * 
+	 * <pre>
+	 * DateTime start = new DateTime(2010, 2, 10, 8, 0, 0);
+	 * DateTime end = start.plusHours(2);
+	 * DateTime until = start.plusMonths(3);
+	 * 
+	 * RecurrentBooking booking = RecurrentBooking.createDailyRecurrence(resId, evId, start, end, 1, until);
+	 * </pre>
 	 * 
 	 * @param idResource
-	 *            the resource to be booked
+	 *            identifier of the <code>Resource</code> to be booked. Not
+	 *            null. The resource must exist.
 	 * @param idEvent
-	 *            the event related to the booking
+	 *            identifier of the <code>Event</code> related to the booking.
+	 *            Not null. The event must exist.
+	 * @param start
+	 *            the <code>DateTime</code> at which the booking starts every
+	 *            day. Default is "now".
+	 * @param end
+	 *            the <code>DateTime</code> at which the booking ends every day.
+	 *            Default is 1 hour after <code>start</code>.
 	 * @param interval
-	 *            the start and end <code>DateTime</code>s of the booking
-	 * 
+	 *            the booking will repeat in steps of <code>interval</code>
+	 *            days. Must be > 0 (otherwise
+	 *            <code>IllegalArgumentException</code> will be thrown). Default
+	 *            is 1 (every day).
+	 * @param until
+	 *            the <code>DateTime</code> at which the recurrence ends. If
+	 *            null, the booking never ends. If not null, <code>until</code>
+	 *            must be greater than <code>start</code> (otherwise, an
+	 *            <code>IllegalArgumentException</code> will be thrown).
+	 * @return a new RecurrentBooking for the specified daily recurrence.
+	 * @throws IllegalArgumentException
 	 */
-	public RecurrentBooking(Long idResource, Long idEvent, Interval interval) {
-		this.setIdResource(idResource);
-		this.setIdEvent(idEvent);
-		this.setDtStart(interval.getStart());
-		this.setDtEnd(interval.getEnd());
+	public static RecurrentBooking asDailyRecurrence(Long idResource, Long idEvent, DateTime start, DateTime end,
+			Short interval, DateTime until) throws IllegalArgumentException {
+
+		if (interval != null && interval.compareTo((short) 1) < 0) {
+			throw new IllegalArgumentException("interval should be > 0");
+		}
+
+		if (until != null && until.isBefore(start)) {
+			throw new IllegalArgumentException("until DateTime should be after start DateTime");
+		}
+
+		RecurrentBooking b = new RecurrentBooking();
+		b.setDtStart(start);
+		b.setDtEnd(end);
+		b.setFrequency(Frequency.DAILY);
+		b.setInterval(interval);
+		b.setUntil(until);
+
+		return b;
 	}
 
-	/**
-	 * Create a booking for an interval, specified by the start
-	 * <code>DateTime</code> and a <code>Duration</code>.
-	 * 
-	 * @param idResource
-	 * @param idEvent
-	 * @param dtstart
-	 * @param duration
-	 */
-	public RecurrentBooking(long idResource, long idEvent, DateTime start, Duration duration) {
-		this.setIdResource(idResource);
-		this.setIdEvent(idEvent);
-		this.setDtStart(start);
-		this.setDtEnd(start.plus(duration));
-	}
+	public static RecurrentBooking asWeeklyRecurrence(Long idResource, Long idEvent, DateTime start, DateTime end,
+			Set<DayOfWeek> byDay, Short interval, DateTime until) {
 
-	public RecurrentBooking(long idResource, long idEvent, DateTime start, DateTime until, Duration duration,
-			int interval) {
-		// TODO
+		RecurrentBooking b = new RecurrentBooking();
+		b.setDtStart(start);
+		b.setDtEnd(end);
+		b.setFrequency(Frequency.WEEKLY);
+		b.setByDay(byDay);
+		b.setInterval(interval);
+		b.setUntil(until);
+
+		return b;
 	}
 
 	public Set<DayOfWeek> getByDay() {
@@ -136,38 +175,18 @@ public class RecurrentBooking extends Booking {
 	 * "last day of the month").
 	 * 
 	 * @param byDayOfMonth
-	 *            set of integer values in the ranges [-1 .. 31] or [1 .. 31].
+	 *            set of values in the ranges [-31 .. -1] or [1 .. 31].
+	 * @throws IllegalArgumentException
+	 *             if byDayOfMonth contains any illegal value
 	 */
-	public void setByDayOfMonth(Set<Short> byDayOfMonth) {
+	public void setByDayOfMonth(Set<Short> byDayOfMonth) throws IllegalArgumentException {
+		for (Short d : byDayOfMonth) {
+			if (d == null || (!GenericValidator.isInRange(d, -31, -1) && !GenericValidator.isInRange(d, 1, 31))) {
+				throw new IllegalArgumentException(
+						"illegal day of month value: only values between ranges [-31 .. -1] or [1 .. 31] are valid");
+			}
+		}
 		this.by_day_month = byDayOfMonth;
-	}
-
-	public Set<Short> getByHour() {
-		return by_hour;
-	}
-
-	/**
-	 * Set the hours of the day which are affected by the recurrence.
-	 * 
-	 * @param byHour
-	 *            set of integer values in the range [0 .. 23]
-	 */
-	public void setByHour(Set<Short> byHour) {
-		this.by_hour = byHour;
-	}
-
-	public Set<Short> getByMinute() {
-		return by_minute;
-	}
-
-	/**
-	 * Set the minutes of the hour which are affected by the recurrence.
-	 * 
-	 * @param byMinute
-	 *            set of integer values in the range [0 .. 59]
-	 */
-	public void setByMinute(Set<Short> byMinute) {
-		this.by_minute = byMinute;
 	}
 
 	public Set<Short> getByMonth() {
@@ -184,34 +203,20 @@ public class RecurrentBooking extends Booking {
 		this.by_month = byMonth;
 	}
 
-	public DateTime getDtEnd() {
-		return dtend;
-	}
-
-	public void setDtEnd(DateTime dtEnd) {
-		this.dtend = dtEnd;
-	}
-
 	public DateTime getDtStart() {
 		return dtstart;
 	}
 
 	public void setDtStart(DateTime dtStart) {
-		this.dtstart = dtStart;
+		this.dtstart = (dtStart == null) ? new DateTime() : dtStart;
 	}
 
-	public Duration getDuration() {
-		return duration;
+	public DateTime getDtEnd() {
+		return dtend;
 	}
 
-	/**
-	 * Sets the duration of the booking.
-	 * 
-	 * @param duration
-	 *            see {@link org.joda.time.Duration}
-	 */
-	public void setDuration(Duration duration) {
-		this.duration = duration;
+	public void setDtEnd(DateTime dtEnd) {
+		this.dtend = (dtEnd == null) ? getDtStart().plusHours(1) : dtEnd;
 	}
 
 	public Frequency getFrequency() {
@@ -219,6 +224,13 @@ public class RecurrentBooking extends Booking {
 	}
 
 	/**
+	 * The </code>Frequency</code> rule part identifies the type of recurrence
+	 * rule. Valid values include DAILY, to specify repeating events based on an
+	 * interval of a day or more; WEEKLY, to specify repeating events based on
+	 * an interval of a week or more; MONTHLY, to specify repeating events based
+	 * on an interval of a month or more; and YEARLY, to specify repeating
+	 * events based on an interval of a year or more.
+	 * 
 	 * Sets the frequency of the booking. Its used in combination with
 	 * <code>byDay</code>, <code>byDayOfMonth</code>, <code>byHour</code> or
 	 * <code>byMinute</code> attributes.
@@ -239,14 +251,19 @@ public class RecurrentBooking extends Booking {
 	}
 
 	/**
-	 * Used in combination with <code>setFrequency</code>, defines how often the
-	 * recurrence rule repeats. For example, within a <code>frequency</code>
-	 * value of <code>Frequency.WEEKLY</code>, an interval of 2 states that the
-	 * recurrence repeats every 2 weeks.
+	 * The INTERVAL rule part contains a positive integer representing at which
+	 * intervals the recurrence rule repeats. The default value is "1", every
+	 * day for a DAILY rule, every week for a WEEKLY rule, every month for a
+	 * MONTHLY rule, and every year for a YEARLY rule. For example, within a
+	 * DAILY rule, a value of "8" means every eight days.
 	 * 
 	 * @param interval
+	 *            the new interval value. Default is <code>1</code>.
 	 */
-	public void setInterval(Short interval) {
+	public void setInterval(Short interval) throws IllegalArgumentException {
+		if (interval != null && interval.compareTo((short) 1) < 0) {
+			throw new IllegalArgumentException("interval must be greater than 0");
+		}
 		this.interval = interval;
 	}
 
@@ -255,13 +272,20 @@ public class RecurrentBooking extends Booking {
 	}
 
 	/**
-	 * Set the date/time when the recurrence ends. Can be set to
-	 * <code>null</code> to define an infinite recurrence.
+	 * The <code>UNTIL</code> rule part defines a DateTime value that bounds the
+	 * recurrence rule in an inclusive manner. If the value specified by UNTIL
+	 * is synchronized with the specified recurrence, this DateTime becomes the
+	 * last instance of the recurrence.
+	 * <p>
+	 * If UNTIL is null, the recurrence is considered to repeat forever.
 	 * 
 	 * @param until
 	 *            the <code>DateTime</code> where the recurrence ends.
 	 */
-	public void setUntil(DateTime until) {
+	public void setUntil(DateTime until) throws IllegalArgumentException {
+		if (until != null && until.isBefore(getDtStart())) {
+			throw new IllegalArgumentException("until cannot be before dtStart");
+		}
 		this.until = until;
 	}
 

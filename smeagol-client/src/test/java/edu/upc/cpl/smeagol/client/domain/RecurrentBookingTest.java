@@ -39,7 +39,7 @@ public class RecurrentBookingTest {
 		B1.setIdResource(ID_RESOURCE1);
 		B1.setIdEvent(ID_EVENT1);
 		B1.setDtStart(DTSTART1);
-		B1.setDuration(DURATION1);
+		//B1.setDuration(DURATION1);
 		B1.setFrequency(FREQUENCY1);
 		BY_DAY1.add(DayOfWeek.MONDAY);
 		B1.setByDay(BY_DAY1);

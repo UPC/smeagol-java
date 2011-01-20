@@ -35,13 +35,13 @@ public class DayOfWeekListConverter implements JsonSerializer<Set<DayOfWeek>>, J
 			return null;
 		}
 
-		Set<String> labels = new TreeSet<String>();
+		Set<String> days = new TreeSet<String>();
 
 		for (DayOfWeek d : src) {
-			labels.add(d.getLabel());
+			days.add(d.getAsString());
 		}
 
-		return new JsonPrimitive(StringUtils.join(labels, ","));
+		return new JsonPrimitive(StringUtils.join(days, ","));
 	}
 
 	public Set<DayOfWeek> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
@@ -57,7 +57,7 @@ public class DayOfWeekListConverter implements JsonSerializer<Set<DayOfWeek>>, J
 
 		for (String l : labels) {
 			try {
-				DayOfWeek d = DayOfWeek.newFromLabel(l.trim());
+				DayOfWeek d = new DayOfWeek(l.trim());
 				result.add(d);
 			} catch (IllegalArgumentException e) {
 				throw new JsonParseException("Invalid DayOfWeek found on deserialization of " + json.getAsString());
