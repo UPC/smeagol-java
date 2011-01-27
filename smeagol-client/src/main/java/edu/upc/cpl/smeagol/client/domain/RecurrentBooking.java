@@ -7,6 +7,8 @@ import java.util.Set;
 
 import org.apache.commons.validator.GenericValidator;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.joda.time.Interval;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -35,6 +37,9 @@ import edu.upc.cpl.smeagol.json.ShortSetConverter;
 public class RecurrentBooking extends Booking {
 
 	private static transient Gson gson = new Gson();
+
+	private static transient Duration MAX_SPAN_DURATION_FOR_DAILY_RECURRENCE = Duration.standardHours(24);
+	private static transient Duration MAX_SPAN_DURATION_FOR_WEEKLY_RECURRENCE = Duration.standardDays(7);
 
 	/*
 	 * provide custom serializers/deserializers for several attributes
@@ -75,50 +80,58 @@ public class RecurrentBooking extends Booking {
 	}
 
 	/**
-	 * Returns a booking which repeats on a daily basis. For example, to define
-	 * a booking for a resource identified by <code>resId</code> for an event
-	 * identified by <code>evId</code>, every day from <code>8:00am</code> to
-	 * <code>10:00am</code>, starting on <code>2010-02-01</code> during the next
-	 * <code>3</code> monts:
+	 * Creates recurrent bookings which repeat on a daily basis.
+	 * <p>
+	 * For example, to define a booking for a resource identified by
+	 * <code>resId</code> for an event identified by <code>evId</code>, every
+	 * day from <code>8:00am</code> to <code>10:00am</code>, starting on
+	 * <code>2010-02-01</code> during the next <code>3</code> monts:
 	 * 
 	 * <pre>
-	 * DateTime start = new DateTime(2010, 2, 10, 8, 0, 0);
+	 * DateTime start = new DateTime(2010, 2, 1, 8, 0, 0);
 	 * DateTime end = start.plusHours(2);
 	 * DateTime until = start.plusMonths(3);
 	 * 
-	 * RecurrentBooking booking = RecurrentBooking.createDailyRecurrence(resId, evId, start, end, 1, until);
+	 * RecurrentBooking booking = RecurrentBooking.asDailyRecurrence(resId, evId, start, end, 1, until);
 	 * </pre>
 	 * 
 	 * @param idResource
 	 *            identifier of the <code>Resource</code> to be booked. Not
 	 *            null. The resource must exist.
+	 * 
 	 * @param idEvent
 	 *            identifier of the <code>Event</code> related to the booking.
 	 *            Not null. The event must exist.
+	 * 
 	 * @param start
 	 *            the <code>DateTime</code> at which the booking starts every
-	 *            day. Default is "now".
+	 *            duration day. Default is "now".
+	 * 
 	 * @param end
 	 *            the <code>DateTime</code> at which the booking ends every day.
 	 *            Default is 1 hour after <code>start</code>.
+	 * 
 	 * @param interval
 	 *            the booking will repeat in steps of <code>interval</code>
-	 *            days. Must be > 0 (otherwise
-	 *            <code>IllegalArgumentException</code> will be thrown). Default
-	 *            is 1 (every day).
+	 *            days. Must be > 0. Default is 1 (every day).
+	 * 
 	 * @param until
 	 *            the <code>DateTime</code> at which the recurrence ends. If
 	 *            null, the booking never ends. If not null, <code>until</code>
 	 *            must be greater than <code>start</code> (otherwise, an
 	 *            <code>IllegalArgumentException</code> will be thrown).
+	 * 
 	 * @return a new RecurrentBooking for the specified daily recurrence.
+	 * 
 	 * @throws IllegalArgumentException
 	 */
 	public static RecurrentBooking asDailyRecurrence(Long idResource, Long idEvent, DateTime start, DateTime end,
 			Short interval, DateTime until) throws IllegalArgumentException {
 
-		if (interval != null && interval.compareTo((short) 1) < 0) {
-			throw new IllegalArgumentException("interval should be > 0");
+		Interval i = new Interval(start, end);
+		if (i.toDuration().isLongerThan(MAX_SPAN_DURATION_FOR_DAILY_RECURRENCE)) {
+			throw new IllegalArgumentException(
+					"time span defined by [start,end] is too wide (should last at most one day for daily recurrences)");
 		}
 
 		if (until != null && until.isBefore(start)) {
@@ -126,6 +139,8 @@ public class RecurrentBooking extends Booking {
 		}
 
 		RecurrentBooking b = new RecurrentBooking();
+		b.setIdResource(idResource);
+		b.setIdEvent(idEvent);
 		b.setDtStart(start);
 		b.setDtEnd(end);
 		b.setFrequency(Frequency.DAILY);
@@ -135,16 +150,228 @@ public class RecurrentBooking extends Booking {
 		return b;
 	}
 
+	/**
+	 * Creates recurrent bookings which repeat on a weekly basis.
+	 * <p>
+	 * For example, to define a booking for a resource identified by
+	 * <code>resId</code> for an event identified by <code>evId</code>, all
+	 * Mondays and Thursdays, from <code>8:00am</code> to <code>14:00pm</code>,
+	 * starting on <code>2010-02-01</code> during the next <code>3</code> monts:
+	 * 
+	 * <pre>
+	 * DateTime start = new DateTime(2010, 2, 1, 8, 0, 0, 0);
+	 * DateTime end = start.plusHours(6);
+	 * DateTime until = start.plusMonths(3);
+	 * 
+	 * Set&lt;short&gt; byDay = new HashSet&lt;short&gt;;
+	 * byDay.add(DayOfWeek.MONDAY);
+	 * byDay.add(DayOfWeek.THURSDAY);
+	 * 
+	 * RecurrentBooking booking = RecurrentBooking.asWeeklyRecurrence(resId, evId, start, end, 1, until, byDay);
+	 * </pre>
+	 * 
+	 * @param idResource
+	 *            identifier of the <code>Resource</code> to be booked. Not
+	 *            null. The resource must exist.
+	 * 
+	 * @param idEvent
+	 *            identifier of the <code>Event</code> related to the booking.
+	 *            Not null. The event must exist.
+	 * 
+	 * @param start
+	 *            the <code>DateTime</code> at which the booking starts every
+	 *            duration day. Default is "now".
+	 * 
+	 * @param end
+	 *            the <code>DateTime</code> at which the booking ends every day.
+	 *            Default is 1 hour after <code>start</code>.
+	 * 
+	 * @param interval
+	 *            the booking will repeat in steps of <code>interval</code>
+	 *            days. Must be > 0. Default is 1 (every day).
+	 * 
+	 * @param until
+	 *            the <code>DateTime</code> at which the recurrence ends. If
+	 *            null, the booking never ends. If not null, <code>until</code>
+	 *            must be greater than <code>start</code> (otherwise, an
+	 *            <code>IllegalArgumentException</code> will be thrown).
+	 * 
+	 * @param byDay
+	 *            the days of the week at which the booking happens. The
+	 *            {@link DayOfWeek} class provides several constants you can use
+	 *            to populate this parameter.
+	 * 
+	 * @throws IllegalArgumentException
+	 */
 	public static RecurrentBooking asWeeklyRecurrence(Long idResource, Long idEvent, DateTime start, DateTime end,
-			Set<DayOfWeek> byDay, Short interval, DateTime until) {
+			Short interval, DateTime until, Set<DayOfWeek> byDay) throws IllegalArgumentException {
+
+		Interval i = new Interval(start, end);
+		if (i.toDuration().isLongerThan(MAX_SPAN_DURATION_FOR_WEEKLY_RECURRENCE)) {
+			throw new IllegalArgumentException(
+					"time span defined by [start,end] is too long (should last at most one week for weekly recurrences)");
+		}
+
+		if (until != null && until.isBefore(start)) {
+			throw new IllegalArgumentException("until DateTime should be after start DateTime");
+		}
 
 		RecurrentBooking b = new RecurrentBooking();
+		b.setIdResource(idResource);
+		b.setIdEvent(idEvent);
 		b.setDtStart(start);
 		b.setDtEnd(end);
 		b.setFrequency(Frequency.WEEKLY);
 		b.setByDay(byDay);
 		b.setInterval(interval);
 		b.setUntil(until);
+
+		return b;
+	}
+
+	/**
+	 * Returns a booking which repeats on a monthly basis. For example, to
+	 * define a booking for a resource identified by <code>resId</code> for an
+	 * event identified by <code>evId</code>, all mondays and thursdays from
+	 * <code>8:00am</code> to <code>14:00pm</code>, starting on
+	 * <code>2010-02-01</code> during the next <code>3</code> monts:
+	 * 
+	 * <pre>
+	 * DateTime start = new DateTime(2010, 2, 1, 8, 0, 0, 0);
+	 * DateTime end = start.plusHours(6);
+	 * DateTime until = start.plusMonths(3);
+	 * 
+	 * Set&lt;short&gt; byDay = new HashSet&lt;short&gt;;
+	 * byDay.add(DayOfWeek.MONDAY);
+	 * byDay.add(DayOfWeek.THURSDAY);
+	 * 
+	 * RecurrentBooking booking = RecurrentBooking.asMonthlyRecurrence(resId, evId, start, end, 1, until, byDay);
+	 * </pre>
+	 * 
+	 * @param idResource
+	 *            identifier of the <code>Resource</code> to be booked. Not
+	 *            null. The resource must exist.
+	 * 
+	 * @param idEvent
+	 *            identifier of the <code>Event</code> related to the booking.
+	 *            Not null. The event must exist.
+	 * 
+	 * @param start
+	 *            the <code>DateTime</code> at which the booking starts every
+	 *            duration day. Default is "now".
+	 * 
+	 * @param end
+	 *            the <code>DateTime</code> at which the booking ends every day.
+	 *            Default is 1 hour after <code>start</code>.
+	 * 
+	 * @param byDay
+	 *            the days of the week at which the booking happens. The
+	 *            {@link DayOfWeek} class provides several constants you can use
+	 *            to populate this parameter.
+	 * 
+	 * @param interval
+	 *            the booking will repeat in steps of <code>interval</code>
+	 *            days. Must be > 0. Default is 1 (every day).
+	 * 
+	 * @param until
+	 *            the <code>DateTime</code> at which the recurrence ends. If
+	 *            null, the booking never ends. If not null, <code>until</code>
+	 *            must be greater than <code>start</code> (otherwise, an
+	 *            <code>IllegalArgumentException</code> will be thrown).
+	 * 
+	 * @return a new RecurrentBooking for the specified daily recurrence.
+	 */
+	public static RecurrentBooking asMonthlyRecurrence(Long idResource, Long idEvent, DateTime start, DateTime end,
+			Short interval, DateTime until, Set<Short> byMonthDay) throws IllegalArgumentException {
+
+		// TODO: Check that end - start <= 1 month (???)
+
+		if (until != null && until.isBefore(start)) {
+			throw new IllegalArgumentException("until DateTime should be after start DateTime");
+		}
+
+		RecurrentBooking b = new RecurrentBooking();
+
+		b.setIdResource(idResource);
+		b.setIdEvent(idEvent);
+		b.setDtStart(start);
+		b.setDtEnd(end);
+		b.setFrequency(Frequency.MONTHLY);
+		b.setByDayOfMonth(byMonthDay);
+		b.setInterval(interval);
+		b.setUntil(until);
+
+		return b;
+	}
+
+	/**
+	 * Returns a booking which repeats on a yearly basis.
+	 * <p>
+	 * For example, to define a booking for a resource identified by
+	 * <code>resId</code> for an event identified by <code>evId</code>, every
+	 * December the 25th (all day):
+	 * 
+	 * <pre>
+	 * DateTime start = new DateTime(2010, 12, 25, 0, 0, 0, 0);
+	 * DateTime end = start.plusDays(1);
+	 * 
+	 * RecurrentBooking booking = RecurrentBooking.asYearlyRecurrence(resId, evId, start, end, 1, until, byDay);
+	 * </pre>
+	 * 
+	 * @param idResource
+	 *            identifier of the <code>Resource</code> to be booked. Not
+	 *            null. The resource must exist.
+	 * 
+	 * @param idEvent
+	 *            identifier of the <code>Event</code> related to the booking.
+	 *            Not null. The event must exist.
+	 * 
+	 * @param start
+	 *            the <code>DateTime</code> at which the booking starts every
+	 *            duration day. Default is "now".
+	 * 
+	 * @param end
+	 *            the <code>DateTime</code> at which the booking ends every day.
+	 *            Default is 1 hour after <code>start</code>.
+	 * 
+	 * @param interval
+	 *            the booking will repeat in steps of <code>interval</code>
+	 *            days. Must be > 0. Default is 1 (every day).
+	 * 
+	 * @param until
+	 *            the <code>DateTime</code> at which the recurrence ends. If
+	 *            null, the booking never ends. If not null, <code>until</code>
+	 *            must be greater than <code>start</code> (otherwise, an
+	 *            <code>IllegalArgumentException</code> will be thrown).
+	 * 
+	 * @param byMonthDay
+	 *            the days of the month at which the booking happens. See the
+	 *            {@link #setByDayOfMonth(Set)} method for valid days of the
+	 *            month values.
+	 * 
+	 * @param byMonth
+	 *            the months of the year which are affected by the recurrence.
+	 *            Valid months are numbers in the range [1..12].
+	 * 
+	 * @return a new RecurrentBooking for the specified daily recurrence.
+	 */
+	public static RecurrentBooking asYearlyRecurrence(Long idResource, Long idEvent, DateTime start, DateTime end,
+			Short interval, DateTime until, Set<Short> byMonthDay, Set<Short> byMonth) {
+
+		// TODO: Check that end - start <= 1 year (???)
+
+		if (until != null && until.isBefore(start)) {
+			throw new IllegalArgumentException("until DateTime should be after start DateTime");
+		}
+
+		RecurrentBooking b = new RecurrentBooking();
+		b.setIdResource(idResource);
+		b.setIdEvent(idEvent);
+		b.setDtStart(start);
+		b.setDtEnd(end);
+		b.setFrequency(Frequency.YEARLY);
+		b.setByDayOfMonth(byMonthDay);
+		b.setByMonth(byMonth);
 
 		return b;
 	}
@@ -199,7 +426,12 @@ public class RecurrentBooking extends Booking {
 	 * @param byMonth
 	 *            set of integer values in the range [1 .. 12]
 	 */
-	public void setByMonth(Set<Short> byMonth) {
+	public void setByMonth(Set<Short> byMonth) throws IllegalArgumentException {
+		for (Short m : byMonth) {
+			if (m == null || (!GenericValidator.isInRange(m, 1, 12))) {
+				throw new IllegalArgumentException("illegal month: only values between [1 .. 12] are valid");
+			}
+		}
 		this.by_month = byMonth;
 	}
 
@@ -260,11 +492,12 @@ public class RecurrentBooking extends Booking {
 	 * @param interval
 	 *            the new interval value. Default is <code>1</code>.
 	 */
-	public void setInterval(Short interval) throws IllegalArgumentException {
-		if (interval != null && interval.compareTo((short) 1) < 0) {
-			throw new IllegalArgumentException("interval must be greater than 0");
+	public void setInterval(Short interval) {
+		if (interval == null || interval.compareTo((short) 1) < 0) {
+			this.interval = 1;
+		} else {
+			this.interval = interval;
 		}
-		this.interval = interval;
 	}
 
 	public DateTime getUntil() {
