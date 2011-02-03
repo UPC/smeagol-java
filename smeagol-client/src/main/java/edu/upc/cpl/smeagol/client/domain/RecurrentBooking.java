@@ -80,7 +80,7 @@ public class RecurrentBooking extends Booking {
 	}
 
 	/**
-	 * Creates recurrent bookings which repeat on a daily basis.
+	 * Constructor method for bookings which repeat on a daily basis.
 	 * <p>
 	 * For example, to define a booking for a resource identified by
 	 * <code>resId</code> for an event identified by <code>evId</code>, every
@@ -104,12 +104,12 @@ public class RecurrentBooking extends Booking {
 	 *            Not null. The event must exist.
 	 * 
 	 * @param start
-	 *            the <code>DateTime</code> at which the booking starts every
-	 *            duration day. Default is "now".
+	 *            <code>DateTime</code> at which the booking starts every day.
+	 *            <code>null</code> means now.
 	 * 
 	 * @param end
 	 *            the <code>DateTime</code> at which the booking ends every day.
-	 *            Default is 1 hour after <code>start</code>.
+	 *            <code>null</code> means "1 hour after <code>start</code>".
 	 * 
 	 * @param interval
 	 *            the booking will repeat in steps of <code>interval</code>
@@ -151,7 +151,7 @@ public class RecurrentBooking extends Booking {
 	}
 
 	/**
-	 * Creates recurrent bookings which repeat on a weekly basis.
+	 * Constructor method for bookings which repeat on a weekly basis.
 	 * <p>
 	 * For example, to define a booking for a resource identified by
 	 * <code>resId</code> for an event identified by <code>evId</code>, all
@@ -230,11 +230,12 @@ public class RecurrentBooking extends Booking {
 	}
 
 	/**
-	 * Returns a booking which repeats on a monthly basis. For example, to
-	 * define a booking for a resource identified by <code>resId</code> for an
-	 * event identified by <code>evId</code>, all mondays and thursdays from
-	 * <code>8:00am</code> to <code>14:00pm</code>, starting on
-	 * <code>2010-02-01</code> during the next <code>3</code> monts:
+	 * Constructor method for bookings which repeat on a monthly basis.
+	 * <p>
+	 * For example, to define a booking for a resource identified by
+	 * <code>resId</code> for an event identified by <code>evId</code>, all
+	 * mondays and thursdays from <code>8:00am</code> to <code>14:00pm</code>,
+	 * starting on <code>2010-02-01</code> during the next <code>3</code> monts:
 	 * 
 	 * <pre>
 	 * DateTime start = new DateTime(2010, 2, 1, 8, 0, 0, 0);
@@ -305,7 +306,7 @@ public class RecurrentBooking extends Booking {
 	}
 
 	/**
-	 * Returns a booking which repeats on a yearly basis.
+	 * Constructor method for bookings which repeat on a yearly basis.
 	 * <p>
 	 * For example, to define a booking for a resource identified by
 	 * <code>resId</code> for an event identified by <code>evId</code>, every

@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.GenericValidator;
+import org.apache.log4j.Logger;
 
 /**
  * Days of week, for recurrences. Valid days have the form "MO" (monday), "-1MO"
@@ -19,34 +20,36 @@ import org.apache.commons.validator.GenericValidator;
  */
 public class DayOfWeek {
 
+	private static Logger logger = Logger.getLogger(DayOfWeek.class);
+
 	/**
 	 * Value for representing Sundays
 	 */
-	public static String SUNDAY = "SU";
+	public static DayOfWeek SUNDAY = new DayOfWeek("SU");
 	/**
 	 * Value for representing Mondays
 	 */
-	public static String MONDAY = "MO";
+	public static DayOfWeek MONDAY = new DayOfWeek("MO");
 	/**
 	 * Value for representing Thursdays
 	 */
-	public static String TUESDAY = "TU";
+	public static DayOfWeek TUESDAY = new DayOfWeek("TU");
 	/**
 	 * Value for representing Wednesdays
 	 */
-	public static String WEDNESDAY = "WE";
+	public static DayOfWeek WEDNESDAY = new DayOfWeek("WE");
 	/**
 	 * Value for representing Thursdays
 	 */
-	public static String THURSDAY = "TH";
+	public static DayOfWeek THURSDAY = new DayOfWeek("TH");
 	/**
 	 * Value for representing Fridays
 	 */
-	public static String FRIDAY = "FR";
+	public static DayOfWeek FRIDAY = new DayOfWeek("FR");
 	/**
 	 * Value for representing Saturdays
 	 */
-	public static String SATURDAY = "SA";
+	public static DayOfWeek SATURDAY = new DayOfWeek("SA");
 
 	private String dayOfWeek;
 
@@ -69,6 +72,7 @@ public class DayOfWeek {
 	 */
 	public static boolean validate(String dayOfWeek) {
 		if (StringUtils.isEmpty(dayOfWeek)) {
+			logger.debug("DayOfWeek is empty");
 			return false;
 		}
 
@@ -76,13 +80,17 @@ public class DayOfWeek {
 		Matcher m = p.matcher(dayOfWeek);
 
 		if (!m.matches()) {
+			logger.debug("DayOfWeek does not match regexp.");
 			return false;
 		}
 
-		if (m.groupCount() == 2) {
+		if (m.groupCount() == 2 && StringUtils.isNotEmpty(m.group(1))) {
 			// tye day is in the form +NNday or -NNday
 			String prefix = m.group(1);
+			logger.debug("groupCount(): " + m.groupCount() + ", DayOfWeek[prefix: " + m.group(1) + ", suffix: "
+					+ m.group(2) + "]");
 			if (!GenericValidator.isShort(prefix) || !GenericValidator.isInRange(Short.parseShort(prefix), 1, 53)) {
+				logger.debug("DayOfWeek prefix is not in a valid range.");
 				return false;
 			}
 		}
