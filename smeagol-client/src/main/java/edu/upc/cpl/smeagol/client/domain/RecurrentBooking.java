@@ -4,6 +4,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.validator.GenericValidator;
 import org.joda.time.DateTime;
@@ -371,6 +372,8 @@ public class RecurrentBooking extends Booking {
 		b.setDtStart(start);
 		b.setDtEnd(end);
 		b.setFrequency(Frequency.YEARLY);
+		b.setInterval(interval);
+		b.setUntil(until);
 		b.setByDayOfMonth(byMonthDay);
 		b.setByMonth(byMonth);
 
@@ -388,7 +391,7 @@ public class RecurrentBooking extends Booking {
 	 *            a list of {@link DayOfWeek} values
 	 */
 	public void setByDay(Set<DayOfWeek> byDay) {
-		this.by_day = byDay;
+		this.by_day = byDay == null ? new TreeSet<DayOfWeek>() : byDay;
 	}
 
 	public Set<Short> getByDayOfMonth() {
@@ -408,13 +411,17 @@ public class RecurrentBooking extends Booking {
 	 *             if byDayOfMonth contains any illegal value
 	 */
 	public void setByDayOfMonth(Set<Short> byDayOfMonth) throws IllegalArgumentException {
-		for (Short d : byDayOfMonth) {
-			if (d == null || (!GenericValidator.isInRange(d, -31, -1) && !GenericValidator.isInRange(d, 1, 31))) {
-				throw new IllegalArgumentException(
-						"illegal day of month value: only values between ranges [-31 .. -1] or [1 .. 31] are valid");
+		if (byDayOfMonth == null) {
+			this.by_day_month = new TreeSet<Short>();
+		} else {
+			for (Short d : byDayOfMonth) {
+				if (d == null || (!GenericValidator.isInRange(d, -31, -1) && !GenericValidator.isInRange(d, 1, 31))) {
+					throw new IllegalArgumentException(
+							"illegal day of month value: only values between ranges [-31 .. -1] or [1 .. 31] are valid");
+				}
 			}
+			this.by_day_month = byDayOfMonth;
 		}
-		this.by_day_month = byDayOfMonth;
 	}
 
 	public Set<Short> getByMonth() {
@@ -428,12 +435,16 @@ public class RecurrentBooking extends Booking {
 	 *            set of integer values in the range [1 .. 12]
 	 */
 	public void setByMonth(Set<Short> byMonth) throws IllegalArgumentException {
-		for (Short m : byMonth) {
-			if (m == null || (!GenericValidator.isInRange(m, 1, 12))) {
-				throw new IllegalArgumentException("illegal month: only values between [1 .. 12] are valid");
+		if (byMonth == null) {
+			this.by_month = new TreeSet<Short>();
+		} else {
+			for (Short m : byMonth) {
+				if (m == null || (!GenericValidator.isInRange(m, 1, 12))) {
+					throw new IllegalArgumentException("illegal month: only values between [1 .. 12] are valid");
+				}
 			}
+			this.by_month = byMonth;
 		}
-		this.by_month = byMonth;
 	}
 
 	public DateTime getDtStart() {
