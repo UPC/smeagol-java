@@ -71,10 +71,10 @@ public abstract class Booking implements Comparable<Booking> {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof SimpleBooking)) {
+		if (!(o instanceof Booking)) {
 			return false;
 		}
-		SimpleBooking other = (SimpleBooking) o;
+		Booking other = (Booking) o;
 		return new EqualsBuilder().append(this.getId(), other.getId()).isEquals();
 	}
 

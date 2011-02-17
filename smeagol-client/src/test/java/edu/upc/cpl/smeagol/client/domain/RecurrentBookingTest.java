@@ -29,7 +29,8 @@ public class RecurrentBookingTest extends TestCase {
 
 	private static long ID_RESOURCE2 = 2;
 	private static long ID_EVENT2 = 20;
-	private static DateTime DTSTART2 = new DateTime("2011-01-02T15:00:00");
+	private static DateTime DTSTART2 = new DateTime("2011-03-02T15:00:00");
+	private static DateTime DTEND2 = new DateTime("2011-03-02T16:00:00");
 	private static RecurrentBooking B1;
 	private static RecurrentBooking B2;
 
@@ -37,6 +38,7 @@ public class RecurrentBookingTest extends TestCase {
 	@Override
 	public void setUp() throws Exception {
 		B1 = new RecurrentBooking();
+		B1.setId(1L);
 		B1.setIdResource(ID_RESOURCE1);
 		B1.setIdEvent(ID_EVENT1);
 		B1.setDtStart(DTSTART1);
@@ -52,6 +54,9 @@ public class RecurrentBookingTest extends TestCase {
 		BY_MONTH1.add((short) DateTimeConstants.JULY);
 
 		B2 = new RecurrentBooking();
+		B2.setId(2L);
+		B2.setDtStart(DTSTART2);
+		B2.setDtEnd(DTEND2);
 	}
 
 	@Test
@@ -187,13 +192,18 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testCompareTo() {
-		
-		fail("Not yet implemented");
+		assertTrue(B1.compareTo(B2) < 0);
+		assertTrue(B2.compareTo(B1) > 0);
+		assertTrue(B1.compareTo(B1) == 0);
 	}
 
 	@Test
-	public void testEqualsObject() {
-		fail("Not yet implemented");
+	public void testEquals() {
+		RecurrentBooking x = new RecurrentBooking();
+		RecurrentBooking y = new RecurrentBooking();
+		assertTrue(B1.equals(B1));
+		assertFalse(B1.equals(B2));
+		assertTrue(x.equals(y));
 	}
 
 }
