@@ -2,7 +2,6 @@ package edu.upc.cpl.smeagol.client.domain;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -48,12 +47,12 @@ public class RecurrentBooking extends Booking {
 	static {
 		GsonBuilder gb = new GsonBuilder();
 
-		Type listOfDayOfWeekType = new TypeToken<List<DayOfWeek>>() {
+		Type setOfDayOfWeekType = new TypeToken<Set<DayOfWeek>>() {
 		}.getType();
-		Type listOfShortType = new TypeToken<List<Short>>() {
+		Type setOfShortType = new TypeToken<Set<Short>>() {
 		}.getType();
-		gb.registerTypeAdapter(listOfDayOfWeekType, new DayOfWeekListConverter());
-		gb.registerTypeAdapter(listOfShortType, new ShortSetConverter());
+		gb.registerTypeAdapter(setOfDayOfWeekType, new DayOfWeekListConverter());
+		gb.registerTypeAdapter(setOfShortType, new ShortSetConverter());
 		gb.registerTypeAdapter(DateTime.class, new DateTimeConverter());
 		gson = gb.create();
 	}

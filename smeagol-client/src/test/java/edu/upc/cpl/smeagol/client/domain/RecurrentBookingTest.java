@@ -6,6 +6,7 @@ import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.junit.Before;
@@ -15,6 +16,7 @@ import edu.upc.cpl.smeagol.client.ical.DayOfWeek;
 import edu.upc.cpl.smeagol.client.ical.Frequency;
 
 public class RecurrentBookingTest extends TestCase {
+	private static Logger logger = Logger.getLogger(RecurrentBookingTest.class);
 
 	private static long ID_RESOURCE1 = 111;
 	private static long ID_EVENT1 = 222;
@@ -42,6 +44,7 @@ public class RecurrentBookingTest extends TestCase {
 		B1.setIdResource(ID_RESOURCE1);
 		B1.setIdEvent(ID_EVENT1);
 		B1.setDtStart(DTSTART1);
+		B1.setDtEnd(DTEND1);
 		B1.setFrequency(FREQUENCY1);
 		BY_DAY1.add(DayOfWeek.MONDAY);
 		BY_DAY1.add(DayOfWeek.WEDNESDAY);
@@ -55,6 +58,8 @@ public class RecurrentBookingTest extends TestCase {
 
 		B2 = new RecurrentBooking();
 		B2.setId(2L);
+		B2.setIdResource(ID_RESOURCE2);
+		B2.setIdEvent(ID_EVENT2);
 		B2.setDtStart(DTSTART2);
 		B2.setDtEnd(DTEND2);
 	}
@@ -172,6 +177,8 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testSerialize() {
+		String b1AsJson = B1.serialize();
+		logger.debug("B1 as json: " + b1AsJson);
 		fail("Not yet implemented");
 	}
 
