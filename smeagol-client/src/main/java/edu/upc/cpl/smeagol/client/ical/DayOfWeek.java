@@ -4,6 +4,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.CompareToBuilder;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.validator.GenericValidator;
 import org.apache.log4j.Logger;
 
@@ -18,7 +22,7 @@ import org.apache.log4j.Logger;
  * @author angel
  * 
  */
-public class DayOfWeek {
+public class DayOfWeek implements Comparable<DayOfWeek> {
 
 	private static Logger logger = Logger.getLogger(DayOfWeek.class);
 
@@ -96,5 +100,34 @@ public class DayOfWeek {
 		}
 
 		return true;
+	}
+
+	public int compareTo(DayOfWeek other) {
+		return new CompareToBuilder().append(this.dayOfWeek, other.dayOfWeek).toComparison();
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this).append(this.dayOfWeek).toString();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17,37).append(this.dayOfWeek).toHashCode();
+	};
+	
+	@Override
+	public boolean equals(Object other) {
+		if (other == null) {
+			return false;
+		}
+		if (other == this) {
+			return true;
+		}
+		if (!(other instanceof DayOfWeek)) {
+			return false;
+		}
+		DayOfWeek d = (DayOfWeek) other;
+		return new EqualsBuilder().append(this.dayOfWeek, d.dayOfWeek).isEquals();
 	}
 }

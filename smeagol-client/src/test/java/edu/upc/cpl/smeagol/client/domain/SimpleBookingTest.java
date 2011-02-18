@@ -5,12 +5,14 @@ import java.util.Collection;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class SimpleBookingTest extends TestCase {
 
@@ -57,11 +59,17 @@ public class SimpleBookingTest extends TestCase {
 	@Test
 	public void testSerialize() {
 		String b1AsJson = B1.serialize();
-		assertTrue(StringUtils.contains(b1AsJson, "\"id\":" + B1.getId()));
-		assertTrue(StringUtils.contains(b1AsJson, "\"dtstart\":\"" + B1.getDtStart() + "\""));
-		assertTrue(StringUtils.contains(b1AsJson, "\"dtend\":\"" + B1.getDtEnd() + "\""));
-		assertTrue(StringUtils.contains(b1AsJson, "\"id_resource\":" + B1.getIdResource()));
-		assertTrue(StringUtils.contains(b1AsJson, "\"id_event\":" + B1.getIdEvent()));
+		JsonObject obj = new JsonParser().parse(b1AsJson).getAsJsonObject();
+		assertTrue(obj.has("id"));
+		assertTrue(B1.getId().equals(obj.get("id").getAsLong()));
+		assertTrue(obj.has("id_resource"));
+		assertTrue(B1.getIdResource().equals(obj.get("id_resource").getAsLong()));
+		assertTrue(obj.has("id_event"));
+		assertTrue(B1.getIdEvent().equals(obj.get("id_event").getAsLong()));
+		assertTrue(obj.has("dtstart"));
+		assertEquals(B1.getDtStart(), new DateTime(obj.get("dtstart").getAsString()));
+		assertTrue(obj.has("dtend"));
+		assertEquals(B1.getDtEnd(), new DateTime(obj.get("dtend").getAsString()));
 	}
 
 	@Test
