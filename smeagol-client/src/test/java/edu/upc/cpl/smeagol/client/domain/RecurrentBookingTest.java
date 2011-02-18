@@ -12,6 +12,8 @@ import org.joda.time.DateTimeConstants;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.gson.Gson;
+
 import edu.upc.cpl.smeagol.client.ical.DayOfWeek;
 import edu.upc.cpl.smeagol.client.ical.Frequency;
 
@@ -180,6 +182,14 @@ public class RecurrentBookingTest extends TestCase {
 		String b1AsJson = B1.serialize();
 		logger.debug("B1 as json: " + b1AsJson);
 		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testSerializeDailyRecurrence() {
+		RecurrentBooking b = RecurrentBooking.asDailyRecurrence(ID_RESOURCE1, ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1);
+		String json = b.serialize();
+		Gson g = new Gson();
+		
 	}
 
 	@Test
