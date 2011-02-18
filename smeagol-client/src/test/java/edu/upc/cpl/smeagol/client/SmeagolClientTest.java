@@ -11,15 +11,32 @@ import org.junit.Test;
 import edu.upc.cpl.smeagol.client.domain.Tag;
 import edu.upc.cpl.smeagol.client.exception.NotFoundException;
 
+/**
+ * <code>SmeagolClient</code> tests.
+ * <p>
+ * WARNING: Before running these tests
+ * 
+ * @author angel
+ * 
+ */
 public class SmeagolClientTest extends TestCase {
 
 	private static Logger logger = Logger.getLogger(SmeagolClientTest.class);
+
+	private static final String SERVER_URL = "http://localhost:3000";
+
+	static {
+		logger.info("****************************************************************************");
+		logger.info(" NOTE: Before running these tests, check that a compatible Smeagol server   ");
+		logger.info(" is running on " + SERVER_URL);
+		logger.info("****************************************************************************");
+	}
 
 	private static SmeagolClient client;
 
 	@Before
 	public void setUp() throws Exception {
-		client = new SmeagolClient("http://localhost:3000");
+		client = new SmeagolClient(SERVER_URL);
 	}
 
 	@Test

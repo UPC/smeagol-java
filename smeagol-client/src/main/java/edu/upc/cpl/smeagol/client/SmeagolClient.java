@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
