@@ -51,7 +51,6 @@ public class SmeagolClientTest extends TestCase {
 		try {
 			t = client.getTag("videoconferencia");
 			assertTrue(t != null);
-			logger.debug(t.toString());
 		} catch (NotFoundException e) {
 			logger.error(e.getLocalizedMessage());
 		}

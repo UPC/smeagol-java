@@ -22,11 +22,10 @@ import com.google.gson.JsonParser;
 import edu.upc.cpl.smeagol.client.ical.DayOfWeek;
 import edu.upc.cpl.smeagol.client.ical.Frequency;
 
-public class RecurrentBookingTest extends TestCase {
+public class BookingTest extends TestCase {
 
 	@SuppressWarnings("unused")
-	private static final Logger logger = Logger
-			.getLogger(RecurrentBookingTest.class);
+	private static final Logger logger = Logger.getLogger(BookingTest.class);
 
 	private static final Long ID1 = 1L;
 	private static final Long ID2 = 2L;
@@ -34,11 +33,9 @@ public class RecurrentBookingTest extends TestCase {
 	private static final Long ID_RESOURCE2 = 2L;
 	private static final Long ID_EVENT1 = 222L;
 	private static final Long ID_EVENT2 = 20L;
-	private static final DateTime DTSTART1 = new DateTime(2011, 2, 3, 8, 0, 0,
-			0);
+	private static final DateTime DTSTART1 = new DateTime(2011, 2, 3, 8, 0, 0, 0);
 	private static final DateTime DTSTART2 = new DateTime("2011-03-02T15:00:00");
-	private static final DateTime DTEND1 = new DateTime(2011, 2, 3, 10, 30, 0,
-			0);
+	private static final DateTime DTEND1 = new DateTime(2011, 2, 3, 10, 30, 0, 0);
 	private static final DateTime DTEND2 = new DateTime("2011-03-02T16:00:00");
 	private static final Short INTERVAL1 = 2;
 	private static final Short INTERVAL2 = 4;
@@ -50,8 +47,8 @@ public class RecurrentBookingTest extends TestCase {
 	private static final Set<Short> BY_DAYOFMONTH1 = new TreeSet<Short>();
 	private static final Set<Short> BY_MONTH1 = new TreeSet<Short>();
 
-	private static RecurrentBooking B1;
-	private static RecurrentBooking B2;
+	private static Booking B1;
+	private static Booking B2;
 
 	private static JsonObject B1_AS_JSON_OBJECT;
 	private static JsonObject B2_AS_JSON_OBJECT;
@@ -59,7 +56,7 @@ public class RecurrentBookingTest extends TestCase {
 	@Before
 	@Override
 	public void setUp() throws Exception {
-		B1 = new RecurrentBooking();
+		B1 = new Booking();
 		B1.setId(ID1);
 		B1.setIdResource(ID_RESOURCE1);
 		B1.setIdEvent(ID_EVENT1);
@@ -78,7 +75,7 @@ public class RecurrentBookingTest extends TestCase {
 		B1.setInterval(INTERVAL1);
 		B1.setUntil(UNTIL1);
 
-		B2 = new RecurrentBooking();
+		B2 = new Booking();
 		B2.setId(ID2);
 		B2.setIdResource(ID_RESOURCE2);
 		B2.setIdEvent(ID_EVENT2);
@@ -94,8 +91,7 @@ public class RecurrentBookingTest extends TestCase {
 		B1_AS_JSON_OBJECT.addProperty("id_event", B1.getIdEvent());
 		B1_AS_JSON_OBJECT.addProperty("dtstart", B1.getDtStart().toString());
 		B1_AS_JSON_OBJECT.addProperty("dtend", B1.getDtEnd().toString());
-		B1_AS_JSON_OBJECT
-				.addProperty("frequency", B1.getFrequency().toString());
+		B1_AS_JSON_OBJECT.addProperty("frequency", B1.getFrequency().toString());
 		B1_AS_JSON_OBJECT.addProperty("interval", B1.getInterval());
 		B1_AS_JSON_OBJECT.addProperty("until", B1.getUntil().toString());
 
@@ -105,16 +101,23 @@ public class RecurrentBookingTest extends TestCase {
 		B2_AS_JSON_OBJECT.addProperty("id_event", B2.getIdEvent());
 		B2_AS_JSON_OBJECT.addProperty("dtstart", B2.getDtStart().toString());
 		B2_AS_JSON_OBJECT.addProperty("dtend", B2.getDtEnd().toString());
-		B2_AS_JSON_OBJECT
-				.addProperty("frequency", B2.getFrequency().toString());
+		B2_AS_JSON_OBJECT.addProperty("frequency", B2.getFrequency().toString());
 		B2_AS_JSON_OBJECT.addProperty("interval", B2.getInterval());
 		B2_AS_JSON_OBJECT.addProperty("until", B2.getUntil().toString());
 	}
 
 	@Test
+	public void testAsSimple() {
+		Booking b = Booking.asSimple(ID_RESOURCE1, ID_EVENT1, DTSTART1, DTEND1);
+		assertEquals(ID_RESOURCE1, b.getIdResource());
+		assertEquals(ID_EVENT1, b.getIdEvent());
+		assertEquals(DTSTART1, b.getDtStart());
+		assertEquals(DTEND1, b.getDtEnd());
+	}
+
+	@Test
 	public void testAsDailyRecurrence() {
-		RecurrentBooking r = RecurrentBooking.asDailyRecurrence(ID_RESOURCE1,
-				ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1);
+		Booking r = Booking.asDailyRecurrence(ID_RESOURCE1, ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1);
 		assertEquals(Frequency.DAILY, r.getFrequency());
 		assertEquals(ID_RESOURCE1, r.getIdResource());
 		assertEquals(ID_EVENT1, r.getIdEvent());
@@ -126,8 +129,7 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testAsDailyRecurrenceWithDefaultArgs() {
-		RecurrentBooking r = RecurrentBooking.asDailyRecurrence(ID_RESOURCE1,
-				ID_EVENT1, null, null, null, null);
+		Booking r = Booking.asDailyRecurrence(ID_RESOURCE1, ID_EVENT1, null, null, null, null);
 		assertEquals(Frequency.DAILY, r.getFrequency());
 		assertEquals(ID_RESOURCE1, r.getIdResource());
 		assertEquals(ID_EVENT1, r.getIdEvent());
@@ -139,8 +141,7 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testAsWeeklyRecurrence() {
-		RecurrentBooking r = RecurrentBooking.asWeeklyRecurrence(ID_RESOURCE1,
-				ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1, BY_DAY1);
+		Booking r = Booking.asWeeklyRecurrence(ID_RESOURCE1, ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1, BY_DAY1);
 		assertEquals(Frequency.WEEKLY, r.getFrequency());
 		assertEquals(ID_RESOURCE1, r.getIdResource());
 		assertEquals(ID_EVENT1, r.getIdEvent());
@@ -153,8 +154,7 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testAsWeeklyRecurrenceWithDefaultArgs() {
-		RecurrentBooking r = RecurrentBooking.asWeeklyRecurrence(ID_RESOURCE1,
-				ID_EVENT1, null, null, null, null, null);
+		Booking r = Booking.asWeeklyRecurrence(ID_RESOURCE1, ID_EVENT1, null, null, null, null, null);
 		assertEquals(Frequency.WEEKLY, r.getFrequency());
 		assertEquals(ID_RESOURCE1, r.getIdResource());
 		assertEquals(ID_EVENT1, r.getIdEvent());
@@ -168,8 +168,8 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testAsMonthlyRecurrence() {
-		RecurrentBooking r = RecurrentBooking.asMonthlyRecurrence(ID_RESOURCE1,
-				ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1, BY_DAYOFMONTH1);
+		Booking r = Booking.asMonthlyRecurrence(ID_RESOURCE1, ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1,
+				BY_DAYOFMONTH1);
 		assertEquals(Frequency.MONTHLY, r.getFrequency());
 		assertEquals(ID_RESOURCE1, r.getIdResource());
 		assertEquals(ID_EVENT1, r.getIdEvent());
@@ -182,8 +182,7 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testAsMonthlyRecurrenceWithDefaultArgs() {
-		RecurrentBooking r = RecurrentBooking.asMonthlyRecurrence(ID_RESOURCE1,
-				ID_EVENT1, null, null, null, null, null);
+		Booking r = Booking.asMonthlyRecurrence(ID_RESOURCE1, ID_EVENT1, null, null, null, null, null);
 		assertEquals(Frequency.MONTHLY, r.getFrequency());
 		assertEquals(ID_RESOURCE1, r.getIdResource());
 		assertEquals(ID_EVENT1, r.getIdEvent());
@@ -197,9 +196,8 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testAsYearlyRecurrence() {
-		RecurrentBooking r = RecurrentBooking.asYearlyRecurrence(ID_RESOURCE1,
-				ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1, BY_DAYOFMONTH1,
-				BY_MONTH1);
+		Booking r = Booking.asYearlyRecurrence(ID_RESOURCE1, ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1,
+				BY_DAYOFMONTH1, BY_MONTH1);
 		assertEquals(Frequency.YEARLY, r.getFrequency());
 		assertEquals(ID_RESOURCE1, r.getIdResource());
 		assertEquals(ID_EVENT1, r.getIdEvent());
@@ -212,8 +210,7 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testAsYearlyRecurrenceWithDefaultArgs() {
-		RecurrentBooking r = RecurrentBooking.asYearlyRecurrence(ID_RESOURCE1,
-				ID_EVENT1, null, null, null, null, null, null);
+		Booking r = Booking.asYearlyRecurrence(ID_RESOURCE1, ID_EVENT1, null, null, null, null, null, null);
 		assertEquals(Frequency.YEARLY, r.getFrequency());
 		assertEquals(ID_RESOURCE1, r.getIdResource());
 		assertEquals(ID_EVENT1, r.getIdEvent());
@@ -226,9 +223,26 @@ public class RecurrentBookingTest extends TestCase {
 	}
 
 	@Test
+	public void testSerializeSimple() {
+		Booking b = Booking.asSimple(ID_RESOURCE1, ID_EVENT1, DTSTART1, DTEND1);
+		b.setId(ID1);
+		String json = b.serialize();
+		JsonObject obj = new JsonParser().parse(json).getAsJsonObject();
+		assertTrue(obj.has("id"));
+		assertEquals((long) ID1, obj.get("id").getAsLong());
+		assertTrue(obj.has("id_resource"));
+		assertEquals((long) ID_RESOURCE1, obj.get("id_resource").getAsLong());
+		assertTrue(obj.has("id_event"));
+		assertEquals((long) ID_EVENT1, obj.get("id_event").getAsLong());
+		assertTrue(obj.has("dtstart"));
+		assertEquals(DTSTART1, new DateTime(obj.get("dtstart").getAsString()));
+		assertTrue(obj.has("dtend"));
+		assertEquals(DTEND1, new DateTime(obj.get("dtend").getAsString()));
+	}
+	
+	@Test
 	public void testSerializeDailyRecurrence() {
-		RecurrentBooking b = RecurrentBooking.asDailyRecurrence(ID_RESOURCE1,
-				ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1);
+		Booking b = Booking.asDailyRecurrence(ID_RESOURCE1, ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1);
 		b.setId(ID1);
 		String json = b.serialize();
 		JsonObject obj = new JsonParser().parse(json).getAsJsonObject();
@@ -243,8 +257,7 @@ public class RecurrentBookingTest extends TestCase {
 		assertTrue(obj.has("dtend"));
 		assertEquals(DTEND1, new DateTime(obj.get("dtend").getAsString()));
 		assertTrue(obj.has("frequency"));
-		assertEquals(Frequency.DAILY,
-				Frequency.valueOf(obj.get("frequency").getAsString()));
+		assertEquals(Frequency.DAILY, Frequency.valueOf(obj.get("frequency").getAsString()));
 		assertTrue(obj.has("interval"));
 		assertEquals((short) INTERVAL1, obj.get("interval").getAsShort());
 		assertTrue(obj.has("until"));
@@ -253,8 +266,7 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testSerializeWeeklyRecurrence() {
-		RecurrentBooking b = RecurrentBooking.asWeeklyRecurrence(ID_RESOURCE1,
-				ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1, BY_DAY1);
+		Booking b = Booking.asWeeklyRecurrence(ID_RESOURCE1, ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1, BY_DAY1);
 		b.setId(ID1);
 		String json = b.serialize();
 		JsonObject obj = new JsonParser().parse(json).getAsJsonObject();
@@ -269,8 +281,7 @@ public class RecurrentBookingTest extends TestCase {
 		assertTrue(obj.has("dtend"));
 		assertEquals(DTEND1, new DateTime(obj.get("dtend").getAsString()));
 		assertTrue(obj.has("frequency"));
-		assertEquals(Frequency.WEEKLY,
-				Frequency.valueOf(obj.get("frequency").getAsString()));
+		assertEquals(Frequency.WEEKLY, Frequency.valueOf(obj.get("frequency").getAsString()));
 		assertTrue(obj.has("interval"));
 		assertEquals((short) INTERVAL1, obj.get("interval").getAsShort());
 		assertTrue(obj.has("until"));
@@ -285,8 +296,8 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testSerializeMonthlyRecurrence() {
-		RecurrentBooking b = RecurrentBooking.asMonthlyRecurrence(ID_RESOURCE1,
-				ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1, BY_DAYOFMONTH1);
+		Booking b = Booking.asMonthlyRecurrence(ID_RESOURCE1, ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1,
+				BY_DAYOFMONTH1);
 		b.setId(ID1);
 		String json = b.serialize();
 		JsonObject obj = new JsonParser().parse(json).getAsJsonObject();
@@ -301,8 +312,7 @@ public class RecurrentBookingTest extends TestCase {
 		assertTrue(obj.has("dtend"));
 		assertEquals(DTEND1, new DateTime(obj.get("dtend").getAsString()));
 		assertTrue(obj.has("frequency"));
-		assertEquals(Frequency.MONTHLY,
-				Frequency.valueOf(obj.get("frequency").getAsString()));
+		assertEquals(Frequency.MONTHLY, Frequency.valueOf(obj.get("frequency").getAsString()));
 		assertTrue(obj.has("interval"));
 		assertEquals((short) INTERVAL1, obj.get("interval").getAsShort());
 		assertTrue(obj.has("until"));
@@ -317,9 +327,8 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testSerializeYearlyRecurrence() {
-		RecurrentBooking b = RecurrentBooking.asYearlyRecurrence(ID_RESOURCE1,
-				ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1, BY_DAYOFMONTH1,
-				BY_MONTH1);
+		Booking b = Booking.asYearlyRecurrence(ID_RESOURCE1, ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1,
+				BY_DAYOFMONTH1, BY_MONTH1);
 		b.setId(ID1);
 		String json = b.serialize();
 		JsonObject obj = new JsonParser().parse(json).getAsJsonObject();
@@ -334,8 +343,7 @@ public class RecurrentBookingTest extends TestCase {
 		assertTrue(obj.has("dtend"));
 		assertEquals(DTEND1, new DateTime(obj.get("dtend").getAsString()));
 		assertTrue(obj.has("frequency"));
-		assertEquals(Frequency.YEARLY,
-				Frequency.valueOf(obj.get("frequency").getAsString()));
+		assertEquals(Frequency.YEARLY, Frequency.valueOf(obj.get("frequency").getAsString()));
 		assertTrue(obj.has("interval"));
 		assertEquals((short) INTERVAL1, obj.get("interval").getAsShort());
 		assertTrue(obj.has("until"));
@@ -356,23 +364,20 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testSerializeCollection() {
-		RecurrentBooking b1 = RecurrentBooking.asDailyRecurrence(ID_RESOURCE1,
-				ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1);
-		RecurrentBooking b2 = RecurrentBooking.asDailyRecurrence(ID_RESOURCE2,
-				ID_EVENT2, DTSTART2, DTEND2, INTERVAL2, UNTIL2);
+		Booking b1 = Booking.asDailyRecurrence(ID_RESOURCE1, ID_EVENT1, DTSTART1, DTEND1, INTERVAL1, UNTIL1);
+		Booking b2 = Booking.asDailyRecurrence(ID_RESOURCE2, ID_EVENT2, DTSTART2, DTEND2, INTERVAL2, UNTIL2);
 
 		b1.setId(ID1);
 		b2.setId(ID2);
 
-		List<RecurrentBooking> bookings = new ArrayList<RecurrentBooking>();
+		List<Booking> bookings = new ArrayList<Booking>();
 		bookings.add(b1);
 		bookings.add(b2);
 
-		String json = RecurrentBooking.serialize(bookings);
+		String json = Booking.serialize(bookings);
 		JsonArray arr = new JsonParser().parse(json).getAsJsonArray();
 
-		assertEquals("serialization contains all bookings", bookings.size(),
-				arr.size());
+		assertEquals("serialization contains all bookings", bookings.size(), arr.size());
 
 		JsonObject obj1 = arr.get(0).getAsJsonObject();
 		JsonObject obj2 = arr.get(1).getAsJsonObject();
@@ -404,10 +409,8 @@ public class RecurrentBookingTest extends TestCase {
 
 		assertTrue(obj1.has("frequency"));
 		assertTrue(obj2.has("frequency"));
-		assertEquals(Frequency.DAILY,
-				Frequency.valueOf(obj1.get("frequency").getAsString()));
-		assertEquals(Frequency.DAILY,
-				Frequency.valueOf(obj2.get("frequency").getAsString()));
+		assertEquals(Frequency.DAILY, Frequency.valueOf(obj1.get("frequency").getAsString()));
+		assertEquals(Frequency.DAILY, Frequency.valueOf(obj2.get("frequency").getAsString()));
 
 		assertTrue(obj1.has("interval"));
 		assertTrue(obj2.has("interval"));
@@ -421,9 +424,25 @@ public class RecurrentBookingTest extends TestCase {
 	}
 
 	@Test
+	public void testDeserializeSimple() {
+		JsonObject jsonObj = new JsonObject();
+		jsonObj.addProperty("id", B1.getId());
+		jsonObj.addProperty("id_resource", B1.getIdResource());
+		jsonObj.addProperty("id_event", B1.getIdEvent());
+		jsonObj.addProperty("dtstart", B1.getDtStart().toString());
+		jsonObj.addProperty("dtend", B1.getDtEnd().toString());
+		
+		Booking b = Booking.deserialize(jsonObj.toString());
+		assertEquals(ID1, b.getId());
+		assertEquals(ID_RESOURCE1, b.getIdResource());
+		assertEquals(ID_EVENT1, b.getIdEvent());
+		assertEquals(DTSTART1, b.getDtStart());
+		assertEquals(DTEND1, b.getDtEnd());		
+	}
+	
+	@Test
 	public void testDeserializeDailyRecurrence() {
-		RecurrentBooking b = RecurrentBooking.deserialize(B1_AS_JSON_OBJECT
-				.toString());
+		Booking b = Booking.deserialize(B1_AS_JSON_OBJECT.toString());
 		assertEquals(ID1, b.getId());
 		assertEquals(ID_RESOURCE1, b.getIdResource());
 		assertEquals(ID_EVENT1, b.getIdEvent());
@@ -451,7 +470,7 @@ public class RecurrentBookingTest extends TestCase {
 		obj.addProperty("by_day", BY_DAY);
 
 		String json = obj.toString();
-		RecurrentBooking b = RecurrentBooking.deserialize(json);
+		Booking b = Booking.deserialize(json);
 		assertEquals(ID1, b.getId());
 		assertEquals(ID_RESOURCE1, b.getIdResource());
 		assertEquals(ID_EVENT1, b.getIdEvent());
@@ -483,7 +502,7 @@ public class RecurrentBookingTest extends TestCase {
 		obj.addProperty("by_day_month", BY_MONTH_DAY);
 
 		String json = obj.toString();
-		RecurrentBooking b = RecurrentBooking.deserialize(json);
+		Booking b = Booking.deserialize(json);
 		assertEquals(ID1, b.getId());
 		assertEquals(ID_RESOURCE1, b.getIdResource());
 		assertEquals(ID_EVENT1, b.getIdEvent());
@@ -518,7 +537,7 @@ public class RecurrentBookingTest extends TestCase {
 		obj.addProperty("by_month", BY_MONTH);
 
 		String json = obj.toString();
-		RecurrentBooking b = RecurrentBooking.deserialize(json);
+		Booking b = Booking.deserialize(json);
 		assertEquals(ID1, b.getId());
 		assertEquals(ID_RESOURCE1, b.getIdResource());
 		assertEquals(ID_EVENT1, b.getIdEvent());
@@ -544,15 +563,12 @@ public class RecurrentBookingTest extends TestCase {
 		arr.add(B1_AS_JSON_OBJECT);
 		arr.add(B2_AS_JSON_OBJECT);
 		String json = arr.toString();
-		Collection<RecurrentBooking> bookings = RecurrentBooking
-				.deserializeCollection(json);
+		Collection<Booking> bookings = Booking.deserializeCollection(json);
 
 		assertEquals(arr.size(), bookings.size());
 
-		RecurrentBooking b1 = (RecurrentBooking) CollectionUtils.get(bookings,
-				0);
-		RecurrentBooking b2 = (RecurrentBooking) CollectionUtils.get(bookings,
-				1);
+		Booking b1 = (Booking) CollectionUtils.get(bookings, 0);
+		Booking b2 = (Booking) CollectionUtils.get(bookings, 1);
 
 		assertEquals(ID1, b1.getId());
 		assertEquals(ID2, b2.getId());
@@ -581,8 +597,8 @@ public class RecurrentBookingTest extends TestCase {
 
 	@Test
 	public void testEquals() {
-		RecurrentBooking x = new RecurrentBooking();
-		RecurrentBooking y = new RecurrentBooking();
+		Booking x = new Booking();
+		Booking y = new Booking();
 		assertTrue(B1.equals(B1));
 		assertFalse(B1.equals(B2));
 		assertTrue(x.equals(y));
