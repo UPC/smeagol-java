@@ -23,13 +23,16 @@ public class SmeagolClientTest extends TestCase {
 
 	private static Logger logger = Logger.getLogger(SmeagolClientTest.class);
 
+	/**
+	 * url for test server
+	 */
 	private static final String SERVER_URL = "http://localhost:3000";
 
 	static {
-		logger.info("****************************************************************************");
-		logger.info(" NOTE: Before running these tests, check that a compatible Smeagol server   ");
-		logger.info(" is running on " + SERVER_URL);
-		logger.info("****************************************************************************");
+		logger.info("*************************************************************************");
+		logger.info("NOTE: Before running these tests, check that a compatible Smeagol server ");
+		logger.info("is running on " + SERVER_URL);
+		logger.info("*************************************************************************");
 	}
 
 	private static SmeagolClient client;
