@@ -41,6 +41,7 @@ public class SmeagolClient {
 	private WebResource bookingWR;
 
 	/**
+	 * Sméagol client constructor.
 	 * 
 	 * @param url
 	 *            the base url of the Sméagol server. For example:

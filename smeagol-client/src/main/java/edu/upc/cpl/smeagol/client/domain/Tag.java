@@ -46,7 +46,7 @@ public class Tag implements Comparable<Tag> {
 	}
 
 	/**
-	 * Create a tag without an empty description.
+	 * Create a tag with an empty description.
 	 * 
 	 * @param id
 	 *            the tag's identifier, not null, not empty.
