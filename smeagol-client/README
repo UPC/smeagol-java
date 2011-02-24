@@ -1,6 +1,12 @@
 smeagol-client 2.0
 ------------------
 
+Requisits
+---------
+
+ * JDK5 o superior (serveix OpenJDK)
+ * Maven 2
+ 
 Compilar el codi
 ----------------
 
@@ -15,14 +21,20 @@ Compilar el codi
  * El fitxer .jar es pot obtenir amb la comanda:
 
         mvn package
+        
+   Els fitxers resultats de la compilació o empaquetat es troben al subdirectori
+   ./target.
 
 Generar la documentació
 -----------------------
 
- * Executar la següent instrucció:
+ * Executar la següent instrucció per generar el Javadoc de la API:
+
+        mvn javadoc:javadoc
+
+ * Executar la següent instrucció per generar informacio sobre el projecte:
 
         mvn site
 
    La documentació es genera sota el subdirectori target/site.
-
 
