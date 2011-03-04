@@ -32,10 +32,11 @@ public class SmeagolClientTest extends TestCase {
 
 	private static int TAG_COUNT = 8; // number of tags in server
 	private static Tag EXISTENT_TAG = new Tag("videoconferencia", "descr 3");
+	private static Tag NEW_TAG = new Tag("newtag",
+			"description for a new tag with a really really really really really "
+					+ "really really really really really really long description");
 	private static Tag NON_EXISTENT_TAG = new Tag("nonexistent", "non existent description");
 	private static Tag PROJECTOR = new Tag("projector", "descr 1");
-	private static String TAG_ID = "newtag";
-	private static String TAG_DESCRIPTION = "new tag description";
 
 	static {
 		logger.info("**************************************************************************");
@@ -141,8 +142,8 @@ public class SmeagolClientTest extends TestCase {
 	@Test
 	public void testCreateTag() {
 		try {
-			Tag t = client.createTag(NON_EXISTENT_TAG.getId(), NON_EXISTENT_TAG.getDescription());
-			assertEquals(NON_EXISTENT_TAG, t);
+			Tag t = client.createTag(NEW_TAG.getId(), NEW_TAG.getDescription());
+			assertEquals(NEW_TAG, t);
 			assertEquals(TAG_COUNT + 1, client.getTags().size());
 			TAG_COUNT++;
 		} catch (IllegalArgumentException e) {
@@ -179,10 +180,31 @@ public class SmeagolClientTest extends TestCase {
 
 	@Test
 	public void testUpdateTag() {
-		fail("Not yet implemented.");
+		String OLD_DESCRIPTION = EXISTENT_TAG.getDescription();
+		String NEW_DESCRIPTION = "hi! am a new description";
+		try {
+			Collection<Tag> tags = client.getTags();
+			assertTrue(tags.contains(EXISTENT_TAG));
+			client.updateTag(EXISTENT_TAG.getId(), NEW_DESCRIPTION);
+			Tag updated = client.getTag(EXISTENT_TAG.getId());
+			assertEquals(EXISTENT_TAG.getId(), updated.getId());
+			assertEquals(NEW_DESCRIPTION, updated.getDescription());
+			client.updateTag(EXISTENT_TAG.getId(), OLD_DESCRIPTION);
+			Tag old = client.getTag(EXISTENT_TAG.getId());
+			assertEquals(EXISTENT_TAG.getDescription(), old.getDescription());
+		} catch (NotFoundException e) {
+			fail("update tag");
+		}
 	}
 
 	public void testUpdateTagNotFound() {
-		fail("Not yet implemented.");
+		Collection<Tag> tags = client.getTags();
+		assertFalse(tags.contains(NON_EXISTENT_TAG));
+		try {
+			client.updateTag("dummy100", "dummy value");
+			fail("update tag not found");
+		} catch (NotFoundException e) {
+			// OK. It should fail.
+		}
 	}
 }

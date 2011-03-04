@@ -29,16 +29,6 @@ public class Tag implements Comparable<Tag> {
 	public transient static final String ID_ATTR_NAME = "id";
 	public transient static final String DESCRIPTION_ATTR_NAME = "description";
 
-	/**
-	 * Maximum length for Tag id.
-	 */
-	public transient static final int MAX_ID_LEN = 64;
-
-	/**
-	 * Maximum length for Tag description.
-	 */
-	public transient static final int MAX_DESCRIPTION_LEN = 255;
-
 	private String id;
 	private String description;
 

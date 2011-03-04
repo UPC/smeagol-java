@@ -7,6 +7,8 @@ import java.util.Collection;
 
 import javax.ws.rs.core.MediaType;
 
+import org.apache.log4j.Logger;
+
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.ClientResponse.Status;
@@ -35,10 +37,10 @@ public class SmeagolClient {
 
 	/* WebResource encapsulates a REST web resource */
 
-	private WebResource tagWR;
-	private WebResource resourceWR;
-	private WebResource eventWR;
-	private WebResource bookingWR;
+	private WebResource tagWr;
+	private WebResource resourceWr;
+	private WebResource eventWr;
+	private WebResource bookingWr;
 
 	/**
 	 * Sméagol client constructor.
@@ -54,10 +56,10 @@ public class SmeagolClient {
 		client = Client.create();
 
 		try {
-			tagWR = client.resource(new URL(serverUrl, TAG_PATH).toURI());
-			resourceWR = client.resource(new URL(serverUrl, RESOURCE_PATH).toURI());
-			eventWR = client.resource(new URL(serverUrl, EVENT_PATH).toURI());
-			bookingWR = client.resource(new URL(serverUrl, BOOKING_PATH).toURI());
+			tagWr = client.resource(new URL(serverUrl, TAG_PATH).toURI());
+			resourceWr = client.resource(new URL(serverUrl, RESOURCE_PATH).toURI());
+			eventWr = client.resource(new URL(serverUrl, EVENT_PATH).toURI());
+			bookingWr = client.resource(new URL(serverUrl, BOOKING_PATH).toURI());
 		} catch (URISyntaxException e) {
 			/*
 			 * this should never happen, since we have been provided a valid url
@@ -75,7 +77,7 @@ public class SmeagolClient {
 	 *         server.
 	 */
 	public Collection<Tag> getTags() {
-		String tagJsonArray = tagWR.accept(MediaType.APPLICATION_JSON).get(String.class);
+		String tagJsonArray = tagWr.accept(MediaType.APPLICATION_JSON).get(String.class);
 		return Tag.deserializeCollection(tagJsonArray);
 	}
 
@@ -90,7 +92,7 @@ public class SmeagolClient {
 	 *             provided id.
 	 */
 	public Tag getTag(String id) throws NotFoundException {
-		ClientResponse response = tagWR.path(id).accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
 			throw new NotFoundException();
@@ -124,7 +126,10 @@ public class SmeagolClient {
 		f.add(Tag.ID_ATTR_NAME, id);
 		f.add(Tag.DESCRIPTION_ATTR_NAME, description);
 
-		ClientResponse response = tagWR.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
+		ClientResponse response = tagWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
+
+		Logger logger = Logger.getLogger(SmeagolClient.class);
+		logger.debug(response.toString());
 
 		switch (response.getClientResponseStatus()) {
 		case CONFLICT:
@@ -157,8 +162,8 @@ public class SmeagolClient {
 		f.add(Tag.ID_ATTR_NAME, id);
 		f.add(Tag.DESCRIPTION_ATTR_NAME, newDescription);
 
-		ClientResponse response = tagWR.path(id).accept(MediaType.APPLICATION_JSON).put(ClientResponse.class, f);
-
+		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).put(ClientResponse.class, f);
+		
 		switch (response.getClientResponseStatus()) {
 		case NOT_FOUND:
 			throw new NotFoundException();
@@ -177,7 +182,7 @@ public class SmeagolClient {
 	 * @throws NotFoundException
 	 */
 	public void deleteTag(String id) throws NotFoundException {
-		ClientResponse response = tagWR.path(id).accept(MediaType.APPLICATION_JSON).delete(ClientResponse.class);
+		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).delete(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
 			throw new NotFoundException();
