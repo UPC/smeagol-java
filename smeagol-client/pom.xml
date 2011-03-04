@@ -89,7 +89,7 @@
     	<artifactId>log4j</artifactId>
     	<version>1.2.16</version>
     	<type>jar</type>
-    	<scope>compile</scope>
+    	<scope>test</scope>
     </dependency>
     <dependency>
     	<groupId>joda-time</groupId>
