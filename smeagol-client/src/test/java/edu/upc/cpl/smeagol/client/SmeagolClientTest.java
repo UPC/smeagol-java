@@ -2,6 +2,7 @@ package edu.upc.cpl.smeagol.client;
 
 import java.net.MalformedURLException;
 import java.util.Collection;
+import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
@@ -9,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.upc.cpl.smeagol.client.domain.Resource;
 import edu.upc.cpl.smeagol.client.domain.Tag;
 import edu.upc.cpl.smeagol.client.exception.AlreadyExistsException;
 import edu.upc.cpl.smeagol.client.exception.NotFoundException;
@@ -31,17 +33,23 @@ public class SmeagolClientTest extends TestCase {
 	private static final String SERVER_URL = "http://localhost:3000";
 
 	private static int TAG_COUNT = 8; // number of tags in server
-	private static Tag EXISTENT_TAG = new Tag("videoconferencia", "descr 3");
-	private static Tag NEW_TAG = new Tag("newtag",
+	private static int RESOURCE_COUNT = 5; // number of resources in server
+
+	private static final Tag EXISTENT_TAG = new Tag("videoconferencia", "descr 3");
+	private static final Tag NEW_TAG = new Tag("newtag",
 			"description for a new tag with a really really really really really "
 					+ "really really really really really really long description");
-	private static Tag NON_EXISTENT_TAG = new Tag("nonexistent", "non existent description");
-	private static Tag PROJECTOR = new Tag("projector", "descr 1");
+	private static final Tag NON_EXISTENT_TAG = new Tag("nonexistent", "non existent description");
+	private static final Tag PROJECTOR = new Tag("projector", "descr 1");
+
+	private static final Long EXISTENT_RESOURCE_ID = 2L;
+	private static final Collection<Tag> EXISTENT_RESOURCE_TAGS = new TreeSet<Tag>();
+	private static final Resource EXISTENT_RESOURCE = new Resource("Aula test 2", "Estem de proves");
 
 	static {
 		logger.info("*******************************************************************************");
 		logger.info("NOTE: Before running these tests, check that a compatible Smeagol server       ");
-		logger.info("is running on " + SERVER_URL                                                    );
+		logger.info("is running on " + SERVER_URL);
 		logger.info("Anyway, you should use the file src/test/resources/db-test.sql to recreate the ");
 		logger.info("server database before running the test suite.                                 ");
 		logger.info("*******************************************************************************");
@@ -52,6 +60,11 @@ public class SmeagolClientTest extends TestCase {
 	@Before
 	public void setUp() throws Exception {
 		client = new SmeagolClient(SERVER_URL);
+
+		EXISTENT_RESOURCE.setId(EXISTENT_RESOURCE_ID);
+		EXISTENT_RESOURCE_TAGS.add(new Tag("pantalla", "descr 2"));
+		EXISTENT_RESOURCE_TAGS.add(new Tag("wireless", "descr 8"));
+		EXISTENT_RESOURCE.setTags(EXISTENT_RESOURCE_TAGS);
 	}
 
 	@Test
@@ -206,5 +219,11 @@ public class SmeagolClientTest extends TestCase {
 		} catch (NotFoundException e) {
 			// OK. It should fail.
 		}
+	}
+
+	public void testGetResources() {
+		Collection<Resource> resources = client.getResources();
+		assertEquals(RESOURCE_COUNT, resources.size());
+		assertTrue(resources.contains(EXISTENT_RESOURCE));
 	}
 }

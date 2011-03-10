@@ -4,10 +4,10 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 import javax.ws.rs.core.MediaType;
-
-import org.apache.log4j.Logger;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -15,6 +15,7 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.representation.Form;
 
+import edu.upc.cpl.smeagol.client.domain.Resource;
 import edu.upc.cpl.smeagol.client.domain.Tag;
 import edu.upc.cpl.smeagol.client.exception.AlreadyExistsException;
 import edu.upc.cpl.smeagol.client.exception.NotFoundException;
@@ -128,9 +129,6 @@ public class SmeagolClient {
 
 		ClientResponse response = tagWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
 
-		Logger logger = Logger.getLogger(SmeagolClient.class);
-		logger.debug(response.toString());
-
 		switch (response.getClientResponseStatus()) {
 		case CONFLICT:
 			throw new AlreadyExistsException();
@@ -163,7 +161,7 @@ public class SmeagolClient {
 		f.add(Tag.DESCRIPTION_ATTR_NAME, newDescription);
 
 		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).put(ClientResponse.class, f);
-		
+
 		switch (response.getClientResponseStatus()) {
 		case NOT_FOUND:
 			throw new NotFoundException();
@@ -188,4 +186,66 @@ public class SmeagolClient {
 			throw new NotFoundException();
 		}
 	}
+
+	/**
+	 * Returns all tags defined in server whose identifiers are in the provided
+	 * list.
+	 * 
+	 * @param identifiers
+	 *            a list of valid tag identifiers
+	 * @return
+	 */
+	public Collection<Tag> getTags(Collection<String> identifiers) {
+		Collection<Tag> result = new HashSet<Tag>();
+		for (String id : identifiers) {
+			try {
+				result.add(getTag(id));
+			} catch (NotFoundException e) {
+				// not found? ok. do nothing
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Retrieve all <code>Resource</code>s defined in server.
+	 * 
+	 * @return
+	 */
+	public Collection<Resource> getResources() {
+		String resourceJsonArray = resourceWr.accept(MediaType.APPLICATION_JSON).get(String.class);
+
+		Collection<Resource> resources = Resource.deserializeCollection(resourceJsonArray);
+
+		/*
+		 * In a Resource list, the server only returns the tag identifiers
+		 * instead of the full tag tag list for every resource. For each
+		 * identifier, we must retrieve the full tag attributes and repopulate
+		 * the Resource tags.
+		 */
+		for (Resource r : resources) {
+			Collection<String> ids = new HashSet<String>();
+			for (Tag t : r.getTags()) {
+				ids.add(t.getId());
+			}
+			r.setTags(getTags(ids));
+		}
+		return resources;
+	}
+
+	/*
+	 * public Resource createResource(String description, String info) { Form f
+	 * = new Form(); f.add(Resource.DESCRIPTION_ATTR_NAME, description);
+	 * f.add(Resource.INFO_ATTR_NAME, info);
+	 * 
+	 * ClientResponse response =
+	 * resourceWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class,
+	 * f);
+	 * 
+	 * switch (response.getClientResponseStatus()) {
+	 * 
+	 * }
+	 * 
+	 * }
+	 */
 }

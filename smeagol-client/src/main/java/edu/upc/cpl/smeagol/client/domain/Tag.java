@@ -35,7 +35,10 @@ public class Tag implements Comparable<Tag> {
 	private String id;
 	private String description;
 
-	public Tag() {
+	/**
+	 * This constructor should only be used during deserialization.
+	 */
+	protected Tag() {
 	}
 
 	/**
