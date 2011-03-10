@@ -16,6 +16,9 @@ import com.google.gson.reflect.TypeToken;
 
 /**
  * Tags are used to add semantic information to resources, events and bookings.
+ * <p>
+ * Tags are identified by a case-insensitive description, and may have an
+ * optional description.
  * 
  * @author angel
  * 

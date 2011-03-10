@@ -4,9 +4,31 @@ smeagol-client 2.0
 Requisits
 ---------
 
- * JDK5 o superior (serveix OpenJDK)
+Per compilar:
+
+ * JDK5 o superior (també serveix OpenJDK)
  * Maven 2
- 
+
+En temps d'execució, cal tenir disponibles al CLASSPATH les llibreries següents:
+
+ * Apache commons (commons-lang 2.4, commons-collections 3.2.1, commons-validator 1.3.1)
+ * Jersey Apache client 1.4
+ * Joda Time 1.6
+ * Google-gson 1.6
+
+Per a executar els tests, necessitareu les següents llibreries:
+
+ * jUnit 4.8
+ * log4j 1.2
+
+Les versions indicades són les que s'inclouen al fitxer pom.xml del projecte Maven.
+És probable que el programa pugui compilar i funcionar correctament amb versions 
+anteriors de les llibreries, però no està provat. Per comprovar-ho, us recomanem
+modificar el pom.xml indicant les versions de què disposeu en el vostre sistema, 
+i intentar compilar i passar els tests.
+
+
+
 Compilar el codi
 ----------------
 
@@ -24,6 +46,7 @@ Compilar el codi
         
    Els fitxers resultats de la compilació o empaquetat es troben al subdirectori
    ./target.
+   
 
 Generar la documentació
 -----------------------
@@ -32,7 +55,7 @@ Generar la documentació
 
         mvn javadoc:javadoc
 
- * Executar la següent instrucció per generar informacio sobre el projecte:
+ * Executar la següent instrucció per generar informacio sobre el projecte en format HTML:
 
         mvn site
 
