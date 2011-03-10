@@ -39,12 +39,12 @@ public class SmeagolClientTest extends TestCase {
 	private static Tag PROJECTOR = new Tag("projector", "descr 1");
 
 	static {
-		logger.info("**************************************************************************");
-		logger.info("NOTE: Before running these tests, check that a compatible Smeagol server  ");
-		logger.info("is running on " + SERVER_URL);
-		logger.info("Anyway, you should use the file src/test/resources/db.sql to recreate the ");
-		logger.info("server database before running the test suite.");
-		logger.info("**************************************************************************");
+		logger.info("*******************************************************************************");
+		logger.info("NOTE: Before running these tests, check that a compatible Smeagol server       ");
+		logger.info("is running on " + SERVER_URL                                                    );
+		logger.info("Anyway, you should use the file src/test/resources/db-test.sql to recreate the ");
+		logger.info("server database before running the test suite.                                 ");
+		logger.info("*******************************************************************************");
 	}
 
 	private static SmeagolClient client;
