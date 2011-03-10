@@ -161,6 +161,8 @@ public class Booking implements Comparable<Booking> {
 	public static Booking asDailyRecurrence(Long idResource, Long idEvent, DateTime start, DateTime end,
 			Short interval, DateTime until) throws IllegalArgumentException {
 
+		// TODO: Check that end - start <= 24 hours (???)
+		
 		Interval i = new Interval(start, end);
 		if (i.toDuration().isLongerThan(MAX_SPAN_DURATION_FOR_DAILY_RECURRENCE)) {
 			throw new IllegalArgumentException(
@@ -238,6 +240,8 @@ public class Booking implements Comparable<Booking> {
 	 */
 	public static Booking asWeeklyRecurrence(Long idResource, Long idEvent, DateTime start, DateTime end,
 			Short interval, DateTime until, Set<DayOfWeek> byDay) throws IllegalArgumentException {
+
+		// TODO: Check that end - start <= 24 hours (???)
 
 		Interval i = new Interval(start, end);
 		if (i.toDuration().isLongerThan(MAX_SPAN_DURATION_FOR_WEEKLY_RECURRENCE)) {

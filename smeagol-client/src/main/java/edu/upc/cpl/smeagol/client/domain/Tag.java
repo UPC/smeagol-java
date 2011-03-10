@@ -16,6 +16,9 @@ import com.google.gson.reflect.TypeToken;
 
 /**
  * Tags are used to add semantic information to resources, events and bookings.
+ * <p>
+ * Tags are identified by a case-insensitive description, and may have an
+ * optional description.
  * 
  * @author angel
  * 
@@ -29,16 +32,6 @@ public class Tag implements Comparable<Tag> {
 	public transient static final String ID_ATTR_NAME = "id";
 	public transient static final String DESCRIPTION_ATTR_NAME = "description";
 
-	/**
-	 * Maximum length for Tag id.
-	 */
-	public transient static final int MAX_ID_LEN = 64;
-
-	/**
-	 * Maximum length for Tag description.
-	 */
-	public transient static final int MAX_DESCRIPTION_LEN = 255;
-
 	private String id;
 	private String description;
 
@@ -46,7 +39,7 @@ public class Tag implements Comparable<Tag> {
 	}
 
 	/**
-	 * Create a tag without an empty description.
+	 * Create a tag with an empty description.
 	 * 
 	 * @param id
 	 *            the tag's identifier, not null, not empty.
