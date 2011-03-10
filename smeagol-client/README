@@ -15,11 +15,11 @@ En temps d'execució, cal tenir disponibles al CLASSPATH les llibreries següent
  * Jersey Apache client 1.4
  * Joda Time 1.6
  * Google-gson 1.6
+ * log4j 1.2
 
 Per a executar els tests, necessitareu les següents llibreries:
 
  * jUnit 4.8
- * log4j 1.2
 
 Les versions indicades són les que s'inclouen al fitxer pom.xml del projecte Maven.
 És probable que el programa pugui compilar i funcionar correctament amb versions 
