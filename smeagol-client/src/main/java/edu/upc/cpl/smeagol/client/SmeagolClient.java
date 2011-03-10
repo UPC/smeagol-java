@@ -5,9 +5,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
+
+import org.apache.log4j.Logger;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -135,7 +137,7 @@ public class SmeagolClient {
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
 		case CREATED:
-			result = new Tag(id, description);
+			result = Tag.deserialize(response.getEntity(String.class));
 			break;
 		}
 
@@ -166,7 +168,7 @@ public class SmeagolClient {
 		case NOT_FOUND:
 			throw new NotFoundException();
 		case OK:
-			result = new Tag(id, newDescription);
+			result = Tag.deserialize(response.getEntity(String.class));
 			break;
 		}
 		return result;
@@ -233,19 +235,84 @@ public class SmeagolClient {
 		return resources;
 	}
 
-	/*
-	 * public Resource createResource(String description, String info) { Form f
-	 * = new Form(); f.add(Resource.DESCRIPTION_ATTR_NAME, description);
-	 * f.add(Resource.INFO_ATTR_NAME, info);
+	/**
+	 * Retrieve the resource whith the provided identifier.
 	 * 
-	 * ClientResponse response =
-	 * resourceWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class,
-	 * f);
-	 * 
-	 * switch (response.getClientResponseStatus()) {
-	 * 
-	 * }
-	 * 
-	 * }
+	 * @param id
+	 *            the resource identifier
+	 * @return
+	 * @throws NotFoundException
+	 *             if there is no resource with such identifier.
 	 */
+	public Resource getResource(Long id) throws NotFoundException {
+		ClientResponse response = resourceWr.path(id.toString()).accept(MediaType.APPLICATION_JSON)
+				.get(ClientResponse.class);
+
+		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
+			throw new NotFoundException();
+		}
+
+		String json = response.getEntity(String.class);
+		Resource result = Resource.deserialize(json);
+
+		/* Populate tag descriptions before returning the resource to the user */
+		HashSet<String> ids = new HashSet<String>();
+		for (Tag t : result.getTags()) {
+			ids.add(t.getId());
+		}
+		result.setTags(getTags(ids));
+
+		return result;
+	}
+
+	/**
+	 * Create a new resource in the server.
+	 * 
+	 * @param description
+	 *            the description of the new resource, must be a not null,
+	 *            non-blank string.
+	 * @param info
+	 *            additional information of the new resource
+	 * @param tags
+	 *            an optional collection of tags to assign to the resource. If
+	 *            the collection contains any non-existent tags, they will be
+	 *            created in the server.
+	 * @return
+	 * @throws AlreadyExistsException
+	 *             if there is already another resource with the same
+	 *             description defined in the server.
+	 * @throws IllegalArgumentException
+	 *             if the provided description is <code>null</code>, an empty
+	 *             string, or a blank string.
+	 */
+	public Resource createResource(String description, String info, Collection<Tag> tags)
+			throws AlreadyExistsException, IllegalArgumentException {
+		Form f = new Form();
+		f.add(Resource.DESCRIPTION_ATTR_NAME, description);
+		f.add(Resource.INFO_ATTR_NAME, info);
+
+		ClientResponse response = resourceWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
+
+		Resource result = null;
+
+		switch (response.getClientResponseStatus()) {
+		case CONFLICT:
+			throw new AlreadyExistsException();
+		case BAD_REQUEST:
+			throw new IllegalArgumentException();
+		case CREATED:
+			result = Resource.deserialize(response.getEntity(String.class));
+			try {
+				result = getResource(result.getId());
+			} catch (NotFoundException e) {
+				/*
+				 * This should not happen, as we are retrieving the resource we
+				 * just created.
+				 */
+				e.printStackTrace();
+			}
+			break;
+		}
+		return result;
+	}
 }

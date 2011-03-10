@@ -45,7 +45,12 @@ public class SmeagolClientTest extends TestCase {
 	private static final Long EXISTENT_RESOURCE_ID = 2L;
 	private static final Collection<Tag> EXISTENT_RESOURCE_TAGS = new TreeSet<Tag>();
 	private static final Resource EXISTENT_RESOURCE = new Resource("Aula test 2", "Estem de proves");
+	private static final Resource NEW_RESOURCE = new Resource("New resource desc", "New resource info");
+	private static final Collection<Tag> NEW_RESOURCE_TAGS = new TreeSet<Tag>();
 
+	private static final Long NON_EXISTENT_RESOURCE_ID = 2000L;
+	private static final Resource NON_EXISTENT_RESOURCE = new Resource("NON EXISTENT RESOURCE", "NON EXISTENT DESCRIPTION");
+	
 	static {
 		logger.info("*******************************************************************************");
 		logger.info("NOTE: Before running these tests, check that a compatible Smeagol server       ");
@@ -65,6 +70,14 @@ public class SmeagolClientTest extends TestCase {
 		EXISTENT_RESOURCE_TAGS.add(new Tag("pantalla", "descr 2"));
 		EXISTENT_RESOURCE_TAGS.add(new Tag("wireless", "descr 8"));
 		EXISTENT_RESOURCE.setTags(EXISTENT_RESOURCE_TAGS);
+
+		NEW_RESOURCE_TAGS.add(new Tag("newtag1", "newtag1 description"));
+		NEW_RESOURCE_TAGS.add(new Tag("newtag2", "newtag2 description"));
+		NEW_RESOURCE_TAGS.add(new Tag("newtag3", "newtag3 description"));
+		NEW_RESOURCE.setTags(NEW_RESOURCE_TAGS);
+		
+		NON_EXISTENT_RESOURCE.setId(NON_EXISTENT_RESOURCE_ID);
+		
 	}
 
 	@Test
@@ -225,5 +238,83 @@ public class SmeagolClientTest extends TestCase {
 		Collection<Resource> resources = client.getResources();
 		assertEquals(RESOURCE_COUNT, resources.size());
 		assertTrue(resources.contains(EXISTENT_RESOURCE));
+	}
+
+	public void testGetResourceNotFound() {
+		try {
+			@SuppressWarnings("unused")
+			Resource r = client.getResource(NON_EXISTENT_RESOURCE.getId());
+			fail("get resource not found");
+		} catch (NotFoundException e) {
+			// OK. It should fail.
+		}
+	}
+	
+	public void testGetResource() {
+		try {
+			Resource r = client.getResource(EXISTENT_RESOURCE.getId());
+			assertNotNull(r);
+			assertEquals(EXISTENT_RESOURCE, r);
+		} catch (NotFoundException e) {
+			fail("get resource");
+		}
+	}
+	
+	public void testCreateDuplicatedResource() {
+		try {
+			Collection<Resource> resources = client.getResources();
+			assertTrue(resources.contains(EXISTENT_RESOURCE));
+			@SuppressWarnings("unused")
+			Resource r = client.createResource(EXISTENT_RESOURCE.getDescription(), null, null);
+			RESOURCE_COUNT++;
+			fail("create duplicated resource");
+		} catch (AlreadyExistsException e) {
+			// OK. It should fail.
+		} catch (IllegalArgumentException e) {
+			fail("create duplicated resource");
+		}
+	}
+
+	public void testCreateResourceWithEmptyDescription() {
+		String NULL_STR = null;
+		String EMPTY_STR = "";
+		String BLANKS_STR = "         ";
+		try {
+			@SuppressWarnings("unused")
+			Resource r = client.createResource(NULL_STR, null, null);
+			RESOURCE_COUNT++;
+			fail("create resource with null description");
+			r = client.createResource(EMPTY_STR, null, null);
+			RESOURCE_COUNT++;
+			fail("create resource with empty description");
+			r = client.createResource(BLANKS_STR, null, null);
+			RESOURCE_COUNT++;
+			fail("create resource with blank description");
+		} catch (AlreadyExistsException e) {
+			fail("create resource with empty description");
+		} catch (IllegalArgumentException e) {
+			// OK. It should fail.
+		}
+	}
+
+	public void testCreateResource() {
+		try {
+			Collection<Resource> resources = client.getResources();
+			assertEquals(RESOURCE_COUNT, resources.size());
+			assertFalse(resources.contains(NEW_RESOURCE));
+			Resource r = client.createResource(NEW_RESOURCE.getDescription(), NEW_RESOURCE.getInfo(),
+					NEW_RESOURCE.getTags());
+			resources = client.getResources();
+			NEW_RESOURCE.setId(r.getId());
+			assertEquals(NEW_RESOURCE, r);
+			assertEquals(++RESOURCE_COUNT, resources.size());
+			assertTrue(resources.contains(NEW_RESOURCE));
+		} catch (AlreadyExistsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
