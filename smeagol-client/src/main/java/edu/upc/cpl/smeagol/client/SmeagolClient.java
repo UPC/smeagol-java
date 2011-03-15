@@ -6,10 +6,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
 
-import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
-
-import org.apache.log4j.Logger;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
