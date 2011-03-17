@@ -15,15 +15,19 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 /**
- * A customized serializer/deserializer for type
- * <code>List&lt;Short&gt;</code>. To be used by <code>GsonBuilder</code>s.
- * 
+ * This class is used internally by the Sméagol client and should not be used
+ * directly in your programs.
+ * <p>
+ * A customized serializer/deserializer for type {@code List<Short>}. To be used
+ * by {@codeGsonBuilder}s.
+ * <p>
  * This class is needed because default serialization provided by the Gson
  * library does not conform to Sméagol Server API v2.0.
  * 
  * @author angel
  * 
- */public class ShortSetConverter implements JsonSerializer<Set<Short>>, JsonDeserializer<Set<Short>> {
+ */
+public class ShortSetConverter implements JsonSerializer<Set<Short>>, JsonDeserializer<Set<Short>> {
 
 	public JsonElement serialize(Set<Short> src, Type typeOfSrc, JsonSerializationContext context) {
 		return new JsonPrimitive(StringUtils.join(src, ","));
@@ -31,10 +35,10 @@ import com.google.gson.JsonSerializer;
 
 	public Set<Short> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
 			throws JsonParseException {
-		
+
 		Set<Short> result = new TreeSet<Short>();
 		String[] values = StringUtils.split(json.getAsString(), ",");
-		
+
 		for (String v : values) {
 			try {
 				result.add(new Short(v));
@@ -42,7 +46,7 @@ import com.google.gson.JsonSerializer;
 				throw new JsonParseException("Invalid Short value found on deserialization");
 			}
 		}
-		
+
 		return result;
 	}
 

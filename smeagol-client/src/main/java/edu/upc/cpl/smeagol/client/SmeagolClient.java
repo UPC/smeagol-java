@@ -112,10 +112,10 @@ public class SmeagolClient {
 	 * @return the new <code>Tag</code>
 	 * @throws IllegalArgumentException
 	 *             if the id is null or an empty string, or if the lengths of
-	 *             the provided arguments exceed {@link Tag.MAX_ID_LEN} and/or
-	 *             {@link Tag.MAX_DESCRIPTION_LEN}.
+	 *             the provided id or description exceed the maximum length
+	 *             allowed by the server.
 	 * @throws AlreadyExistsException
-	 *             if the server already contains a tag with the provided id
+	 *             if the server already contains a tag with the provided id.
 	 * @see Tag
 	 * 
 	 */
@@ -192,7 +192,7 @@ public class SmeagolClient {
 	 * 
 	 * @param identifiers
 	 *            a list of valid tag identifiers
-	 * @return
+	 * @return a collection containing all the tags defined in the server.
 	 */
 	public Collection<Tag> getTags(Collection<String> identifiers) {
 		Collection<Tag> result = new HashSet<Tag>();
@@ -209,7 +209,7 @@ public class SmeagolClient {
 	/**
 	 * Retrieve all <code>Resource</code>s defined in server.
 	 * 
-	 * @return
+	 * @return a collection containing all the resources defined in the server.
 	 */
 	public Collection<Resource> getResources() {
 		String resourceJsonArray = resourceWr.accept(MediaType.APPLICATION_JSON).get(String.class);
@@ -237,7 +237,7 @@ public class SmeagolClient {
 	 * 
 	 * @param id
 	 *            the resource identifier
-	 * @return
+	 * @return the resource with the provided identifier, if exists.
 	 * @throws NotFoundException
 	 *             if there is no resource with such identifier.
 	 */
@@ -274,7 +274,7 @@ public class SmeagolClient {
 	 *            an optional collection of tags to assign to the resource. If
 	 *            the collection contains any non-existent tags, they will be
 	 *            created in the server.
-	 * @return
+	 * @return the resource just created
 	 * @throws AlreadyExistsException
 	 *             if there is already another resource with the same
 	 *             description defined in the server.

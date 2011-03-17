@@ -19,7 +19,16 @@ import com.google.gson.reflect.TypeToken;
 import edu.upc.cpl.smeagol.json.DateTimeConverter;
 
 /**
- * Events are objects which can hold a number of Bookings.
+ * Sméagol events.
+ * <p>
+ * In <em>real life</em>, events are the reason why people book resources.
+ * <p>
+ * In a Sméagol server, bookings are always related to one single event. This is
+ * a <em>one-to-many</em> relationship (one event is related to zero or more
+ * bookings).
+ * <p>
+ * Examples of events could be <em>Smeagol developers online meeting</em>,
+ * <em>Perl conference</em>, etc.
  * 
  * @author angel
  * 
@@ -28,7 +37,7 @@ public class Event implements Comparable<Event> {
 	@SuppressWarnings("unused")
 	private static transient Logger logger = Logger.getLogger(Event.class);
 	private static transient Gson gson = new Gson();
-	
+
 	/**
 	 * provide custom serializers/deserializers for several attributes
 	 */
@@ -41,11 +50,15 @@ public class Event implements Comparable<Event> {
 
 	/**
 	 * Maximum length for the "description" field
+	 * <p>
+	 * TODO: check the maximum value allowed by the server
 	 */
 	public static transient final int MAX_DESCRIPTION_LEN = 50;
 
 	/**
 	 * Maximum length for the "info" length
+	 * <p>
+	 * TODO: check the current maximum value allowed by the server
 	 */
 	public static transient int MAX_INFO_LEN = 20;
 
@@ -86,6 +99,7 @@ public class Event implements Comparable<Event> {
 	 * Set the interval at which the event occurs.
 	 * 
 	 * @param interval
+	 *            the interval
 	 */
 	public void setInterval(Interval interval) {
 		if (interval != null) {
@@ -97,7 +111,7 @@ public class Event implements Comparable<Event> {
 	/**
 	 * Get the interval at which the event occurs.
 	 * 
-	 * @return
+	 * @return the interval
 	 */
 	public Interval getInterval() {
 		return new Interval(starts, ends);
@@ -120,8 +134,7 @@ public class Event implements Comparable<Event> {
 		}
 		Event other = (Event) obj;
 
-		return new EqualsBuilder().append(this.id, other.id).append(this.description, other.description)
-				.isEquals();
+		return new EqualsBuilder().append(this.id, other.id).append(this.description, other.description).isEquals();
 	}
 
 	@Override
