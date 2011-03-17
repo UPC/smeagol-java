@@ -4,7 +4,7 @@
   <groupId>edu.upc.cpl.smeagol.client</groupId>
   <artifactId>smeagol-client</artifactId>
   <packaging>jar</packaging>
-  <version>2.0</version>
+  <version>0.01</version>
   <name>smeagol-client</name>
   <description>A Java-based Sméagol client library</description>
   <url>http://devel.cpl.upc.edu/recursos/</url>
