@@ -49,8 +49,9 @@ public class SmeagolClientTest extends TestCase {
 	private static final Collection<Tag> NEW_RESOURCE_TAGS = new TreeSet<Tag>();
 
 	private static final Long NON_EXISTENT_RESOURCE_ID = 2000L;
-	private static final Resource NON_EXISTENT_RESOURCE = new Resource("NON EXISTENT RESOURCE", "NON EXISTENT DESCRIPTION");
-	
+	private static final Resource NON_EXISTENT_RESOURCE = new Resource("NON EXISTENT RESOURCE",
+			"NON EXISTENT DESCRIPTION");
+
 	static {
 		logger.info("*******************************************************************************");
 		logger.info("NOTE: Before running these tests, check that a compatible Smeagol server       ");
@@ -75,9 +76,9 @@ public class SmeagolClientTest extends TestCase {
 		NEW_RESOURCE_TAGS.add(new Tag("newtag2", "newtag2 description"));
 		NEW_RESOURCE_TAGS.add(new Tag("newtag3", "newtag3 description"));
 		NEW_RESOURCE.setTags(NEW_RESOURCE_TAGS);
-		
+
 		NON_EXISTENT_RESOURCE.setId(NON_EXISTENT_RESOURCE_ID);
-		
+
 	}
 
 	@Test
@@ -249,7 +250,7 @@ public class SmeagolClientTest extends TestCase {
 			// OK. It should fail.
 		}
 	}
-	
+
 	public void testGetResource() {
 		try {
 			Resource r = client.getResource(EXISTENT_RESOURCE.getId());
@@ -259,7 +260,7 @@ public class SmeagolClientTest extends TestCase {
 			fail("get resource");
 		}
 	}
-	
+
 	public void testCreateDuplicatedResource() {
 		try {
 			Collection<Resource> resources = client.getResources();
@@ -316,5 +317,35 @@ public class SmeagolClientTest extends TestCase {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public void testDeleteResourceNotFound() {
+		Collection<Resource> resources = client.getResources();
+		assertEquals(RESOURCE_COUNT, resources.size());
+		try {
+			client.deleteResource(NON_EXISTENT_RESOURCE_ID);
+		} catch (NotFoundException e) {
+			// OK. It should fail.
+		}
+		/* nothing has been deleted */
+		resources = client.getResources();
+		assertEquals(RESOURCE_COUNT, resources.size());
+	}
+
+	public void testDeleteResource() {
+		Collection<Resource> resources = client.getResources();
+		assertEquals(RESOURCE_COUNT, resources.size());
+		try {
+			client.deleteResource(EXISTENT_RESOURCE_ID);
+		} catch (NotFoundException e) {
+			fail("delete resource");
+		}
+		Collection<Resource> resourcesAfter = client.getResources();
+		assertFalse(resourcesAfter.contains(EXISTENT_RESOURCE));
+		assertEquals(--RESOURCE_COUNT, resourcesAfter.size());
+	}
+
+	public void testCreateTags() {
+		fail("not yet implemented");
 	}
 }

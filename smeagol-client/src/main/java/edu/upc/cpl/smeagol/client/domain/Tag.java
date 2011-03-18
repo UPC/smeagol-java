@@ -8,6 +8,7 @@ import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.validator.GenericValidator;
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
@@ -21,7 +22,6 @@ import com.google.gson.reflect.TypeToken;
  * optional description.
  * 
  * @author angel
- * 
  */
 public class Tag implements Comparable<Tag> {
 
@@ -29,8 +29,20 @@ public class Tag implements Comparable<Tag> {
 	private transient Logger logger = Logger.getLogger(getClass());
 	private transient static Gson gson = new Gson();
 
-	public transient static final String ID_ATTR_NAME = "id";
-	public transient static final String DESCRIPTION_ATTR_NAME = "description";
+	/**
+	 * Minimum length for tag identifiers = {@value}
+	 */
+	public transient static final int ID_MIN_LEN = 3;
+
+	/**
+	 * Maximum length for tag identifiers = {@value}
+	 */
+	public transient static final int ID_MAX_LEN = 64;
+
+	/**
+	 * Maximum length for tag descriptions = {@value}
+	 */
+	public transient static final int DESCRIPTION_MAX_LEN = 256;
 
 	private String id;
 	private String description;
@@ -42,6 +54,23 @@ public class Tag implements Comparable<Tag> {
 	}
 
 	/**
+	 * Validate if a string is a valid Tag identifier.
+	 * 
+	 * @param candidate
+	 *            the string to validate.
+	 * @return {@code true} if {@code id} is a valid identifier. Otherwise
+	 *         returns false.
+	 */
+	private static boolean validateId(String candidate) {
+		return (candidate != null && StringUtils.isNotBlank(candidate) && GenericValidator.isInRange(
+				candidate.length(), ID_MIN_LEN, ID_MAX_LEN));
+	}
+
+	private static boolean validateDescription(String candidate) {
+		return (candidate == null || GenericValidator.maxLength(candidate, DESCRIPTION_MAX_LEN));
+	}
+
+	/**
 	 * Create a tag with an empty description.
 	 * 
 	 * @param id
@@ -50,10 +79,7 @@ public class Tag implements Comparable<Tag> {
 	 *             if the provided id is null or an empty string ("").
 	 */
 	public Tag(String id) throws IllegalArgumentException {
-		if (StringUtils.isEmpty(id)) {
-			throw new IllegalArgumentException();
-		}
-		this.id = id;
+		setId(id);
 	}
 
 	/**
@@ -65,16 +91,19 @@ public class Tag implements Comparable<Tag> {
 	 *            is immutable.
 	 * @param description
 	 *            A description for the new tag.
+	 * @throws IllegalArgumentException
+	 *             if the provided arguments are not valid tag id and
+	 *             description.
 	 */
 	public Tag(String id, String description) throws IllegalArgumentException {
-		if (StringUtils.isEmpty(id)) {
-			throw new IllegalArgumentException();
-		}
-		this.id = id;
-		this.description = description;
+		setId(id);
+		setDescription(description);
 	}
 
 	public void setId(String id) {
+		if (!validateId(id)) {
+			throw new IllegalArgumentException("invalid tag id");
+		}
 		this.id = id;
 	}
 
@@ -83,6 +112,9 @@ public class Tag implements Comparable<Tag> {
 	}
 
 	public void setDescription(String description) {
+		if (!validateDescription(description)) {
+			throw new IllegalArgumentException("invalid description id");
+		}
 		this.description = description;
 	}
 

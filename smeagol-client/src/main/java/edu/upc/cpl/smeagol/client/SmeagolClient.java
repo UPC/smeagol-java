@@ -5,8 +5,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -32,6 +36,13 @@ public class SmeagolClient {
 	private static final String RESOURCE_PATH = "resource";
 	private static final String EVENT_PATH = "event";
 	private static final String BOOKING_PATH = "booking";
+
+	public static final String TAG_ID_ATTR_NAME = "id";
+	public static final String TAG_DESCRIPTION_ATTR_NAME = "description";
+
+	public static final String RESOURCE_DESCRIPTION_ATTR_NAME = "description";
+	public static final String RESOURCE_INFO_ATTR_NAME = "info";
+	public static final String RESOURCE_TAGS_ATTR_NAME = "tags";
 
 	private Client client;
 
@@ -123,8 +134,8 @@ public class SmeagolClient {
 		Tag result = null;
 
 		Form f = new Form();
-		f.add(Tag.ID_ATTR_NAME, id);
-		f.add(Tag.DESCRIPTION_ATTR_NAME, description);
+		f.add(TAG_ID_ATTR_NAME, id);
+		f.add(TAG_DESCRIPTION_ATTR_NAME, description);
 
 		ClientResponse response = tagWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
 
@@ -156,8 +167,8 @@ public class SmeagolClient {
 		Tag result = null;
 
 		Form f = new Form();
-		f.add(Tag.ID_ATTR_NAME, id);
-		f.add(Tag.DESCRIPTION_ATTR_NAME, newDescription);
+		f.add(TAG_ID_ATTR_NAME, id);
+		f.add(TAG_DESCRIPTION_ATTR_NAME, newDescription);
 
 		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).put(ClientResponse.class, f);
 
@@ -198,12 +209,54 @@ public class SmeagolClient {
 		Collection<Tag> result = new HashSet<Tag>();
 		for (String id : identifiers) {
 			try {
-				result.add(getTag(id));
+				Tag t = getTag(id);
+				result.add(t);
 			} catch (NotFoundException e) {
 				// not found? ok. do nothing
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Create all tags in collection.
+	 * <p>
+	 * Existent tags will be ignored. Tags with invalid arguments will also be
+	 * ignored.
+	 * 
+	 * @param tags
+	 *            a collection of tags to be created
+	 * @return the number of tags actually created (i.e. those which did not
+	 *         exist in server before).
+	 */
+	public int createTags(Collection<Tag> tags) {
+		if (CollectionUtils.isEmpty(tags)) {
+			return 0;
+		}
+
+		int count = 0;
+
+		/*
+		 * To save expensive network operations, we check locally wether they
+		 * exist or not.
+		 */
+		HashSet<Tag> tagsInServer = new HashSet<Tag>(getTags());
+
+		for (Tag t : tags) {
+			if (!tagsInServer.contains(t)) {
+				try {
+					createTag(t.getId(), t.getDescription());
+					count++;
+				} catch (IllegalArgumentException e) {
+					// tag ignored, counter not incremented
+				} catch (AlreadyExistsException e) {
+					// this should never happen, as this is checked the "if"
+					// condition
+					e.printStackTrace();
+				}
+			}
+		}
+		return count;
 	}
 
 	/**
@@ -225,9 +278,12 @@ public class SmeagolClient {
 		for (Resource r : resources) {
 			Collection<String> ids = new HashSet<String>();
 			for (Tag t : r.getTags()) {
-				ids.add(t.getId());
+				if (StringUtils.isNotBlank(t.getId())) {
+					ids.add(t.getId());
+				}
 			}
-			r.setTags(getTags(ids));
+			Collection<Tag> tags = getTags(ids);
+			r.setTags(tags);
 		}
 		return resources;
 	}
@@ -257,7 +313,8 @@ public class SmeagolClient {
 		for (Tag t : result.getTags()) {
 			ids.add(t.getId());
 		}
-		result.setTags(getTags(ids));
+		Collection<Tag> tags = getTags(ids);
+		result.setTags(tags);
 
 		return result;
 	}
@@ -285,8 +342,26 @@ public class SmeagolClient {
 	public Resource createResource(String description, String info, Collection<Tag> tags)
 			throws AlreadyExistsException, IllegalArgumentException {
 		Form f = new Form();
-		f.add(Resource.DESCRIPTION_ATTR_NAME, description);
-		f.add(Resource.INFO_ATTR_NAME, info);
+		f.add(RESOURCE_DESCRIPTION_ATTR_NAME, description);
+		f.add(RESOURCE_INFO_ATTR_NAME, info);
+
+		/*
+		 * TODO: provided tags will be created by the server if they don't
+		 * exist. BUT the tags descriptions will be lost, because the server
+		 * expects a "tags" attribute containing only a comma-separated list of
+		 * tag identifiers (without descriptions!). As a workaround, we will
+		 * create the tags via createTag() until a more convenient behaviour of
+		 * the resource creation operation is provided by the server.
+		 */
+		if (CollectionUtils.isNotEmpty(tags)) {
+			createTags(tags);
+
+			Set<String> tagIds = new HashSet<String>();
+			for (Tag t : tags) {
+				tagIds.add(t.getId());
+			}
+			f.add(RESOURCE_TAGS_ATTR_NAME, StringUtils.join(tagIds, ","));
+		}
 
 		ClientResponse response = resourceWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
 
@@ -311,5 +386,22 @@ public class SmeagolClient {
 			break;
 		}
 		return result;
+	}
+
+	/**
+	 * Delete existing resource from server.
+	 * 
+	 * @param id
+	 *            the identifier for the resource to delete.
+	 * @throws NotFoundException
+	 *             if there is no such resource with the provided identifier.
+	 */
+	public void deleteResource(Long id) throws NotFoundException {
+		ClientResponse response = resourceWr.path(id.toString()).accept(MediaType.APPLICATION_JSON)
+				.delete(ClientResponse.class);
+
+		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
+			throw new NotFoundException();
+		}
 	}
 }

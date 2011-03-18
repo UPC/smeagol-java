@@ -3,10 +3,12 @@ package edu.upc.cpl.smeagol.client.domain;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.validator.GenericValidator;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -22,16 +24,18 @@ import edu.upc.cpl.smeagol.json.DateTimeConverter;
  * Sméagol events.
  * <p>
  * In <em>real life</em>, events are the reason why people book resources.
- * <p>
- * In a Sméagol server, bookings are always related to one single event. This is
- * a <em>one-to-many</em> relationship (one event is related to zero or more
- * bookings).
- * <p>
  * Examples of events could be <em>Smeagol developers online meeting</em>,
  * <em>Perl conference</em>, etc.
+ * <p>
+ * Events have a unique, non-null <em>description</em>, some optional
+ * <em>info</em> and start and end {@code Datetime}s.
+ * <p>
+ * Conceptually, in a Sméagol server, bookings are always related to one single
+ * event. This is a <em>one-to-many</em> relationship (one event is related to
+ * zero or more bookings).
+ * <p>
  * 
  * @author angel
- * 
  */
 public class Event implements Comparable<Event> {
 	@SuppressWarnings("unused")
@@ -49,18 +53,18 @@ public class Event implements Comparable<Event> {
 	}
 
 	/**
-	 * Maximum length for the "description" field
+	 * Maximum length for event descriptions = {@value}
 	 * <p>
 	 * TODO: check the maximum value allowed by the server
 	 */
-	public static transient final int MAX_DESCRIPTION_LEN = 50;
+	public static transient final int DESCRIPTION_MAX_LEN = 50;
 
 	/**
-	 * Maximum length for the "info" length
+	 * Maximum length for event info = {@value}
 	 * <p>
 	 * TODO: check the current maximum value allowed by the server
 	 */
-	public static transient int MAX_INFO_LEN = 20;
+	public static transient int INFO_MAX_LEN = 20;
 
 	private Long id;
 	private String description;
@@ -68,7 +72,16 @@ public class Event implements Comparable<Event> {
 	private DateTime starts;
 	private DateTime ends;
 
-	public Event() {
+	public static boolean validateDescription(String candidate) {
+		return (candidate != null && StringUtils.isNotBlank(candidate) && GenericValidator.maxLength(candidate,
+				DESCRIPTION_MAX_LEN));
+	}
+
+	public static boolean validateInfo(String candidate) {
+		return (candidate == null || GenericValidator.maxLength(candidate, INFO_MAX_LEN));
+	}
+
+	protected Event() {
 	}
 
 	public Long getId() {
@@ -84,6 +97,9 @@ public class Event implements Comparable<Event> {
 	}
 
 	public void setDescription(String description) {
+		if (!validateDescription(description)) {
+			throw new IllegalArgumentException("invalid event description");
+		}
 		this.description = description;
 	}
 
@@ -92,6 +108,9 @@ public class Event implements Comparable<Event> {
 	}
 
 	public void setInfo(String info) {
+		if (!validateInfo(info)) {
+			throw new IllegalArgumentException("invalid event info");
+		}
 		this.info = info;
 	}
 
