@@ -1,6 +1,7 @@
 package edu.upc.cpl.smeagol.client.domain;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
@@ -71,7 +72,16 @@ public class Event implements Comparable<Event> {
 	private String info;
 	private DateTime starts;
 	private DateTime ends;
+	private Collection<Tag> tags = new ArrayList<Tag>();
 
+	/**
+	 * Check if parameter is a valid event description
+	 * 
+	 * @param candidate
+	 *            the string to validate
+	 * @return {@code true} if the argument is not null and is no longer than
+	 *         {@link Event#DESCRIPTION_MAX_LEN}, {@code false} otherwise.
+	 */
 	public static boolean validateDescription(String candidate) {
 		return (candidate != null && StringUtils.isNotBlank(candidate) && GenericValidator.maxLength(candidate,
 				DESCRIPTION_MAX_LEN));
@@ -82,6 +92,22 @@ public class Event implements Comparable<Event> {
 	}
 
 	protected Event() {
+	}
+
+	/**
+	 * Create a new Event with the provided attributes
+	 * 
+	 * @param description
+	 *            non-empty, unique description
+	 * @param info
+	 *            additional, optional info
+	 * @param startEnd
+	 *            the DateTime interval (start, end) at which the event occurs
+	 */
+	public Event(String description, String info, Interval startEnd) {
+		setDescription(description);
+		setInfo(info);
+		setInterval(startEnd);
 	}
 
 	public Long getId() {
@@ -96,7 +122,16 @@ public class Event implements Comparable<Event> {
 		return description;
 	}
 
-	public void setDescription(String description) {
+	/**
+	 * Set event description.
+	 * 
+	 * @param description
+	 *            a valid Event description.
+	 * @throws IllegalArgumentException
+	 *             if {@code description} is not a valid description as required
+	 *             by {@link Event#validateDescription(String)}
+	 */
+	public void setDescription(String description) throws IllegalArgumentException {
 		if (!validateDescription(description)) {
 			throw new IllegalArgumentException("invalid event description");
 		}
@@ -107,7 +142,7 @@ public class Event implements Comparable<Event> {
 		return info;
 	}
 
-	public void setInfo(String info) {
+	public void setInfo(String info) throws IllegalArgumentException {
 		if (!validateInfo(info)) {
 			throw new IllegalArgumentException("invalid event info");
 		}
@@ -124,6 +159,9 @@ public class Event implements Comparable<Event> {
 		if (interval != null) {
 			this.starts = interval.getStart();
 			this.ends = interval.getEnd();
+		} else {
+			this.starts = null;
+			this.ends = null;
 		}
 	}
 
@@ -134,6 +172,14 @@ public class Event implements Comparable<Event> {
 	 */
 	public Interval getInterval() {
 		return new Interval(starts, ends);
+	}
+
+	public void setTags(Collection<Tag> tags) {
+		this.tags = tags;
+	}
+
+	public Collection<Tag> getTags() {
+		return tags;
 	}
 
 	public int compareTo(Event other) {
@@ -148,12 +194,13 @@ public class Event implements Comparable<Event> {
 		if (this == obj) {
 			return true;
 		}
-		if (!this.getClass().equals(obj.getClass())) {
+		if (!(obj instanceof Event)) {
 			return false;
 		}
 		Event other = (Event) obj;
 
-		return new EqualsBuilder().append(this.id, other.id).append(this.description, other.description).isEquals();
+		return new EqualsBuilder().append(this.id, other.id).append(this.description, other.description)
+				.append(this.info, other.info).isEquals();
 	}
 
 	@Override
@@ -164,7 +211,7 @@ public class Event implements Comparable<Event> {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this).append("id", id).append("description", description).append("info", info)
-				.toString();
+				.append("tags", tags).toString();
 	}
 
 	public String serialize() {

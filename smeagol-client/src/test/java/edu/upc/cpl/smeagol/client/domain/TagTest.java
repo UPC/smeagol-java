@@ -8,6 +8,10 @@ import junit.framework.TestCase;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 public class TagTest extends TestCase {
 
 	@SuppressWarnings("unused")
@@ -80,8 +84,12 @@ public class TagTest extends TestCase {
 	}
 
 	public void testSerialize() {
-
-		assertEquals(JSON1, t1.serialize());
+		JsonObject got = new JsonParser().parse(t1.serialize()).getAsJsonObject();
+		JsonObject expected = new JsonParser().parse(JSON1).getAsJsonObject();
+		assertTrue(got.has("id"));
+		assertEquals(expected.get("id"), got.get("id"));
+		assertTrue(got.has("description"));
+		assertEquals(expected.get("description"), got.get("description"));
 	}
 
 	public void testDeserialize() {

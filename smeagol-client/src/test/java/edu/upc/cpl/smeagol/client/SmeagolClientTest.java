@@ -1,15 +1,19 @@
 package edu.upc.cpl.smeagol.client;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.upc.cpl.smeagol.client.domain.Event;
 import edu.upc.cpl.smeagol.client.domain.Resource;
 import edu.upc.cpl.smeagol.client.domain.Tag;
 import edu.upc.cpl.smeagol.client.exception.AlreadyExistsException;
@@ -34,6 +38,7 @@ public class SmeagolClientTest extends TestCase {
 
 	private static int TAG_COUNT = 8; // number of tags in server
 	private static int RESOURCE_COUNT = 5; // number of resources in server
+	private static int EVENT_COUNT = 4; // number of events in server
 
 	private static final Tag EXISTENT_TAG = new Tag("videoconferencia", "descr 3");
 	private static final Tag NEW_TAG = new Tag("newtag",
@@ -47,10 +52,13 @@ public class SmeagolClientTest extends TestCase {
 	private static final Resource EXISTENT_RESOURCE = new Resource("Aula test 2", "Estem de proves");
 	private static final Resource NEW_RESOURCE = new Resource("New resource desc", "New resource info");
 	private static final Collection<Tag> NEW_RESOURCE_TAGS = new TreeSet<Tag>();
-
 	private static final Long NON_EXISTENT_RESOURCE_ID = 2000L;
 	private static final Resource NON_EXISTENT_RESOURCE = new Resource("NON EXISTENT RESOURCE",
 			"NON EXISTENT DESCRIPTION");
+
+	private static final long EXISTENT_EVENT_ID = 4L;
+	private static final Event EXISTENT_EVENT = new Event("Descripció de l'event 4", "Informació 4", new Interval(
+			new DateTime("2011-02-16T04:00:00"), new DateTime("2011-02-16T05:00:00")));
 
 	static {
 		logger.info("*******************************************************************************");
@@ -78,7 +86,8 @@ public class SmeagolClientTest extends TestCase {
 		NEW_RESOURCE.setTags(NEW_RESOURCE_TAGS);
 
 		NON_EXISTENT_RESOURCE.setId(NON_EXISTENT_RESOURCE_ID);
-
+		
+		EXISTENT_EVENT.setId(EXISTENT_EVENT_ID);
 	}
 
 	@Test
@@ -180,6 +189,7 @@ public class SmeagolClientTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testDeleteTagNotFound() {
 		try {
 			client.deleteTag("TrulyInexistentTag");
@@ -224,6 +234,7 @@ public class SmeagolClientTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testUpdateTagNotFound() {
 		Collection<Tag> tags = client.getTags();
 		assertFalse(tags.contains(NON_EXISTENT_TAG));
@@ -235,12 +246,14 @@ public class SmeagolClientTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testGetResources() {
 		Collection<Resource> resources = client.getResources();
 		assertEquals(RESOURCE_COUNT, resources.size());
 		assertTrue(resources.contains(EXISTENT_RESOURCE));
 	}
 
+	@Test
 	public void testGetResourceNotFound() {
 		try {
 			@SuppressWarnings("unused")
@@ -251,6 +264,7 @@ public class SmeagolClientTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testGetResource() {
 		try {
 			Resource r = client.getResource(EXISTENT_RESOURCE.getId());
@@ -261,6 +275,7 @@ public class SmeagolClientTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCreateDuplicatedResource() {
 		try {
 			Collection<Resource> resources = client.getResources();
@@ -276,6 +291,7 @@ public class SmeagolClientTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCreateResourceWithEmptyDescription() {
 		String NULL_STR = null;
 		String EMPTY_STR = "";
@@ -298,6 +314,7 @@ public class SmeagolClientTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCreateResource() {
 		try {
 			Collection<Resource> resources = client.getResources();
@@ -319,10 +336,12 @@ public class SmeagolClientTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testDeleteResourceNotFound() {
 		Collection<Resource> resources = client.getResources();
 		assertEquals(RESOURCE_COUNT, resources.size());
 		try {
+			// FIXME: Commented until bug #301 is fixed
 			client.deleteResource(NON_EXISTENT_RESOURCE_ID);
 		} catch (NotFoundException e) {
 			// OK. It should fail.
@@ -332,6 +351,7 @@ public class SmeagolClientTest extends TestCase {
 		assertEquals(RESOURCE_COUNT, resources.size());
 	}
 
+	@Test
 	public void testDeleteResource() {
 		Collection<Resource> resources = client.getResources();
 		assertEquals(RESOURCE_COUNT, resources.size());
@@ -345,7 +365,14 @@ public class SmeagolClientTest extends TestCase {
 		assertEquals(--RESOURCE_COUNT, resourcesAfter.size());
 	}
 
-	public void testCreateTags() {
-		fail("not yet implemented");
+	@Test
+	public void testGetEvents() {
+		ArrayList<Event> events = new ArrayList<Event>(client.getEvents());
+		
+		assertEquals(EVENT_COUNT, events.size());
+		logger.debug(events);
+		assertEquals(EXISTENT_EVENT, events.get(3));
+		assertTrue(events.contains(EXISTENT_EVENT));
 	}
+
 }
