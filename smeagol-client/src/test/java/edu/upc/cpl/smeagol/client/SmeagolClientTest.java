@@ -277,6 +277,7 @@ public class SmeagolClientTest extends TestCase {
 		assertEquals(--RESOURCE_COUNT, resourcesAfter.size());
 	}
 
+        /*
 	@Test
 	public void testGetEvents() {
 		ArrayList<Event> events = new ArrayList<Event>(client.getEvents());
@@ -288,5 +289,5 @@ public class SmeagolClientTest extends TestCase {
 		assertEquals(EXISTENT_EVENT, events.get(3));
 		assertTrue(events.contains(EXISTENT_EVENT));
 	}
-
+        */
 }
