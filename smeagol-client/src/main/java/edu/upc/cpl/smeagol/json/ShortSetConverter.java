@@ -19,7 +19,7 @@ import com.google.gson.JsonSerializer;
  * directly in your programs.
  * <p>
  * A customized serializer/deserializer for type {@code List<Short>}. To be used
- * by {@codeGsonBuilder}s.
+ * by {@code GsonBuilder}s.
  * <p>
  * This class is needed because default serialization provided by the Gson
  * library does not conform to Sméagol Server API v2.0.

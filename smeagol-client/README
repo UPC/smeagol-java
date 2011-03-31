@@ -46,7 +46,19 @@ Compilar el codi
         
    Els fitxers resultats de la compilació o empaquetat es troben al subdirectori
    ./target.
-   
+
+ *  Si es vol crear el .jar encara que fallin els tests:
+
+        mvn package -DskipTests=true
+
+ * Per empaquetar el Javadoc:
+
+        mvn javadoc:jar
+
+ * Per empaquetar el codi font:
+
+        mvn source:jar
+
 
 Generar la documentació
 -----------------------
