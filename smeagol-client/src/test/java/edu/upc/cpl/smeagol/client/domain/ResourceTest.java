@@ -5,6 +5,12 @@ import java.util.Collection;
 
 import junit.framework.TestCase;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
+@RunWith(JUnit4.class)
 public class ResourceTest extends TestCase {
 	private static final long ID1 = 1;
 	private static final long ID2 = 2;
@@ -21,7 +27,8 @@ public class ResourceTest extends TestCase {
 	private Resource r1;
 	private Resource r2;
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		r1 = new Resource();
 		r2 = new Resource();
 		r1.setId(ID1);
@@ -44,12 +51,14 @@ public class ResourceTest extends TestCase {
 		JSON_ARRAY = "[" + R1_AS_JSON + "," + R2_AS_JSON + "]";
 	}
 
+	@Test
 	public void testCompareTo() {
 		assertTrue(r1.compareTo(r2) < 0);
 		assertTrue(r2.compareTo(r1) > 0);
 		assertTrue(r1.compareTo(r1) == 0);
 	}
 
+	@Test
 	public void testEqualsObject() {
 		assertFalse(r1.equals(r2));
 		assertTrue(r1.equals(r1));
@@ -64,10 +73,12 @@ public class ResourceTest extends TestCase {
 		assertEquals(r1.getTags(), other.getTags());
 	}
 
+	@Test
 	public void testSerialize() {
 		assertEquals(R1_AS_JSON, r1.serialize());
 	}
 
+	@Test
 	public void testDeserialize() {
 		Resource r;
 		r = Resource.deserialize(R1_AS_JSON);
@@ -76,6 +87,7 @@ public class ResourceTest extends TestCase {
 		assertEquals(r2, r);
 	}
 
+	@Test
 	public void testDeserializeCollection() {
 		Collection<Resource> resources = Resource
 				.deserializeCollection(JSON_ARRAY);
@@ -84,6 +96,7 @@ public class ResourceTest extends TestCase {
 		assertTrue(resources.contains(r2));
 	}
 
+	@Test
 	public void testSerializeCollection() {
 		Collection<Resource> c = new ArrayList<Resource>();
 		c.add(r1);

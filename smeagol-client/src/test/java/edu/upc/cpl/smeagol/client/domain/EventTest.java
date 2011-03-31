@@ -10,7 +10,10 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
+@RunWith(JUnit4.class)
 public class EventTest extends TestCase {
 
 	private static final long ID1 = 1;
@@ -33,7 +36,6 @@ public class EventTest extends TestCase {
 	private String E2_JSON;
 
 	@Before
-	@Override
 	public void setUp() throws Exception {
 		e1 = new Event();
 		e1.setId(ID1);

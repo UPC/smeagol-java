@@ -14,6 +14,8 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -22,6 +24,7 @@ import com.google.gson.JsonParser;
 import edu.upc.cpl.smeagol.client.ical.DayOfWeek;
 import edu.upc.cpl.smeagol.client.ical.Frequency;
 
+@RunWith(JUnit4.class)
 public class BookingTest extends TestCase {
 
 	@SuppressWarnings("unused")
