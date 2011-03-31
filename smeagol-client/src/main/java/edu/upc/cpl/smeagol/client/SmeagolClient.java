@@ -4,10 +4,13 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -15,13 +18,15 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.representation.Form;
 
+import edu.upc.cpl.smeagol.client.domain.Event;
+import edu.upc.cpl.smeagol.client.domain.Resource;
 import edu.upc.cpl.smeagol.client.domain.Tag;
 import edu.upc.cpl.smeagol.client.exception.AlreadyExistsException;
 import edu.upc.cpl.smeagol.client.exception.NotFoundException;
 
 /**
  * This class implements a basic Sméagol client conforming to server API version
- * 2.
+ * version 2.
  * 
  * @author angel
  * 
@@ -32,6 +37,13 @@ public class SmeagolClient {
 	private static final String RESOURCE_PATH = "resource";
 	private static final String EVENT_PATH = "event";
 	private static final String BOOKING_PATH = "booking";
+
+	public static final String TAG_ID_ATTR_NAME = "id";
+	public static final String TAG_DESCRIPTION_ATTR_NAME = "description";
+
+	public static final String RESOURCE_DESCRIPTION_ATTR_NAME = "description";
+	public static final String RESOURCE_INFO_ATTR_NAME = "info";
+	public static final String RESOURCE_TAGS_ATTR_NAME = "tags";
 
 	private Client client;
 
@@ -112,10 +124,10 @@ public class SmeagolClient {
 	 * @return the new <code>Tag</code>
 	 * @throws IllegalArgumentException
 	 *             if the id is null or an empty string, or if the lengths of
-	 *             the provided arguments exceed {@link Tag.MAX_ID_LEN} and/or
-	 *             {@link Tag.MAX_DESCRIPTION_LEN}.
+	 *             the provided id or description exceed the maximum length
+	 *             allowed by the server.
 	 * @throws AlreadyExistsException
-	 *             if the server already contains a tag with the provided id
+	 *             if the server already contains a tag with the provided id.
 	 * @see Tag
 	 * 
 	 */
@@ -123,13 +135,10 @@ public class SmeagolClient {
 		Tag result = null;
 
 		Form f = new Form();
-		f.add(Tag.ID_ATTR_NAME, id);
-		f.add(Tag.DESCRIPTION_ATTR_NAME, description);
+		f.add(TAG_ID_ATTR_NAME, id);
+		f.add(TAG_DESCRIPTION_ATTR_NAME, description);
 
 		ClientResponse response = tagWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
-
-		Logger logger = Logger.getLogger(SmeagolClient.class);
-		logger.debug(response.toString());
 
 		switch (response.getClientResponseStatus()) {
 		case CONFLICT:
@@ -137,7 +146,7 @@ public class SmeagolClient {
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
 		case CREATED:
-			result = new Tag(id, description);
+			result = Tag.deserialize(response.getEntity(String.class));
 			break;
 		}
 
@@ -159,16 +168,16 @@ public class SmeagolClient {
 		Tag result = null;
 
 		Form f = new Form();
-		f.add(Tag.ID_ATTR_NAME, id);
-		f.add(Tag.DESCRIPTION_ATTR_NAME, newDescription);
+		f.add(TAG_ID_ATTR_NAME, id);
+		f.add(TAG_DESCRIPTION_ATTR_NAME, newDescription);
 
 		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).put(ClientResponse.class, f);
-		
+
 		switch (response.getClientResponseStatus()) {
 		case NOT_FOUND:
 			throw new NotFoundException();
 		case OK:
-			result = new Tag(id, newDescription);
+			result = Tag.deserialize(response.getEntity(String.class));
 			break;
 		}
 		return result;
@@ -188,4 +197,237 @@ public class SmeagolClient {
 			throw new NotFoundException();
 		}
 	}
+
+	/**
+	 * Returns all tags defined in server whose identifiers are in the provided
+	 * list.
+	 * 
+	 * @param identifiers
+	 *            a list of valid tag identifiers
+	 * @return a collection containing all the tags defined in the server.
+	 */
+	public Collection<Tag> getTags(Collection<String> identifiers) {
+		Collection<Tag> result = new HashSet<Tag>();
+		for (String id : identifiers) {
+			try {
+				Tag t = getTag(id);
+				result.add(t);
+			} catch (NotFoundException e) {
+				// not found? ok. do nothing
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Create all tags in collection.
+	 * <p>
+	 * Existent tags will be ignored. Tags with invalid arguments will also be
+	 * ignored.
+	 * 
+	 * @param tags
+	 *            a collection of tags to be created
+	 * @return the number of tags actually created (i.e. those which did not
+	 *         exist in server before).
+	 */
+	public int createTags(Collection<Tag> tags) {
+		if (CollectionUtils.isEmpty(tags)) {
+			return 0;
+		}
+
+		int count = 0;
+
+		/*
+		 * To save expensive network operations, we check locally wether they
+		 * exist or not.
+		 */
+		HashSet<Tag> tagsInServer = new HashSet<Tag>(getTags());
+
+		for (Tag t : tags) {
+			if (!tagsInServer.contains(t)) {
+				try {
+					createTag(t.getId(), t.getDescription());
+					count++;
+				} catch (IllegalArgumentException e) {
+					// tag ignored, counter not incremented
+				} catch (AlreadyExistsException e) {
+					// this should never happen, as this is checked the "if"
+					// condition
+					e.printStackTrace();
+				}
+			}
+		}
+		return count;
+	}
+
+	/**
+	 * Retrieve all <code>Resource</code>s defined in server.
+	 * 
+	 * @return a collection containing all the resources defined in the server.
+	 */
+	public Collection<Resource> getResources() {
+		String resourceJsonArray = resourceWr.accept(MediaType.APPLICATION_JSON).get(String.class);
+
+		Collection<Resource> resources = Resource.deserializeCollection(resourceJsonArray);
+
+		/*
+		 * In a Resource list, the server only returns the tag identifiers
+		 * instead of the full tag tag list for every resource. For each
+		 * identifier, we must retrieve the full tag attributes and repopulate
+		 * the Resource tags.
+		 */
+		for (Resource r : resources) {
+			Collection<String> ids = new HashSet<String>();
+			for (Tag t : r.getTags()) {
+				if (StringUtils.isNotBlank(t.getId())) {
+					ids.add(t.getId());
+				}
+			}
+			Collection<Tag> tags = getTags(ids);
+			r.setTags(tags);
+		}
+		return resources;
+	}
+
+	/**
+	 * Retrieve the resource whith the provided identifier.
+	 * 
+	 * @param id
+	 *            the resource identifier
+	 * @return the resource with the provided identifier, if exists.
+	 * @throws NotFoundException
+	 *             if there is no resource with such identifier.
+	 */
+	public Resource getResource(Long id) throws NotFoundException {
+		ClientResponse response = resourceWr.path(id.toString()).accept(MediaType.APPLICATION_JSON)
+				.get(ClientResponse.class);
+
+		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
+			throw new NotFoundException();
+		}
+
+		String json = response.getEntity(String.class);
+		Resource result = Resource.deserialize(json);
+
+		/* Populate tag descriptions before returning the resource to the user */
+		HashSet<String> ids = new HashSet<String>();
+		for (Tag t : result.getTags()) {
+			ids.add(t.getId());
+		}
+		Collection<Tag> tags = getTags(ids);
+		result.setTags(tags);
+
+		return result;
+	}
+
+	/**
+	 * Create a new resource in the server.
+	 * 
+	 * @param description
+	 *            the description of the new resource, must be a not null,
+	 *            non-blank string.
+	 * @param info
+	 *            additional information of the new resource
+	 * @param tags
+	 *            an optional collection of tags to assign to the resource. If
+	 *            the collection contains any non-existent tags, they will be
+	 *            created in the server.
+	 * @return the resource just created
+	 * @throws AlreadyExistsException
+	 *             if there is already another resource with the same
+	 *             description defined in the server.
+	 * @throws IllegalArgumentException
+	 *             if the provided description is <code>null</code>, an empty
+	 *             string, or a blank string.
+	 */
+	public Resource createResource(String description, String info, Collection<Tag> tags)
+			throws AlreadyExistsException, IllegalArgumentException {
+		Form f = new Form();
+		f.add(RESOURCE_DESCRIPTION_ATTR_NAME, description);
+		f.add(RESOURCE_INFO_ATTR_NAME, info);
+
+		/*
+		 * TODO: provided tags will be created by the server if they don't
+		 * exist. BUT the tags descriptions will be lost, because the server
+		 * expects a "tags" attribute containing only a comma-separated list of
+		 * tag identifiers (without descriptions!). As a workaround, we will
+		 * create the tags via createTag() until a more convenient behaviour of
+		 * the resource creation operation is provided by the server.
+		 */
+		if (CollectionUtils.isNotEmpty(tags)) {
+			createTags(tags);
+
+			Set<String> tagIds = new HashSet<String>();
+			for (Tag t : tags) {
+				tagIds.add(t.getId());
+			}
+			f.add(RESOURCE_TAGS_ATTR_NAME, StringUtils.join(tagIds, ","));
+		}
+
+		ClientResponse response = resourceWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
+
+		Resource result = null;
+
+		switch (response.getClientResponseStatus()) {
+		case CONFLICT:
+			throw new AlreadyExistsException();
+		case BAD_REQUEST:
+			throw new IllegalArgumentException();
+		case CREATED:
+			result = Resource.deserialize(response.getEntity(String.class));
+			try {
+				result = getResource(result.getId());
+			} catch (NotFoundException e) {
+				/*
+				 * This should not happen, as we are retrieving the resource we
+				 * just created.
+				 */
+				e.printStackTrace();
+			}
+			break;
+		}
+		return result;
+	}
+
+	/**
+	 * Delete existing resource from server.
+	 * 
+	 * @param id
+	 *            the identifier for the resource to delete.
+	 * @throws NotFoundException
+	 *             if there is no such resource with the provided identifier.
+	 */
+	public void deleteResource(Long id) throws NotFoundException {
+		ClientResponse response = resourceWr.path(id.toString()).accept(MediaType.APPLICATION_JSON)
+				.delete(ClientResponse.class);
+
+		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
+			throw new NotFoundException();
+		}
+	}
+
+	/*
+	public Collection<Event> getEvents() {
+		String eventJsonArray = eventWr.accept(MediaType.APPLICATION_JSON).get(String.class);
+
+		Collection<Event> events = Event.deserializeCollection(eventJsonArray);
+
+		// In a Event list, the server only returns the tag identifiers
+		// instead of the full tag tag list for every event. For each
+		// identifier, we must retrieve the full tag attributes and repopulate
+		// the Resource tags.
+
+		for (Event e : events) {
+			Collection<String> ids = new HashSet<String>();
+			for (Tag t : e.getTags()) {
+				if (StringUtils.isNotBlank(t.getId())) {
+					ids.add(t.getId());
+				}
+			}
+			Collection<Tag> tags = getTags(ids);
+			e.setTags(tags);
+		}
+		return events;
+	}
+	*/
 }

@@ -25,11 +25,12 @@ import edu.upc.cpl.smeagol.json.DayOfWeekListConverter;
 import edu.upc.cpl.smeagol.json.ShortSetConverter;
 
 /**
- * An Sméagol booking.
+ * Sméagol bookings.
  * <p>
- * In the Sméagol terminology, bookings can be "simple" or "recurrent". Simple
- * bookings have a "start" DateTime and an "end" DateTime. Recurrent bookings
- * may occur several times during a period of time, as defined by RFC 5545.
+ * In the Sméagol terminology, bookings can be <em>simple</em> or
+ * <em>recurrent</em>. Simple bookings have a <em>start</em> {@code DateTime}
+ * and an <em>end</em> {@code DateTime}. Recurrent bookings may occur several
+ * times during a period of time, as defined by RFC 5545.
  * <p>
  * Keep in mind that Sméagol Server API v2.0 implements <strong>only a
  * subset</strong> of this standard. Please refer to <a
@@ -162,7 +163,7 @@ public class Booking implements Comparable<Booking> {
 			Short interval, DateTime until) throws IllegalArgumentException {
 
 		// TODO: Check that end - start <= 24 hours (???)
-		
+
 		Interval i = new Interval(start, end);
 		if (i.toDuration().isLongerThan(MAX_SPAN_DURATION_FOR_DAILY_RECURRENCE)) {
 			throw new IllegalArgumentException(
@@ -301,11 +302,6 @@ public class Booking implements Comparable<Booking> {
 	 * @param end
 	 *            the <code>DateTime</code> at which the booking ends every day.
 	 *            Default is 1 hour after <code>start</code>.
-	 * 
-	 * @param byDay
-	 *            the days of the week at which the booking happens. The
-	 *            {@link DayOfWeek} class provides several constants you can use
-	 *            to populate this parameter.
 	 * 
 	 * @param interval
 	 *            the booking will repeat in steps of <code>interval</code>
@@ -543,8 +539,9 @@ public class Booking implements Comparable<Booking> {
 	 * a <code>byDay = DayOfWeek.MONDAY</code> value represents <em>all Mondays
 	 * within the month</em>.
 	 * 
-	 * @param see
-	 *            {@see Frequency}
+	 * @param frequency
+	 *            the frequency
+	 * @see Frequency
 	 */
 	public void setFrequency(Frequency frequency) {
 		this.frequency = frequency;

@@ -1,76 +1,78 @@
---
---Crear una base de dades SQLite amb 2 taules: resource i tag
---
-drop table if exists t_resource;
-    CREATE TABLE t_resource (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            description      TEXT(128),
-	    info	TEXT(256)
-    );
+-- Activem la comprovació de constraints perquè ens avisi
+-- dels possibles errors durant la creació de taules. 
+PRAGMA use_constraints = ON;
 
-drop table if exists t_resource_tag;
-    CREATE TABLE t_resource_tag (
-            resource_id     INTEGER REFERENCES resources(id) ON DELETE CASCADE,
-            tag_id   TEXT(64) REFERENCES tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
-            PRIMARY KEY (resource_id, tag_id)
-    );
-
-drop table if exists t_tag;
-  CREATE TABLE t_tag (
-	    id		TEXT(64),
-	    description TEXT(256),
-	    PRIMARY KEY (id)
-    );
-
-drop table if exists t_tag_event;
-   CREATE TABLE t_tag_event (
-	id_tag	TEXT(64) REFERENCES t_tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
-	id_event INTEGER REFERENCES t_event(id) ON DELETE CASCADE,
-	PRIMARY KEY (id_tag,id_event)
-   );
-
-drop table if exists t_event;
-   CREATE TABLE t_event (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	info TEXT(256),
-	description TEXT(128),
-	starts DATETIME,
-	ends DATETIME
-   );
-
-drop table if exists t_booking;
-CREATE TABLE t_booking(
-      id 		INTEGER PRIMARY KEY AUTOINCREMENT,
-      id_resource INTEGER REFERENCES t_resource(id) ON DELETE CASCADE,
-      id_event	INTEGER REFERENCES t_event(id) ON DELETE CASCADE,
-      dtstart	DATETIME,
-      dtend	DATETIME,
-      duration    DURATION,
-      frequency   TEXT,
-      interval    INTEGER,
-      until	DATETIME,
-      by_minute  INTEGER, --0 to 59
-      by_hour   INTEGER, --0 to 23
-      by_day    TEXT,
-      by_month   TEXT,
-      by_day_month INTEGER
+DROP TABLE IF EXISTS t_resource;
+CREATE TABLE t_resource (
+	id          INTEGER PRIMARY KEY AUTOINCREMENT,
+	description TEXT(128) NOT NULL UNIQUE,
+	info        TEXT(256)
 );
 
-drop table if exists t_exception;
+DROP TABLE IF EXISTS t_tag;
+CREATE TABLE t_tag (
+	id          TEXT(64),
+	description TEXT(256) UNIQUE,
+	PRIMARY KEY (id)
+);
+
+DROP TABLE IF EXISTS t_resource_tag;
+CREATE TABLE t_resource_tag (
+	resource_id INTEGER REFERENCES t_resource(id) ON DELETE CASCADE,
+	tag_id      TEXT(64) REFERENCES t_tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
+	PRIMARY KEY (resource_id, tag_id)
+);
+
+DROP TABLE IF EXISTS t_event;
+CREATE TABLE t_event (
+	id          INTEGER PRIMARY KEY AUTOINCREMENT,
+	info        TEXT(256),
+	description TEXT(128),
+	starts      DATETIME,
+	ends        DATETIME,
+	CHECK (starts <= ends)
+);
+
+DROP TABLE IF EXISTS t_tag_event;
+CREATE TABLE t_tag_event (
+	id_tag TEXT(64)  REFERENCES t_tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
+	id_event         INTEGER REFERENCES t_event(id) ON DELETE CASCADE,
+	PRIMARY KEY (id_tag,id_event)
+);
+
+DROP TABLE IF EXISTS t_booking;
+CREATE TABLE t_booking(
+	id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_resource  INTEGER REFERENCES t_resource(id) ON DELETE CASCADE,
+    id_event     INTEGER REFERENCES t_event(id) ON DELETE CASCADE,
+    dtstart      DATETIME,
+    dtend        DATETIME,
+    duration     DURATION,
+    frequency    TEXT,
+    interval     INTEGER,
+    until        DATETIME,
+    by_minute    INTEGER CHECK (by_minute BETWEEN 0 AND 59), --0 to 59
+    by_hour      INTEGER CHECK (by_hour BETWEEN 0 AND 23), --0 to 23
+    by_day       TEXT,
+    by_month     TEXT,
+    by_day_month INTEGER
+);
+
+DROP TABLE IF EXISTS t_exception;
 CREATE TABLE t_exception(
-      id 		INTEGER PRIMARY KEY AUTOINCREMENT,
-      id_booking	INTEGER REFERENCES t_booking(id) ON DELETE CASCADE,
-      dtstart	DATETIME,
-      dtend	DATETIME,
-      duration    DURATION,
-      frequency   TEXT,
-      interval    INTEGER,
-      until	DATETIME,
-      by_minute  INTEGER, --0 to 59
-      by_hour   INTEGER, --0 to 23
-      by_day    TEXT,
-      by_month   TEXT,
-      by_day_month INTEGER
+	id           INTEGER PRIMARY KEY AUTOINCREMENT,
+	id_booking   INTEGER REFERENCES t_booking(id) ON DELETE CASCADE,
+	dtstart	     DATETIME,
+	dtend        DATETIME,
+	duration     DURATION,
+	frequency    TEXT,
+	interval     INTEGER,
+	until        DATETIME,
+	by_minute    INTEGER CHECK (by_minute BETWEEN 0 AND 59), --0 to 59
+	by_hour      INTEGER CHECK (by_hour BETWEEN 0 AND 23), --0 to 23
+	by_day       TEXT,
+	by_month     TEXT,
+	by_day_month INTEGER
 ); 
 
 -- Carreguem uns valors a les taules, sol per a provar
@@ -112,10 +114,10 @@ INSERT INTO t_resource_tag VALUES (5,'microfons inalambrics');
 INSERT INTO t_resource_tag VALUES (5,'videoconferencia');
 INSERT INTO t_resource_tag VALUES (5,'wireless');
 
-INSERT INTO t_event values(1,'Informació 1',"Descripció de l'event 1",'2011-02-16 04:00:00','2011-02-16 05:00:00');
+INSERT INTO t_event values (1,'Informació 1',"Descripció de l'event 1",'2011-02-16 04:00:00','2011-02-16 05:00:00');
 INSERT INTO t_event values (2,'Informació 2',"Descripció de l'event 2",'2011-02-16 04:00:00','2011-02-16 05:00:00');
-INSERT INTO t_event values(3,'Informació 3',"Descripció de l'event 3",'2011-02-16 04:00:00','2011-02-16 05:00:00');
-INSERT INTO t_event values(4,'Informació 4',"Descripció de l'event 4",'2011-02-16 04:00:00','2011-02-16 05:00:00');
+INSERT INTO t_event values (3,'Informació 3',"Descripció de l'event 3",'2011-02-16 04:00:00','2011-02-16 05:00:00');
+INSERT INTO t_event values (4,'Informació 4',"Descripció de l'event 4",'2011-02-16 04:00:00','2011-02-16 05:00:00');
 
 --|id|id_resource|id_event|dtstart|dtend|duration|frequency|interval|until|by_minute|by_hour|by_day|by_month|by_day_month
 

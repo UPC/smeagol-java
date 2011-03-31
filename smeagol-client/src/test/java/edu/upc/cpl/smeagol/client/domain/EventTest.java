@@ -1,6 +1,7 @@
 package edu.upc.cpl.smeagol.client.domain;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import junit.framework.TestCase;
@@ -9,7 +10,10 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
+@RunWith(JUnit4.class)
 public class EventTest extends TestCase {
 
 	private static final long ID1 = 1;
@@ -18,6 +22,9 @@ public class EventTest extends TestCase {
 	private static final String DESC2 = "description2";
 	private static final String INFO1 = "info1";
 	private static final String INFO2 = "info2";
+	private static final Tag TAG1 = new Tag("tag1", "desc1");
+	private static final Tag TAG2 = new Tag("tag2", "desc2");
+	private static final Tag TAG3 = new Tag("tag3", "desc3");
 	private static final DateTime STARTS1 = new DateTime("2010-12-01T08:00:00");
 	private static final DateTime ENDS1 = new DateTime("2010-12-10T19:00:00");
 	private static final DateTime STARTS2 = new DateTime("2011-01-01T08:00:00");
@@ -29,16 +36,16 @@ public class EventTest extends TestCase {
 	private String E2_JSON;
 
 	@Before
-	@Override
 	public void setUp() throws Exception {
 		e1 = new Event();
 		e1.setId(ID1);
 		e1.setDescription(DESC1);
 		e1.setInfo(INFO1);
 		e1.setInterval(new Interval(STARTS1, ENDS1));
+		e1.setTags(Arrays.asList(new Tag[] { TAG1, TAG2, TAG3 }));
 
 		E1_JSON = "{\"id\":" + ID1 + ",\"description\":\"" + DESC1 + "\",\"info\":\"" + INFO1 + "\",\"starts\":\""
-				+ STARTS1 + "\",\"ends\":\"" + ENDS1 + "\"}";
+				+ STARTS1 + "\",\"ends\":\"" + ENDS1 + "\",\"tags\":" + Tag.serialize(e1.getTags()) + "}";
 
 		e2 = new Event();
 		e2.setId(ID2);
@@ -58,6 +65,7 @@ public class EventTest extends TestCase {
 		e1Copy.setDescription(DESC1);
 		e1Copy.setInfo(INFO1);
 		e1Copy.setInterval(new Interval(STARTS1, ENDS1));
+		e1Copy.setTags(Arrays.asList(new Tag[] { TAG1, TAG2, TAG3 }));
 	}
 
 	@Test
