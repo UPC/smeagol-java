@@ -282,7 +282,9 @@ public class SmeagolClientTest extends TestCase {
 		ArrayList<Event> events = new ArrayList<Event>(client.getEvents());
 
 		assertEquals(EVENT_COUNT, events.size());
-		logger.debug(events);
+		for (Event e : events) {
+			logger.debug(e);
+		}
 		assertEquals(EXISTENT_EVENT, events.get(3));
 		assertTrue(events.contains(EXISTENT_EVENT));
 	}
