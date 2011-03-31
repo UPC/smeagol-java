@@ -406,17 +406,17 @@ public class SmeagolClient {
 		}
 	}
 
+	/*
 	public Collection<Event> getEvents() {
 		String eventJsonArray = eventWr.accept(MediaType.APPLICATION_JSON).get(String.class);
 
 		Collection<Event> events = Event.deserializeCollection(eventJsonArray);
 
-		/*
-		 * In a Event list, the server only returns the tag identifiers
-		 * instead of the full tag tag list for every event. For each
-		 * identifier, we must retrieve the full tag attributes and repopulate
-		 * the Resource tags.
-		 */
+		// In a Event list, the server only returns the tag identifiers
+		// instead of the full tag tag list for every event. For each
+		// identifier, we must retrieve the full tag attributes and repopulate
+		// the Resource tags.
+
 		for (Event e : events) {
 			Collection<String> ids = new HashSet<String>();
 			for (Tag t : e.getTags()) {
@@ -429,4 +429,5 @@ public class SmeagolClient {
 		}
 		return events;
 	}
+	*/
 }
