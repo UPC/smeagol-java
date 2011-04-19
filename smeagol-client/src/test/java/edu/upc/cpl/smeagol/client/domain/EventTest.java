@@ -44,17 +44,20 @@ public class EventTest extends TestCase {
 		e1.setInterval(new Interval(STARTS1, ENDS1));
 		e1.setTags(Arrays.asList(new Tag[] { TAG1, TAG2, TAG3 }));
 
-		E1_JSON = "{\"id\":" + ID1 + ",\"description\":\"" + DESC1 + "\",\"info\":\"" + INFO1 + "\",\"starts\":\""
-				+ STARTS1 + "\",\"ends\":\"" + ENDS1 + "\",\"tags\":" + Tag.serialize(e1.getTags()) + "}";
+		E1_JSON = "{\"id\":" + e1.getId() + ",\"description\":\"" + e1.getDescription() + "\",\"info\":\""
+				+ e1.getInfo() + "\",\"starts\":\"" + e1.getInterval().getStart() + "\",\"ends\":\""
+				+ e1.getInterval().getEnd() + "\",\"tags\":" + Tag.serialize(e1.getTags()) + "}";
 
 		e2 = new Event();
 		e2.setId(ID2);
 		e2.setDescription(DESC2);
 		e2.setInfo(INFO2);
 		e2.setInterval(new Interval(STARTS2, ENDS2));
+		e2.setTags(new ArrayList<Tag>());
 
-		E2_JSON = "{\"id\":" + ID2 + ",\"description\":\"" + DESC2 + "\",\"info\":\"" + INFO2 + "\",\"starts\":\""
-				+ STARTS2 + "\",\"ends\":\"" + ENDS2 + "\"}";
+		E2_JSON = "{\"id\":" + e2.getId() + ",\"description\":\"" + e2.getDescription() + "\",\"info\":\""
+				+ e2.getInfo() + "\",\"starts\":\"" + e2.getInterval().getStart() + "\",\"ends\":\""
+				+ e2.getInterval().getEnd() + "\",\"tags\":" + Tag.serialize(e2.getTags()) + "}";
 
 		/*
 		 * e1 and e1Copy will have the same attributes and tags, so
@@ -119,7 +122,7 @@ public class EventTest extends TestCase {
 
 	@Test
 	public void tesGetInterval() {
-		assertEquals(STARTS1, e1.getInterval());
+		assertEquals(new Interval(STARTS1, ENDS1), e1.getInterval());
 	}
 
 }
