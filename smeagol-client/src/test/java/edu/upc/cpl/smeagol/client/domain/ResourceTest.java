@@ -29,24 +29,18 @@ public class ResourceTest extends TestCase {
 
 	@Before
 	public void setUp() throws Exception {
-		r1 = new Resource();
-		r2 = new Resource();
-		r1.setId(ID1);
-		r2.setId(ID2);
-		r1.setDescription(DESC1);
-		r2.setDescription(DESC2);
-		r1.setInfo(INFO1);
-		r2.setInfo(INFO2);
 		Collection<Tag> tags = new ArrayList<Tag>();
 		tags.add(T1);
 		tags.add(T2);
-		r1.setTags(tags);
-		r2.setTags(EMPTY_TAG_LIST);
-		R1_AS_JSON = "{\"id\":" + ID1 + ",\"description\":\"" + DESC1
-				+ "\",\"info\":\"" + INFO1 + "\",\"tags\":"
+
+		r1 = new Resource(DESC1, INFO1, tags);
+		r2 = new Resource(DESC2, INFO2, EMPTY_TAG_LIST);
+		r1.setId(ID1);
+		r2.setId(ID2);
+
+		R1_AS_JSON = "{\"id\":" + ID1 + ",\"description\":\"" + DESC1 + "\",\"info\":\"" + INFO1 + "\",\"tags\":"
 				+ Tag.serialize(tags) + "}";
-		R2_AS_JSON = "{\"id\":" + ID2 + ",\"description\":\"" + DESC2
-				+ "\",\"info\":\"" + INFO2 + "\",\"tags\":"
+		R2_AS_JSON = "{\"id\":" + ID2 + ",\"description\":\"" + DESC2 + "\",\"info\":\"" + INFO2 + "\",\"tags\":"
 				+ Tag.serialize(EMPTY_TAG_LIST) + "}";
 		JSON_ARRAY = "[" + R1_AS_JSON + "," + R2_AS_JSON + "]";
 	}
@@ -62,13 +56,11 @@ public class ResourceTest extends TestCase {
 	public void testEqualsObject() {
 		assertFalse(r1.equals(r2));
 		assertTrue(r1.equals(r1));
-		Resource other = new Resource();
+		Collection<Tag> tags = new ArrayList<Tag>();
+		tags.addAll(r1.getTags());
+
+		Resource other = new Resource(DESC1, INFO1, tags);
 		other.setId(ID1);
-		other.setDescription(DESC1);
-		other.setInfo(INFO1);
-		Collection<Tag> c = new ArrayList<Tag>();
-		c.addAll(r1.getTags());
-		other.setTags(c);
 		assertTrue(r1.equals(other));
 		assertEquals(r1.getTags(), other.getTags());
 	}
@@ -89,8 +81,7 @@ public class ResourceTest extends TestCase {
 
 	@Test
 	public void testDeserializeCollection() {
-		Collection<Resource> resources = Resource
-				.deserializeCollection(JSON_ARRAY);
+		Collection<Resource> resources = Resource.deserializeCollection(JSON_ARRAY);
 		assertEquals(2, resources.size());
 		assertTrue(resources.contains(r1));
 		assertTrue(resources.contains(r2));

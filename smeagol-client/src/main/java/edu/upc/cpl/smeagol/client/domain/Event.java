@@ -91,7 +91,20 @@ public class Event implements Comparable<Event> {
 		return (candidate == null || GenericValidator.maxLength(candidate, INFO_MAX_LEN));
 	}
 
-	protected Event() {
+	/**
+	 * Create a new Event with the provided attributes
+	 * 
+	 * @param description
+	 *            non-empty, unique description
+	 * @param info
+	 *            additional, optional info
+	 * @param startEnd
+	 *            the {@link Interval} (start, end) at which the event occurs
+	 */
+	public Event(String description, String info, Interval startEnd) {
+		setDescription(description);
+		setInfo(info);
+		setInterval(startEnd);
 	}
 
 	/**
@@ -102,12 +115,15 @@ public class Event implements Comparable<Event> {
 	 * @param info
 	 *            additional, optional info
 	 * @param startEnd
-	 *            the DateTime interval (start, end) at which the event occurs
+	 *            the {@link Interval} (start, end) at which the event occurs
+	 * @param tags
+	 *            the event tags
 	 */
-	public Event(String description, String info, Interval startEnd) {
+	public Event(String description, String info, Interval startEnd, Collection<Tag> tags) {
 		setDescription(description);
 		setInfo(info);
 		setInterval(startEnd);
+		setTags(tags);
 	}
 
 	public Long getId() {

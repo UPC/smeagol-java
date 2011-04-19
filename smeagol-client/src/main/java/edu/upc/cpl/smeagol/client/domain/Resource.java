@@ -72,12 +72,6 @@ public class Resource implements Comparable<Resource> {
 	}
 
 	/**
-	 * This constructor should only be used during deserialization.
-	 */
-	protected Resource() {
-	}
-
-	/**
 	 * Resource constructor.
 	 * 
 	 * @param description

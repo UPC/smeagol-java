@@ -48,12 +48,6 @@ public class Tag implements Comparable<Tag> {
 	private String description;
 
 	/**
-	 * This constructor should only be used during deserialization.
-	 */
-	protected Tag() {
-	}
-
-	/**
 	 * Validate if a string is a valid Tag identifier.
 	 * 
 	 * @param candidate

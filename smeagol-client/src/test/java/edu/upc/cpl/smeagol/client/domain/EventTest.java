@@ -37,23 +37,14 @@ public class EventTest extends TestCase {
 
 	@Before
 	public void setUp() throws Exception {
-		e1 = new Event();
+		e1 = new Event(DESC1, INFO1, new Interval(STARTS1, ENDS1), Arrays.asList(new Tag[] { TAG1, TAG2, TAG3 }));
 		e1.setId(ID1);
-		e1.setDescription(DESC1);
-		e1.setInfo(INFO1);
-		e1.setInterval(new Interval(STARTS1, ENDS1));
-		e1.setTags(Arrays.asList(new Tag[] { TAG1, TAG2, TAG3 }));
+		e2 = new Event(DESC2, INFO2, new Interval(STARTS2, ENDS2), new ArrayList<Tag>());
+		e2.setId(ID2);
 
 		E1_JSON = "{\"id\":" + e1.getId() + ",\"description\":\"" + e1.getDescription() + "\",\"info\":\""
 				+ e1.getInfo() + "\",\"starts\":\"" + e1.getInterval().getStart() + "\",\"ends\":\""
 				+ e1.getInterval().getEnd() + "\",\"tags\":" + Tag.serialize(e1.getTags()) + "}";
-
-		e2 = new Event();
-		e2.setId(ID2);
-		e2.setDescription(DESC2);
-		e2.setInfo(INFO2);
-		e2.setInterval(new Interval(STARTS2, ENDS2));
-		e2.setTags(new ArrayList<Tag>());
 
 		E2_JSON = "{\"id\":" + e2.getId() + ",\"description\":\"" + e2.getDescription() + "\",\"info\":\""
 				+ e2.getInfo() + "\",\"starts\":\"" + e2.getInterval().getStart() + "\",\"ends\":\""
@@ -63,12 +54,8 @@ public class EventTest extends TestCase {
 		 * e1 and e1Copy will have the same attributes and tags, so
 		 * e1.equals(e1Copy) should return true
 		 */
-		e1Copy = new Event();
+		e1Copy = new Event(DESC1, INFO1, new Interval(STARTS1, ENDS1), Arrays.asList(new Tag[] { TAG1, TAG2, TAG3 }));
 		e1Copy.setId(ID1);
-		e1Copy.setDescription(DESC1);
-		e1Copy.setInfo(INFO1);
-		e1Copy.setInterval(new Interval(STARTS1, ENDS1));
-		e1Copy.setTags(Arrays.asList(new Tag[] { TAG1, TAG2, TAG3 }));
 	}
 
 	@Test

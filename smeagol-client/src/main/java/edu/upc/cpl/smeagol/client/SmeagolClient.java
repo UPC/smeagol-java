@@ -406,7 +406,6 @@ public class SmeagolClient {
 		}
 	}
 
-	/*
 	public Collection<Event> getEvents() {
 		String eventJsonArray = eventWr.accept(MediaType.APPLICATION_JSON).get(String.class);
 
@@ -429,5 +428,5 @@ public class SmeagolClient {
 		}
 		return events;
 	}
-	*/
+
 }

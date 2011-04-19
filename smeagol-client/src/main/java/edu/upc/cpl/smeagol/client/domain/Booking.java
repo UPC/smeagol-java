@@ -97,13 +97,22 @@ public class Booking implements Comparable<Booking> {
 	private Set<Short> by_month; // valid values: [1 .. 12]
 
 	/**
-	 * Default non-argument constructor. Needed by google-gson for
-	 * deserialization. Protected because users should not be allowed to call it
-	 * directly.
+	 * Constructor for simple bookings (those which happen on a single time
+	 * span).
+	 * 
+	 * @param idResource
+	 *            identifier of the {@link Resource} to be booked. Cannot be
+	 *            null.
+	 * @param idEvent
+	 *            identifier of the {@link Event} related to the booking. Cannot
+	 *            be null.
+	 * @param dtStart
+	 *            the {@link DateTime} at which the booking starts.
+	 * @param dtEnd
+	 *            the {@link DateTime} at which the booking ends. Must be after
+	 *            {@code dtStart}.
+	 * @return the new booking
 	 */
-	protected Booking() {
-	}
-
 	public static Booking asSimple(Long idResource, Long idEvent, DateTime dtStart, DateTime dtEnd) {
 		Booking b = new Booking();
 		b.setIdResource(idResource);
