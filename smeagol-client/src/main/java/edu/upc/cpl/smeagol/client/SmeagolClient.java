@@ -406,6 +406,12 @@ public class SmeagolClient {
 		}
 	}
 
+	/**
+	 * Retrieve all {@code Event}s in server
+	 * 
+	 * @return a (possibly empty) collection containing all the Events defined
+	 *         in the Smeagol server
+	 */
 	public Collection<Event> getEvents() {
 		String eventJsonArray = eventWr.accept(MediaType.APPLICATION_JSON).get(String.class);
 
@@ -427,6 +433,41 @@ public class SmeagolClient {
 			e.setTags(tags);
 		}
 		return events;
+	}
+
+	/**
+	 * Retrieve an {@code Event} by its id
+	 * 
+	 * @param id
+	 *            the identifier of the {@code Event} to retrieve
+	 * @return the requested {@code Event}, if exists
+	 * @throws NotFoundException
+	 *             if there is no {@code Event} in the server with such id
+	 */
+	public Event getEvent(Long id) throws NotFoundException {
+		//if (id == null) {
+		//	throw new IllegalArgumentException("getEvent requires a non null argument");
+		//}
+
+		ClientResponse response = eventWr.path(id.toString()).accept(MediaType.APPLICATION_JSON)
+				.get(ClientResponse.class);
+
+		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
+			throw new NotFoundException();
+		}
+
+		String json = response.getEntity(String.class);
+		Event result = Event.deserialize(json);
+
+		// Populate tag descriptions before returning the event to the user
+		HashSet<String> ids = new HashSet<String>();
+		for (Tag t : result.getTags()) {
+			ids.add(t.getId());
+		}
+		Collection<Tag> tags = getTags(ids);
+		result.setTags(tags);
+
+		return result;
 	}
 
 }

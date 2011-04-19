@@ -65,7 +65,7 @@ public class Event implements Comparable<Event> {
 	 * <p>
 	 * TODO: check the current maximum value allowed by the server
 	 */
-	public static transient final int INFO_MAX_LEN = 20;
+	public static transient final int INFO_MAX_LEN = 256;
 
 	private Long id;
 	private String description;
@@ -221,7 +221,7 @@ public class Event implements Comparable<Event> {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder().append(id).toHashCode();
+		return new HashCodeBuilder().append(id).append(description).append(info).toHashCode();
 	}
 
 	@Override

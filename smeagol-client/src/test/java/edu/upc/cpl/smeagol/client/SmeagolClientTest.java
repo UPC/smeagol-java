@@ -62,6 +62,10 @@ public class SmeagolClientTest extends TestCase {
 	private static final long EXISTENT_EVENT_ID = 4L;
 	private static final Event EXISTENT_EVENT = new Event("Descripció de l'event 4", "Informació 4", new Interval(
 			new DateTime("2011-02-16T04:00:00"), new DateTime("2011-02-16T05:00:00")));
+	private static final long NON_EXISTENT_EVENT_ID = 4000L;
+	private static final Event NON_EXISTENT_EVENT = new Event("NON EXISTENT EVENT", "NON EXISTENT EVENT INFO",
+			new Interval(new DateTime("2000-01-01T08:00:00"), new DateTime("2000-01-01T10:00:00")),
+			new ArrayList<Tag>());
 
 	static {
 		logger.info("*******************************************************************************");
@@ -277,7 +281,6 @@ public class SmeagolClientTest extends TestCase {
 		assertEquals(--RESOURCE_COUNT, resourcesAfter.size());
 	}
 
-        /*
 	@Test
 	public void testGetEvents() {
 		ArrayList<Event> events = new ArrayList<Event>(client.getEvents());
@@ -289,5 +292,26 @@ public class SmeagolClientTest extends TestCase {
 		assertEquals(EXISTENT_EVENT, events.get(3));
 		assertTrue(events.contains(EXISTENT_EVENT));
 	}
-        */
+
+	@Test(expected = NotFoundException.class)
+	public void testGetEventNotFound() throws NotFoundException {
+		@SuppressWarnings("unused")
+		Event event = client.getEvent(NON_EXISTENT_EVENT_ID);
+	}
+
+	@Test
+	public void testGetEvent() {
+		fail("not yet implemented");
+	}
+
+	@Test
+	public void testCreateEvent() {
+		fail("not yet implemented");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateEventWithInvalidDescription() {
+		// test exceptions with blank empty and null description
+	}
+
 }
