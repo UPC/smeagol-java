@@ -41,7 +41,7 @@ public class SmeagolClientTest extends TestCase {
 
 	private static int TAG_COUNT = 8; // number of tags in server
 	private static int RESOURCE_COUNT = 5; // number of resources in server
-	private static int EVENT_COUNT = 4; // number of events in server
+	private static int EVENT_COUNT = 5; // number of events in server
 
 	private static final Tag EXISTENT_TAG = new Tag("videoconferencia", "descr 3");
 	private static final Tag NEW_TAG = new Tag("newtag",
@@ -59,9 +59,9 @@ public class SmeagolClientTest extends TestCase {
 	private static final Resource NON_EXISTENT_RESOURCE = new Resource("NON EXISTENT RESOURCE",
 			"NON EXISTENT DESCRIPTION");
 
-	private static final long EXISTENT_EVENT_ID = 4L;
-	private static final Event EXISTENT_EVENT = new Event("Descripció de l'event 4", "Informació 4", new Interval(
-			new DateTime("2011-02-16T04:00:00"), new DateTime("2011-02-16T05:00:00")));
+	private static final long EXISTENT_EVENT_ID = 5L;
+	private static final Event EXISTENT_EVENT = new Event("Descripcio de l'event 5", "Informacio 5", new Interval(
+			new DateTime("2011-04-20T08:00:00"), new DateTime("2011-04-25T14:00:00")));
 	private static final long NON_EXISTENT_EVENT_ID = 4000L;
 	private static final Event NON_EXISTENT_EVENT = new Event("NON EXISTENT EVENT", "NON EXISTENT EVENT INFO",
 			new Interval(new DateTime("2000-01-01T08:00:00"), new DateTime("2000-01-01T10:00:00")),
@@ -95,6 +95,10 @@ public class SmeagolClientTest extends TestCase {
 		NON_EXISTENT_RESOURCE.setId(NON_EXISTENT_RESOURCE_ID);
 
 		EXISTENT_EVENT.setId(EXISTENT_EVENT_ID);
+		EXISTENT_EVENT.getTags().add(new Tag("isabel", "descr 7"));
+		EXISTENT_EVENT.getTags().add(new Tag("videoconferencia", "descr 3"));
+		EXISTENT_EVENT.getTags().add(new Tag("microfons inalambrics", "descr 6"));
+		EXISTENT_EVENT.getTags().add(new Tag("wireless", "descr 8"));
 	}
 
 	@Test(expected = MalformedURLException.class)
@@ -281,6 +285,9 @@ public class SmeagolClientTest extends TestCase {
 		assertEquals(--RESOURCE_COUNT, resourcesAfter.size());
 	}
 
+	/**
+	 * FIXME: This test will fail until the #306 bug gets fixed.
+	 */
 	@Test
 	public void testGetEvents() {
 		ArrayList<Event> events = new ArrayList<Event>(client.getEvents());
@@ -289,7 +296,7 @@ public class SmeagolClientTest extends TestCase {
 		for (Event e : events) {
 			logger.debug(e);
 		}
-		assertEquals(EXISTENT_EVENT, events.get(3));
+		assertEquals(EXISTENT_EVENT.serialize(), events.get(4).serialize());
 		assertTrue(events.contains(EXISTENT_EVENT));
 	}
 
@@ -299,13 +306,22 @@ public class SmeagolClientTest extends TestCase {
 		Event event = client.getEvent(NON_EXISTENT_EVENT_ID);
 	}
 
+	/**
+	 * FIXME: This test will fail until the #306 bug gets fixed.
+	 */
 	@Test
 	public void testGetEvent() {
-		fail("not yet implemented");
+		Event e;
+		try {
+			e = client.getEvent(EXISTENT_EVENT_ID);
+			assertEquals(EXISTENT_EVENT, e);
+		} catch (NotFoundException e1) {
+			fail("get event");
+		}
 	}
 
-	@Test
-	public void testCreateEvent() {
+	@Test(expected = AlreadyExistsException.class)
+	public void testCreateEventAlreadyExists() throws AlreadyExistsException {
 		fail("not yet implemented");
 	}
 

@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.Interval;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -44,6 +45,12 @@ public class SmeagolClient {
 	public static final String RESOURCE_DESCRIPTION_ATTR_NAME = "description";
 	public static final String RESOURCE_INFO_ATTR_NAME = "info";
 	public static final String RESOURCE_TAGS_ATTR_NAME = "tags";
+
+	public static final String EVENT_DESCRIPTION_ATTR_NAME = "description";
+	public static final String EVENT_INFO_ATTR_NAME = "info";
+	public static final String EVENT_STARTS_ATTR_NAME = "starts";
+	public static final String EVENT_ENDS_ATTR_NAME = "ends";
+	public static final String EVENT_TAGS_ATTR_NAME = "tags";
 
 	private Client client;
 
@@ -277,14 +284,7 @@ public class SmeagolClient {
 		 * the Resource tags.
 		 */
 		for (Resource r : resources) {
-			Collection<String> ids = new HashSet<String>();
-			for (Tag t : r.getTags()) {
-				if (StringUtils.isNotBlank(t.getId())) {
-					ids.add(t.getId());
-				}
-			}
-			Collection<Tag> tags = getTags(ids);
-			r.setTags(tags);
+			populateTagAttributes(r.getTags());
 		}
 		return resources;
 	}
@@ -310,12 +310,7 @@ public class SmeagolClient {
 		Resource result = Resource.deserialize(json);
 
 		/* Populate tag descriptions before returning the resource to the user */
-		HashSet<String> ids = new HashSet<String>();
-		for (Tag t : result.getTags()) {
-			ids.add(t.getId());
-		}
-		Collection<Tag> tags = getTags(ids);
-		result.setTags(tags);
+		populateTagAttributes(result.getTags());
 
 		return result;
 	}
@@ -355,13 +350,10 @@ public class SmeagolClient {
 		 * the resource creation operation is provided by the server.
 		 */
 		if (CollectionUtils.isNotEmpty(tags)) {
+			/* FIXME: createResource should not create non-existent tags */
 			createTags(tags);
-
-			Set<String> tagIds = new HashSet<String>();
-			for (Tag t : tags) {
-				tagIds.add(t.getId());
-			}
-			f.add(RESOURCE_TAGS_ATTR_NAME, StringUtils.join(tagIds, ","));
+			
+			f.add(RESOURCE_TAGS_ATTR_NAME, tagsAsFormParameter(tags));
 		}
 
 		ClientResponse response = resourceWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
@@ -423,14 +415,7 @@ public class SmeagolClient {
 		// the Resource tags.
 
 		for (Event e : events) {
-			Collection<String> ids = new HashSet<String>();
-			for (Tag t : e.getTags()) {
-				if (StringUtils.isNotBlank(t.getId())) {
-					ids.add(t.getId());
-				}
-			}
-			Collection<Tag> tags = getTags(ids);
-			e.setTags(tags);
+			populateTagAttributes(e.getTags());
 		}
 		return events;
 	}
@@ -445,9 +430,9 @@ public class SmeagolClient {
 	 *             if there is no {@code Event} in the server with such id
 	 */
 	public Event getEvent(Long id) throws NotFoundException {
-		//if (id == null) {
-		//	throw new IllegalArgumentException("getEvent requires a non null argument");
-		//}
+		if (id == null) {
+			throw new IllegalArgumentException("getEvent requires a non null argument");
+		}
 
 		ClientResponse response = eventWr.path(id.toString()).accept(MediaType.APPLICATION_JSON)
 				.get(ClientResponse.class);
@@ -460,14 +445,110 @@ public class SmeagolClient {
 		Event result = Event.deserialize(json);
 
 		// Populate tag descriptions before returning the event to the user
-		HashSet<String> ids = new HashSet<String>();
-		for (Tag t : result.getTags()) {
-			ids.add(t.getId());
-		}
-		Collection<Tag> tags = getTags(ids);
-		result.setTags(tags);
+		populateTagAttributes(result.getTags());
 
 		return result;
+	}
+
+	/**
+	 * Creates a new {@code Event} in the server
+	 * 
+	 * @param description
+	 *            the event description. Cannot be null.
+	 * @param info
+	 *            optional info for the event.
+	 * @param startEnd
+	 *            the time interval (start, end) at which the event occurs.
+	 * @param tags
+	 *            the tags to be applied to the event. Tags not existing in
+	 *            server will be ignored.
+	 * @throws AlreadyExistsException
+	 *             when there is already an event with the provided description.
+	 */
+	public Event createEvent(String description, String info, Interval startEnd, Collection<Tag> tags)
+			throws AlreadyExistsException {
+		Form f = new Form();
+		f.add(EVENT_DESCRIPTION_ATTR_NAME, description);
+		f.add(EVENT_INFO_ATTR_NAME, info);
+		f.add(EVENT_STARTS_ATTR_NAME, startEnd.getStart());
+		f.add(EVENT_ENDS_ATTR_NAME, startEnd.getEnd());
+		/*
+		 * TODO: provided tags will be created by the server if they don't
+		 * exist. BUT the tags descriptions will be lost, because the server
+		 * expects a "tags" attribute containing only a comma-separated list of
+		 * tag identifiers (without descriptions!). As a workaround, we will
+		 * create the tags via createTag() until a more convenient behaviour of
+		 * the resource creation operation is provided by the server.
+		 */
+		if (CollectionUtils.isNotEmpty(tags)) {
+			/* FIXME: createEvent should not create non-existent tags */
+			createTags(tags);
+
+			f.add(EVENT_TAGS_ATTR_NAME, tagsAsFormParameter(tags));
+		}
+
+		ClientResponse response = eventWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
+
+		Event result = null;
+
+		switch (response.getClientResponseStatus()) {
+		case CONFLICT:
+			throw new AlreadyExistsException();
+		case BAD_REQUEST:
+			throw new IllegalArgumentException();
+		case CREATED:
+			result = Event.deserialize(response.getEntity(String.class));
+			try {
+				result = getEvent(result.getId());
+			} catch (NotFoundException e) {
+				/*
+				 * This should not happen, as we are retrieving the event we
+				 * just created.
+				 */
+				e.printStackTrace();
+			}
+			break;
+		}
+		return result;
+	}
+
+	/**
+	 * Converts a {@code Tag} collection into a String containing their
+	 * identifiers separated by commas. This is a utility method to prepare
+	 * {@code Form} parameters.
+	 * 
+	 * @param tags
+	 * @return
+	 */
+	private String tagsAsFormParameter(Collection<Tag> tags) {
+		if (CollectionUtils.isEmpty(tags)) {
+			return "";
+		}
+		Set<String> tagIds = new HashSet<String>();
+		for (Tag t : tags) {
+			tagIds.add(t.getId());
+		}
+		return StringUtils.join(tagIds, ",");
+	}
+
+	/**
+	 * Retrieve and populate {@code Tag} descriptions for a collection of Tags.
+	 * Tag descriptions will be retrieved from the server. Tags which don't
+	 * exist in server will be ignored (their descriptions will not be
+	 * modified).
+	 * 
+	 * @param tagsToPopulate
+	 *            a collection of tags with possibly empty descriptions.
+	 */
+	private void populateTagAttributes(Collection<Tag> tagsToPopulate) {
+		for (Tag t : tagsToPopulate) {
+			try {
+				Tag aux = getTag(t.getId());
+				t.setDescription(aux.getDescription());
+			} catch (NotFoundException e) {
+				// This tag does not exist in server. Just ignore it.
+			}
+		}
 	}
 
 }

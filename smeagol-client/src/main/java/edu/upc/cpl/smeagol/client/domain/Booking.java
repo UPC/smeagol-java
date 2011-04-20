@@ -46,8 +46,8 @@ public class Booking implements Comparable<Booking> {
 
 	private static transient Gson gson = new Gson();
 
-	private static transient Duration MAX_SPAN_DURATION_FOR_DAILY_RECURRENCE = Duration.standardHours(24);
-	private static transient Duration MAX_SPAN_DURATION_FOR_WEEKLY_RECURRENCE = Duration.standardDays(7);
+	private static transient final Duration MAX_SPAN_DURATION_FOR_DAILY_RECURRENCE = Duration.standardHours(24);
+	private static transient final Duration MAX_SPAN_DURATION_FOR_WEEKLY_RECURRENCE = Duration.standardDays(7);
 
 	/*
 	 * provide custom serializers/deserializers for several attributes

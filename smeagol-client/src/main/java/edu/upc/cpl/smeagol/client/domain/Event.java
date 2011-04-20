@@ -55,15 +55,11 @@ public class Event implements Comparable<Event> {
 
 	/**
 	 * Maximum length for event descriptions = {@value}
-	 * <p>
-	 * TODO: check the maximum value allowed by the server
 	 */
-	public static transient final int DESCRIPTION_MAX_LEN = 50;
+	public static transient final int DESCRIPTION_MAX_LEN = 128;
 
 	/**
 	 * Maximum length for event info = {@value}
-	 * <p>
-	 * TODO: check the current maximum value allowed by the server
 	 */
 	public static transient final int INFO_MAX_LEN = 256;
 
