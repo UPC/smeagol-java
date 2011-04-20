@@ -118,6 +118,7 @@ INSERT INTO t_event values (1,'Informació 1',"Descripció de l'event 1",'2011-0
 INSERT INTO t_event values (2,'Informació 2',"Descripció de l'event 2",'2011-02-16 04:00:00','2011-02-16 05:00:00');
 INSERT INTO t_event values (3,'Informació 3',"Descripció de l'event 3",'2011-02-16 04:00:00','2011-02-16 05:00:00');
 INSERT INTO t_event values (4,'Informació 4',"Descripció de l'event 4",'2011-02-16 04:00:00','2011-02-16 05:00:00');
+INSERT INTO t_event values (5,'Informacio 5',"Descripcio de l'event 5",'2011-04-20 08:00:00','2011-04-25 14:00:00');
 
 --|id|id_resource|id_event|dtstart|dtend|duration|frequency|interval|until|by_minute|by_hour|by_day|by_month|by_day_month
 
