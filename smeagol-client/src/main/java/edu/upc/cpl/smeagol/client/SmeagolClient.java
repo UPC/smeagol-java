@@ -352,7 +352,7 @@ public class SmeagolClient {
 		if (CollectionUtils.isNotEmpty(tags)) {
 			/* FIXME: createResource should not create non-existent tags */
 			createTags(tags);
-			
+
 			f.add(RESOURCE_TAGS_ATTR_NAME, tagsAsFormParameter(tags));
 		}
 
@@ -462,11 +462,8 @@ public class SmeagolClient {
 	 * @param tags
 	 *            the tags to be applied to the event. Tags not existing in
 	 *            server will be ignored.
-	 * @throws AlreadyExistsException
-	 *             when there is already an event with the provided description.
 	 */
-	public Event createEvent(String description, String info, Interval startEnd, Collection<Tag> tags)
-			throws AlreadyExistsException {
+	public Event createEvent(String description, String info, Interval startEnd, Collection<Tag> tags) {
 		Form f = new Form();
 		f.add(EVENT_DESCRIPTION_ATTR_NAME, description);
 		f.add(EVENT_INFO_ATTR_NAME, info);
@@ -492,8 +489,6 @@ public class SmeagolClient {
 		Event result = null;
 
 		switch (response.getClientResponseStatus()) {
-		case CONFLICT:
-			throw new AlreadyExistsException();
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
 		case CREATED:

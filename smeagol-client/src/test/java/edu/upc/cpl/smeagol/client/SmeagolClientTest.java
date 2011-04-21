@@ -297,6 +297,7 @@ public class SmeagolClientTest extends TestCase {
 			logger.debug(e);
 		}
 		assertEquals(EXISTENT_EVENT.serialize(), events.get(4).serialize());
+		assertEquals(EVENT_COUNT, events.size());
 		assertTrue(events.contains(EXISTENT_EVENT));
 	}
 
@@ -320,14 +321,69 @@ public class SmeagolClientTest extends TestCase {
 		}
 	}
 
-	@Test(expected = AlreadyExistsException.class)
-	public void testCreateEventAlreadyExists() throws AlreadyExistsException {
-		fail("not yet implemented");
+	@Test
+	public void testCreateEventWithInvalidDescription() throws AlreadyExistsException {
+		String NULL_DESCRIPTION = null;
+		String EMPTY_DESCRIPTION = "";
+		String BLANK_DESCRIPTION = "   ";
+
+		@SuppressWarnings("unused")
+		Event evt;
+
+		try {
+			evt = client.createEvent(NULL_DESCRIPTION, null, EXISTENT_EVENT.getInterval(), null);
+			EVENT_COUNT++;
+			fail("create event with null description");
+		} catch (IllegalArgumentException e) {
+			// ok. it should fail
+		}
+
+		try {
+			evt = client.createEvent(EMPTY_DESCRIPTION, null, EXISTENT_EVENT.getInterval(), null);
+			EVENT_COUNT++;
+			fail("create event with empty description");
+		} catch (Exception e) {
+			// ok. it should fail
+		}
+
+		try {
+			evt = client.createEvent(BLANK_DESCRIPTION, null, EXISTENT_EVENT.getInterval(), null);
+			EVENT_COUNT++;
+			fail("create event with blank description");
+
+		} catch (Exception e) {
+			// ok. it should fail
+		}
+	}
+
+	@Test
+	public void testCreateEvent() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testUpdateEvent() {
+		fail("Not yet implemented");
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testUpdateEventNotFound() throws NotFoundException {
+		fail("Not yet implemented");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCreateEventWithInvalidDescription() {
-		// test exceptions with blank empty and null description
+	public void testUPdateEventIllegalArgument() {
+		fail("Not yet implemented");
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testDeleteEventNotFound() throws NotFoundException {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testDeleteEvent() {
+		fail("Not yet implemented");
 	}
 
 }
