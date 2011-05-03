@@ -59,6 +59,13 @@ Compilar el codi
 
         mvn source:jar
 
+ * Per obtenir les dependències del projecte:
+
+        mvn dependency:copy-dependencies
+
+   Això deixarà tots els jar de les llibreries necessàries per còrrer el client
+   a sota el directori target/dependencies. Les haureu d'incloure al vostre classpath.
+
 
 Generar la documentació
 -----------------------
