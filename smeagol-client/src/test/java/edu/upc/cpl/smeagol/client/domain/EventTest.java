@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import junit.framework.TestCase;
 
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.Before;
@@ -15,6 +16,9 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class EventTest extends TestCase {
+
+	@SuppressWarnings("unused")
+	private static Logger logger = Logger.getLogger(EventTest.class);
 
 	private static final long ID1 = 1;
 	private static final long ID2 = 2;
@@ -92,10 +96,12 @@ public class EventTest extends TestCase {
 	@Test
 	public void testDeserializeCollection() {
 		String JSON_ARRAY = "[" + E1_JSON + "," + E2_JSON + "]";
-		Collection<Event> events = Event.deserializeCollection(JSON_ARRAY);
+		ArrayList<Event> events = new ArrayList<Event>(Event.deserializeCollection(JSON_ARRAY));
 		assertEquals(2, events.size());
 		assertTrue(events.contains(e1));
 		assertTrue(events.contains(e2));
+		logger.debug(events.get(0));
+		logger.debug(events.get(1));
 	}
 
 	@Test

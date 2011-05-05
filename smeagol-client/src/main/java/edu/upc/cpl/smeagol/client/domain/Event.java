@@ -1,9 +1,10 @@
 package edu.upc.cpl.smeagol.client.domain;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -68,7 +69,7 @@ public class Event implements Comparable<Event> {
 	private String info;
 	private DateTime starts;
 	private DateTime ends;
-	private Collection<Tag> tags = new ArrayList<Tag>();
+	private Collection<Tag> tags = new HashSet<Tag>();
 
 	/**
 	 * Check if parameter is a valid event description
@@ -212,12 +213,13 @@ public class Event implements Comparable<Event> {
 		Event other = (Event) obj;
 
 		return new EqualsBuilder().append(this.id, other.id).append(this.description, other.description)
-				.append(this.info, other.info).isEquals();
+				.append(this.info, other.info)
+				.appendSuper(CollectionUtils.isEqualCollection(this.getTags(), other.getTags())).isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder().append(id).append(description).append(info).toHashCode();
+		return new HashCodeBuilder().append(id).append(description).append(info).append(tags).toHashCode();
 	}
 
 	@Override

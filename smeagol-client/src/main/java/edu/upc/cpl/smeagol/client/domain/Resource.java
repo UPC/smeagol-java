@@ -1,8 +1,8 @@
 package edu.upc.cpl.smeagol.client.domain;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -44,7 +44,7 @@ public class Resource implements Comparable<Resource> {
 	private Long id;
 	private String description;
 	private String info;
-	private Collection<Tag> tags = new ArrayList<Tag>();
+	private Collection<Tag> tags = new HashSet<Tag>();
 
 	/**
 	 * Check if a string is a valid resource description.

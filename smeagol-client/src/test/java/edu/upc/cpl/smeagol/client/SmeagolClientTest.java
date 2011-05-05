@@ -83,10 +83,12 @@ public class SmeagolClientTest extends TestCase {
 		client = new SmeagolClient(SERVER_URL);
 
 		EXISTENT_RESOURCE.setId(EXISTENT_RESOURCE_ID);
+		EXISTENT_RESOURCE_TAGS.clear();
 		EXISTENT_RESOURCE_TAGS.add(new Tag("pantalla", "descr 2"));
 		EXISTENT_RESOURCE_TAGS.add(new Tag("wireless", "descr 8"));
 		EXISTENT_RESOURCE.setTags(EXISTENT_RESOURCE_TAGS);
 
+		NEW_RESOURCE_TAGS.clear();
 		NEW_RESOURCE_TAGS.add(new Tag("newtag1", "newtag1 description"));
 		NEW_RESOURCE_TAGS.add(new Tag("newtag2", "newtag2 description"));
 		NEW_RESOURCE_TAGS.add(new Tag("newtag3", "newtag3 description"));
@@ -95,6 +97,7 @@ public class SmeagolClientTest extends TestCase {
 		NON_EXISTENT_RESOURCE.setId(NON_EXISTENT_RESOURCE_ID);
 
 		EXISTENT_EVENT.setId(EXISTENT_EVENT_ID);
+		EXISTENT_EVENT.getTags().clear();
 		EXISTENT_EVENT.getTags().add(new Tag("isabel", "descr 7"));
 		EXISTENT_EVENT.getTags().add(new Tag("videoconferencia", "descr 3"));
 		EXISTENT_EVENT.getTags().add(new Tag("microfons inalambrics", "descr 6"));

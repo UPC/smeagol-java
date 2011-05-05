@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.joda.time.Interval;
 
 import com.sun.jersey.api.client.Client;
@@ -33,6 +34,9 @@ import edu.upc.cpl.smeagol.client.exception.NotFoundException;
  * 
  */
 public class SmeagolClient {
+
+	@SuppressWarnings("unused")
+	Logger logger = Logger.getLogger(SmeagolClient.class);
 
 	private static final String TAG_PATH = "tag";
 	private static final String RESOURCE_PATH = "resource";
@@ -407,6 +411,7 @@ public class SmeagolClient {
 	public Collection<Event> getEvents() {
 		String eventJsonArray = eventWr.accept(MediaType.APPLICATION_JSON).get(String.class);
 
+		logger.debug(eventJsonArray);
 		Collection<Event> events = Event.deserializeCollection(eventJsonArray);
 
 		// In a Event list, the server only returns the tag identifiers
