@@ -60,8 +60,9 @@ public class SmeagolClientTest extends TestCase {
 			"NON EXISTENT DESCRIPTION");
 
 	private static final long EXISTENT_EVENT_ID = 5L;
-	private static final Event EXISTENT_EVENT = new Event("Descripcio de l'event 5", "Informacio 5", new Interval(
+	private static Event EXISTENT_EVENT = new Event("Descripcio de l'event 5", "Informacio 5", new Interval(
 			new DateTime("2011-04-20T08:00:00"), new DateTime("2011-04-25T14:00:00")));
+	private static Collection<Tag> EXISTENT_EVENT_TAGS = new TreeSet<Tag>();
 	private static final long NON_EXISTENT_EVENT_ID = 4000L;
 	private static final Event NON_EXISTENT_EVENT = new Event("NON EXISTENT EVENT", "NON EXISTENT EVENT INFO",
 			new Interval(new DateTime("2000-01-01T08:00:00"), new DateTime("2000-01-01T10:00:00")),
@@ -97,11 +98,11 @@ public class SmeagolClientTest extends TestCase {
 		NON_EXISTENT_RESOURCE.setId(NON_EXISTENT_RESOURCE_ID);
 
 		EXISTENT_EVENT.setId(EXISTENT_EVENT_ID);
-		EXISTENT_EVENT.getTags().clear();
-		EXISTENT_EVENT.getTags().add(new Tag("isabel", "descr 7"));
-		EXISTENT_EVENT.getTags().add(new Tag("videoconferencia", "descr 3"));
-		EXISTENT_EVENT.getTags().add(new Tag("microfons inalambrics", "descr 6"));
-		EXISTENT_EVENT.getTags().add(new Tag("wireless", "descr 8"));
+		EXISTENT_EVENT_TAGS.clear();
+		EXISTENT_EVENT_TAGS.add(new Tag("isabel", "descr 7"));
+		EXISTENT_EVENT_TAGS.add(new Tag("videoconferencia", "descr 3"));
+		EXISTENT_EVENT_TAGS.add(new Tag("microfons inalambrics", "descr 6"));
+		EXISTENT_EVENT_TAGS.add(new Tag("wireless", "descr 8"));
 	}
 
 	@Test(expected = MalformedURLException.class)
@@ -361,7 +362,18 @@ public class SmeagolClientTest extends TestCase {
 
 	@Test
 	public void testCreateEvent() {
-		fail("Not yet implemented");
+		String DESC = "new event desc";
+		String INFO = "new event info";
+		Interval INTERVAL = new Interval(new DateTime("2011-05-06T13:00:00"), new DateTime("2011-05-10T20:00:00"));
+		Collection<Tag> TAGS = new TreeSet<Tag>();
+		//TAGS.add(EXISTENT_TAG);
+
+		Collection<Event> events = client.getEvents();
+		int eventCountBefore = events.size();
+		Event e = client.createEvent(DESC, INFO, INTERVAL, TAGS);
+		events = client.getEvents();
+		assertEquals(eventCountBefore + 1, client.getEvents().size());
+		assertTrue(events.contains(e));
 	}
 
 	@Test
