@@ -43,6 +43,7 @@ CREATE TABLE t_tag_event (
 DROP TABLE IF EXISTS t_booking;
 CREATE TABLE t_booking(
 	id           INTEGER PRIMARY KEY AUTOINCREMENT,
+	info         TEXT(256),
     id_resource  INTEGER REFERENCES t_resource(id) ON DELETE CASCADE,
     id_event     INTEGER REFERENCES t_event(id) ON DELETE CASCADE,
     dtstart      DATETIME,
@@ -56,6 +57,13 @@ CREATE TABLE t_booking(
     by_day       TEXT,
     by_month     TEXT,
     by_day_month INTEGER
+);
+
+DROP TABLE IF EXISTS t_tag_booking;
+CREATE TABLE t_tag_booking (
+    id_tag	   TEXT(64) REFERENCES t_tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    id_booking INTEGER REFERENCES t_booking(id) ON DELETE CASCADE,
+    PRIMARY KEY (id_tag,id_booking)
 );
 
 DROP TABLE IF EXISTS t_exception;
@@ -122,16 +130,25 @@ INSERT INTO t_event values (5,'Informacio 5',"Descripcio de l'event 5",'2011-04-
 
 --|id|id_resource|id_event|dtstart|dtend|duration|frequency|interval|until|by_minute|by_hour|by_day|by_month|by_day_month
 
-INSERT INTO t_booking values (1,3,1,'2011-02-25 08:00:00','2011-02-25 09:00:00','60','daily','1','2011-12-25 09:00:00','00','08','','','');
-INSERT INTO t_booking values (6,3,1,'2011-02-23 09:00:00','2011-02-23 10:00:00','60','daily','2','2011-12-31 09:00:00','00','09','','','');
-INSERT INTO t_booking values (7,3,1,'2011-02-23 10:00:00','2011-02-23 11:00:00','60','weekly','1','2011-12-31 09:00:00','00','10','','','');
-INSERT INTO t_booking values (8,3,1,'2011-02-23 11:00:00','2011-02-23 12:00:00','60','monthly','1','2011-03-31 09:00:00','00','11','','','23');
-INSERT INTO t_booking values (9,3,1,'2011-02-23 12:00:00','2011-02-23 13:00:00','60','yearly','1','2019-12-31 09:00:00','00','12','','02','23');
+INSERT INTO t_booking values (1,'Info booking #1',3,1,'2011-02-25 08:00:00','2011-02-25 09:00:00','60','daily','1','2011-12-25 09:00:00','00','08','','','');
+INSERT INTO t_booking values (6,'Info booking #6',3,1,'2011-02-23 09:00:00','2011-02-23 10:00:00','60','daily','2','2011-12-31 09:00:00','00','09','','','');
+INSERT INTO t_booking values (7,'Info booking #7',3,1,'2011-02-23 10:00:00','2011-02-23 11:00:00','60','weekly','1','2011-12-31 09:00:00','00','10','','','');
+INSERT INTO t_booking values (8,'Info booking #8',3,1,'2011-02-23 11:00:00','2011-02-23 12:00:00','60','monthly','1','2011-03-31 09:00:00','00','11','','','23');
+INSERT INTO t_booking values (9,'Info booking #9',3,1,'2011-02-23 12:00:00','2011-02-23 13:00:00','60','yearly','1','2019-12-31 09:00:00','00','12','','02','23');
 
-INSERT INTO t_booking values (2,4,1,'2011-02-16 05:00:00','2011-02-16 06:00:00','60','daily','2','2011-01-01 00:00:00','00','05','','','');
-INSERT INTO t_booking values (3,5,2,'2011-02-16 06:00:00','2011-02-16 07:00:00','60','weekly','2','2011-01-01 00:00:00','00','06','','','');
-INSERT INTO t_booking values (4,2,3,'2011-02-16 07:00:00','2011-02-16 08:00:00','60','monthly','1','2011-01-01 00:00:00','00','07','','','');
-INSERT INTO t_booking values (5,1,4,'2011-02-16 08:00:00','2011-02-16 09:00:00','60','yearly','1','2019-02-16 09:00:00','00','08','','02','16');
+INSERT INTO t_booking values (2,'Info booking #2',4,1,'2011-02-16 05:00:00','2011-02-16 06:00:00','60','daily','2','2011-01-01 00:00:00','00','05','','','');
+INSERT INTO t_booking values (3,'Info booking #3',5,2,'2011-02-16 06:00:00','2011-02-16 07:00:00','60','weekly','2','2011-01-01 00:00:00','00','06','','','');
+INSERT INTO t_booking values (4,'Info booking #4',2,3,'2011-02-16 07:00:00','2011-02-16 08:00:00','60','monthly','1','2011-01-01 00:00:00','00','07','','','');
+INSERT INTO t_booking values (5,'Info booking #5',1,4,'2011-02-16 08:00:00','2011-02-16 09:00:00','60','yearly','1','2019-02-16 09:00:00','00','08','','02','16');
+
+INSERT INTO t_tag_booking values ('tag_booking',1);
+INSERT INTO t_tag_booking values ('tag_booking',2);
+INSERT INTO t_tag_booking values ('tag_booking',3);
+INSERT INTO t_tag_booking values ('tag_booking',4);
+INSERT INTO t_tag_booking values ('tag_booking',5);
+INSERT INTO t_tag_booking values ('tag_booking',6);
+INSERT INTO t_tag_booking values ('tag_booking',7);
+INSERT INTO t_tag_booking values ('tag_booking',9);
 
 INSERT INTO t_tag_event values ('projector',1);
 INSERT INTO t_tag_event values ('pantalla',1);
