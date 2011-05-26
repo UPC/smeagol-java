@@ -103,6 +103,8 @@ public class SmeagolClientTest extends TestCase {
 		EXISTENT_EVENT_TAGS.add(new Tag("videoconferencia", "descr 3"));
 		EXISTENT_EVENT_TAGS.add(new Tag("microfons inalambrics", "descr 6"));
 		EXISTENT_EVENT_TAGS.add(new Tag("wireless", "descr 8"));
+		
+		EXISTENT_EVENT.setTags(EXISTENT_EVENT_TAGS);
 	}
 
 	@Test(expected = MalformedURLException.class)
@@ -114,7 +116,7 @@ public class SmeagolClientTest extends TestCase {
 	@Test
 	public void testGetTags() {
 		Collection<Tag> tags = client.getTags();
-		assertTrue(tags.size() == TAG_COUNT);
+		assertEquals(TAG_COUNT, tags.size());
 		assertTrue(tags.contains(EXISTENT_TAG));
 	}
 
@@ -300,7 +302,7 @@ public class SmeagolClientTest extends TestCase {
 		for (Event e : events) {
 			logger.debug(e);
 		}
-		assertEquals(EXISTENT_EVENT.serialize(), events.get(4).serialize());
+		assertEquals(EXISTENT_EVENT, events.get(4));
 		assertEquals(EVENT_COUNT, events.size());
 		assertTrue(events.contains(EXISTENT_EVENT));
 	}
