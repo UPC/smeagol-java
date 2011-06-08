@@ -3,14 +3,17 @@ package edu.upc.cpl.smeagol.client;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -90,9 +93,8 @@ public class SmeagolClientTest extends TestCase {
 		EXISTENT_RESOURCE.setTags(EXISTENT_RESOURCE_TAGS);
 
 		NEW_RESOURCE_TAGS.clear();
-		NEW_RESOURCE_TAGS.add(new Tag("newtag1", "newtag1 description"));
-		NEW_RESOURCE_TAGS.add(new Tag("newtag2", "newtag2 description"));
-		NEW_RESOURCE_TAGS.add(new Tag("newtag3", "newtag3 description"));
+		NEW_RESOURCE_TAGS.add(new Tag("isabel", "descr 7"));
+		NEW_RESOURCE_TAGS.add(new Tag("wireless", "descr 8"));
 		NEW_RESOURCE.setTags(NEW_RESOURCE_TAGS);
 
 		NON_EXISTENT_RESOURCE.setId(NON_EXISTENT_RESOURCE_ID);
@@ -103,7 +105,7 @@ public class SmeagolClientTest extends TestCase {
 		EXISTENT_EVENT_TAGS.add(new Tag("videoconferencia", "descr 3"));
 		EXISTENT_EVENT_TAGS.add(new Tag("microfons inalambrics", "descr 6"));
 		EXISTENT_EVENT_TAGS.add(new Tag("wireless", "descr 8"));
-		
+
 		EXISTENT_EVENT.setTags(EXISTENT_EVENT_TAGS);
 	}
 
@@ -184,7 +186,7 @@ public class SmeagolClientTest extends TestCase {
 	@Test
 	public void testUpdateTag() throws NotFoundException {
 		String OLD_DESCRIPTION = EXISTENT_TAG.getDescription();
-		String NEW_DESCRIPTION = "hi! am a new description";
+		String NEW_DESCRIPTION = "hi! am a new description á é";
 		Collection<Tag> tags = client.getTags();
 
 		assertTrue(tags.contains(EXISTENT_TAG));
@@ -363,6 +365,7 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test
+	//@Ignore
 	public void testCreateEvent() {
 		String DESC = "new event desc";
 		String INFO = "new event info";
@@ -373,34 +376,54 @@ public class SmeagolClientTest extends TestCase {
 		Collection<Event> events = client.getEvents();
 		int eventCountBefore = events.size();
 		Event e = client.createEvent(DESC, INFO, INTERVAL, TAGS);
+		logger.debug("Event creat: " + e.toString());
 		events = client.getEvents();
 		assertEquals(eventCountBefore + 1, client.getEvents().size());
 		assertTrue(events.contains(e));
 	}
 
 	@Test
-	public void testUpdateEvent() {
-		fail("Not yet implemented");
+	public void testUpdateEvent() throws NotFoundException  {
+		long EVENT_ID = 5L;
+		String NOVADESC = "NovaDesc";
+		String NOVAINFO = "Nova informació";
+		Interval NOUINTERVAL = new Interval(new DateTime("2011-06-07T08:00:00"), new DateTime("2011-06-10T18:00:00"));
+		Collection<Tag> NOVESTAGS = new HashSet<Tag>();
+		NOVESTAGS.add(new Tag("isabel", "descr 7"));
+		NOVESTAGS.add(new Tag("wireless", "descr 8"));
+		NOVESTAGS.add(new Tag("pantalla", "descr 2"));
+
+		Event e = client.getEvent(EVENT_ID);
+		assertEquals(EXISTENT_EVENT, e);
+		Event newEvent = new Event(NOVADESC, NOVAINFO, NOUINTERVAL, NOVESTAGS);
+		Event updated = client.updateEvent(EVENT_ID, newEvent);
+		assertEquals(NOVADESC, updated.getDescription());
+		assertEquals(NOVAINFO, updated.getInfo());
+		assertEquals(NOUINTERVAL, updated.getInterval());
+		assertTrue(CollectionUtils.isEqualCollection(NOVESTAGS, updated.getTags()));
 	}
 
 	@Test(expected = NotFoundException.class)
-	public void testUpdateEventNotFound() throws NotFoundException {
-		fail("Not yet implemented");
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testUPdateEventIllegalArgument() {
-		fail("Not yet implemented");
+	public void testUpdateEventNotFound() throws NotFoundException  {
+		Event e = new Event("dummy desc", "dummy info", new Interval(new DateTime(), new DateTime()));
+		@SuppressWarnings("unused")
+		Event updated = client.updateEvent(NON_EXISTENT_EVENT_ID, e);
 	}
 
 	@Test(expected = NotFoundException.class)
 	public void testDeleteEventNotFound() throws NotFoundException {
-		fail("Not yet implemented");
+		// this should raise a NotFoundException
+		client.deleteEvent(NON_EXISTENT_EVENT_ID);
 	}
 
 	@Test
-	public void testDeleteEvent() {
-		fail("Not yet implemented");
+	public void testDeleteEvent() throws NotFoundException {
+		Collection<Event> eventsBefore = client.getEvents();
+		client.deleteEvent(EXISTENT_EVENT.getId());
+		Collection<Event> eventsAfter = client.getEvents();
+		assertEquals(eventsBefore.size()-1, eventsAfter.size());
+		assertFalse(eventsAfter.contains(EXISTENT_EVENT));
+		EVENT_COUNT--;
 	}
 
 }

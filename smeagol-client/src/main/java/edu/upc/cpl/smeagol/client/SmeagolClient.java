@@ -345,18 +345,7 @@ public class SmeagolClient {
 		f.add(RESOURCE_DESCRIPTION_ATTR_NAME, description);
 		f.add(RESOURCE_INFO_ATTR_NAME, info);
 
-		/*
-		 * TODO: provided tags will be created by the server if they don't
-		 * exist. BUT the tags descriptions will be lost, because the server
-		 * expects a "tags" attribute containing only a comma-separated list of
-		 * tag identifiers (without descriptions!). As a workaround, we will
-		 * create the tags via createTag() until a more convenient behaviour of
-		 * the resource creation operation is provided by the server.
-		 */
 		if (CollectionUtils.isNotEmpty(tags)) {
-			/* FIXME: createResource should not create non-existent tags */
-			createTags(tags);
-
 			f.add(RESOURCE_TAGS_ATTR_NAME, tagsAsFormParameter(tags));
 		}
 
@@ -411,7 +400,6 @@ public class SmeagolClient {
 	public Collection<Event> getEvents() {
 		String eventJsonArray = eventWr.accept(MediaType.APPLICATION_JSON).get(String.class);
 
-		logger.debug(eventJsonArray);
 		Collection<Event> events = Event.deserializeCollection(eventJsonArray);
 
 		// In a Event list, the server only returns the tag identifiers
@@ -472,27 +460,21 @@ public class SmeagolClient {
 		Form f = new Form();
 		f.add(EVENT_DESCRIPTION_ATTR_NAME, description);
 		f.add(EVENT_INFO_ATTR_NAME, info);
-		f.add(EVENT_STARTS_ATTR_NAME, startEnd.getStart());
-		f.add(EVENT_ENDS_ATTR_NAME, startEnd.getEnd());
-		/*
-		 * TODO: provided tags will be created by the server if they don't
-		 * exist. BUT the tags descriptions will be lost, because the server
-		 * expects a "tags" attribute containing only a comma-separated list of
-		 * tag identifiers (without descriptions!). As a workaround, we will
-		 * create the tags via createTag() until a more convenient behaviour of
-		 * the resource creation operation is provided by the server.
-		 */
-		if (CollectionUtils.isNotEmpty(tags)) {
-			/* FIXME: createEvent should not create non-existent tags */
-			createTags(tags);
+		f.add(EVENT_STARTS_ATTR_NAME, startEnd.getStart().toString());
+		f.add(EVENT_ENDS_ATTR_NAME, startEnd.getEnd().toString());
 
+		if (CollectionUtils.isNotEmpty(tags)) {
 			f.add(EVENT_TAGS_ATTR_NAME, tagsAsFormParameter(tags));
 		}
+
+		logger.debug("Formulari enviat amb createEvent: " + f.toString());
 
 		ClientResponse response = eventWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
 
 		Event result = null;
 
+		logger.debug("Estat del servidor: " + response.getStatus());
+		
 		switch (response.getClientResponseStatus()) {
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
@@ -551,4 +533,52 @@ public class SmeagolClient {
 		}
 	}
 
+	/**
+	 * Replace Event identified by {@code id} with a new Event.
+	 * 
+	 * @param id
+	 *            the identifier of the Event to update.
+	 * @param newEvent
+	 *            the Event which will be used to update the old Event.
+	 */
+	public Event updateEvent(long id, Event newEvent) throws NotFoundException {
+		Event result = null;
+
+		Form f = new Form();
+		f.add(EVENT_DESCRIPTION_ATTR_NAME, newEvent.getDescription());
+		f.add(EVENT_INFO_ATTR_NAME, newEvent.getInfo());
+		f.add(EVENT_STARTS_ATTR_NAME, newEvent.getInterval().getStart());
+		f.add(EVENT_ENDS_ATTR_NAME, newEvent.getInterval().getEnd());
+		f.add(EVENT_TAGS_ATTR_NAME, tagsAsFormParameter(newEvent.getTags()));
+		
+		ClientResponse response = eventWr.path("" + id).accept(MediaType.APPLICATION_JSON).put(ClientResponse.class, f);
+
+		switch (response.getClientResponseStatus()) {
+		case NOT_FOUND:
+			throw new NotFoundException();
+		case OK:
+			result = Event.deserialize(response.getEntity(String.class));
+			populateTagAttributes(result.getTags());
+			break;
+		default:
+			logger.debug(response.getClientResponseStatus());
+		}
+		return result;
+	}
+
+	/**
+	 * Delete an Event from the server.
+	 * 
+	 * @param id
+	 *            the identifier of the event to delete.
+	 * @throws NotFoundException
+	 *             if there is no event with the provided id in the server.
+	 */
+	public void deleteEvent(long id) throws NotFoundException {
+		ClientResponse response = eventWr.path("" + id).accept(MediaType.APPLICATION_JSON).delete(ClientResponse.class);
+
+		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
+			throw new NotFoundException();
+		}
+	}
 }
