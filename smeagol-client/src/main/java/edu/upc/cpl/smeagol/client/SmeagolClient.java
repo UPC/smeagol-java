@@ -142,8 +142,7 @@ public class SmeagolClient {
 	 * @see Tag
 	 * 
 	 */
-	public Tag createTag(String id, String description) throws IllegalArgumentException, AlreadyExistsException {
-		Tag result = null;
+	public void createTag(String id, String description) throws IllegalArgumentException, AlreadyExistsException {
 
 		Form f = new Form();
 		f.add(TAG_ID_ATTR_NAME, id);
@@ -157,11 +156,8 @@ public class SmeagolClient {
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
 		case CREATED:
-			result = Tag.deserialize(response.getEntity(String.class));
 			break;
 		}
-
-		return result;
 	}
 
 	/**
@@ -274,23 +270,13 @@ public class SmeagolClient {
 	/**
 	 * Retrieve all <code>Resource</code>s defined in server.
 	 * 
-	 * @return a collection containing all the resources defined in the server.
+	 * @return a collection containing all the resources defined in the the
+	 *         server.
 	 */
 	public Collection<Resource> getResources() {
 		String resourceJsonArray = resourceWr.accept(MediaType.APPLICATION_JSON).get(String.class);
 
-		Collection<Resource> resources = Resource.deserializeCollection(resourceJsonArray);
-
-		/*
-		 * In a Resource list, the server only returns the tag identifiers
-		 * instead of the full tag tag list for every resource. For each
-		 * identifier, we must retrieve the full tag attributes and repopulate
-		 * the Resource tags.
-		 */
-		for (Resource r : resources) {
-			populateTagAttributes(r.getTags());
-		}
-		return resources;
+		return Resource.deserializeCollection(resourceJsonArray);
 	}
 
 	/**
@@ -311,12 +297,7 @@ public class SmeagolClient {
 		}
 
 		String json = response.getEntity(String.class);
-		Resource result = Resource.deserialize(json);
-
-		/* Populate tag descriptions before returning the resource to the user */
-		populateTagAttributes(result.getTags());
-
-		return result;
+		return Resource.deserialize(json);
 	}
 
 	/**
@@ -327,10 +308,6 @@ public class SmeagolClient {
 	 *            non-blank string.
 	 * @param info
 	 *            additional information of the new resource
-	 * @param tags
-	 *            an optional collection of tags to assign to the resource. If
-	 *            the collection contains any non-existent tags, they will be
-	 *            created in the server.
 	 * @return the resource just created
 	 * @throws AlreadyExistsException
 	 *             if there is already another resource with the same
@@ -339,15 +316,10 @@ public class SmeagolClient {
 	 *             if the provided description is <code>null</code>, an empty
 	 *             string, or a blank string.
 	 */
-	public Resource createResource(String description, String info, Collection<Tag> tags)
-			throws AlreadyExistsException, IllegalArgumentException {
+	public Resource createResource(String description, String info) throws AlreadyExistsException {
 		Form f = new Form();
 		f.add(RESOURCE_DESCRIPTION_ATTR_NAME, description);
 		f.add(RESOURCE_INFO_ATTR_NAME, info);
-
-		if (CollectionUtils.isNotEmpty(tags)) {
-			f.add(RESOURCE_TAGS_ATTR_NAME, tagsAsFormParameter(tags));
-		}
 
 		ClientResponse response = resourceWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
 
@@ -474,7 +446,7 @@ public class SmeagolClient {
 		Event result = null;
 
 		logger.debug("Estat del servidor: " + response.getStatus());
-		
+
 		switch (response.getClientResponseStatus()) {
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
@@ -550,7 +522,7 @@ public class SmeagolClient {
 		f.add(EVENT_STARTS_ATTR_NAME, newEvent.getInterval().getStart());
 		f.add(EVENT_ENDS_ATTR_NAME, newEvent.getInterval().getEnd());
 		f.add(EVENT_TAGS_ATTR_NAME, tagsAsFormParameter(newEvent.getTags()));
-		
+
 		ClientResponse response = eventWr.path("" + id).accept(MediaType.APPLICATION_JSON).put(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {

@@ -100,8 +100,6 @@ public class EventTest extends TestCase {
 		assertEquals(2, events.size());
 		assertTrue(events.contains(e1));
 		assertTrue(events.contains(e2));
-		logger.debug(events.get(0));
-		logger.debug(events.get(1));
 	}
 
 	@Test
