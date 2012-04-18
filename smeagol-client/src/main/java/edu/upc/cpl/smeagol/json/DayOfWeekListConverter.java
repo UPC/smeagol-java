@@ -21,7 +21,7 @@ import edu.upc.cpl.smeagol.client.ical.DayOfWeek;
  * This class is used internally by the Sméagol client and should not be used
  * directly in your programs.
  * <p>
- * A customized serializer/deserializer for type
+ * A custom serializer/deserializer for type
  * <code>List&lt;DayOfWeek&gt;</code>. To be used by <code>GsonBuilder</code>s.
  * 
  * This class is needed because default serialization provided by the Gson
