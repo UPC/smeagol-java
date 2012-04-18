@@ -18,8 +18,8 @@ import com.google.gson.reflect.TypeToken;
 /**
  * Tags are used to add semantic information to resources, events and bookings.
  * <p>
- * Tags are identified by a case-insensitive description, and may have an
- * optional description.
+ * Tags are identified by a case-insensitive id, and may have an optional
+ * description.
  * 
  * @author angel
  */
@@ -55,12 +55,12 @@ public class Tag implements Comparable<Tag> {
 	 * @return {@code true} if {@code id} is a valid identifier. Otherwise
 	 *         returns false.
 	 */
-	private static boolean validateId(String candidate) {
-		return (candidate != null && StringUtils.isNotBlank(candidate) && GenericValidator.isInRange(
-				candidate.length(), ID_MIN_LEN, ID_MAX_LEN));
+	private static boolean isValidId(String candidate) {
+		return (!StringUtils.isBlank(candidate) && GenericValidator.isInRange(candidate.length(), ID_MIN_LEN,
+				ID_MAX_LEN));
 	}
 
-	private static boolean validateDescription(String candidate) {
+	private static boolean isValidDescription(String candidate) {
 		return (candidate == null || GenericValidator.maxLength(candidate, DESCRIPTION_MAX_LEN));
 	}
 
@@ -72,7 +72,7 @@ public class Tag implements Comparable<Tag> {
 	 * @throws IllegalArgumentException
 	 *             if the provided id is null or an empty string ("").
 	 */
-	public Tag(String id) throws IllegalArgumentException {
+	public Tag(String id) {
 		setId(id);
 	}
 
@@ -89,13 +89,13 @@ public class Tag implements Comparable<Tag> {
 	 *             if the provided arguments are not valid tag id and
 	 *             description.
 	 */
-	public Tag(String id, String description) throws IllegalArgumentException {
+	public Tag(String id, String description) {
 		setId(id);
 		setDescription(description);
 	}
 
 	public void setId(String id) {
-		if (!validateId(id)) {
+		if (!isValidId(id)) {
 			throw new IllegalArgumentException("invalid tag id");
 		}
 		this.id = id;
@@ -106,8 +106,8 @@ public class Tag implements Comparable<Tag> {
 	}
 
 	public void setDescription(String description) {
-		if (!validateDescription(description)) {
-			throw new IllegalArgumentException("invalid description id");
+		if (!isValidDescription(description)) {
+			throw new IllegalArgumentException("invalid tag description");
 		}
 		this.description = description;
 	}

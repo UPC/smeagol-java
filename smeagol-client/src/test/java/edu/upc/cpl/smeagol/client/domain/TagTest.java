@@ -102,8 +102,7 @@ public class TagTest extends TestCase {
 
 	@Test
 	public void testDeserializeCollection() {
-		String jsonArr = "[" + JSON1 + "," + JSON2 + "]";
-		Collection<Tag> t = Tag.deserializeCollection(jsonArr);
+		Collection<Tag> t = Tag.deserializeCollection(JSON_ARRAY);
 		assertEquals(2, t.size());
 		assertTrue(t.contains(t1));
 		assertTrue(t.contains(t2));
