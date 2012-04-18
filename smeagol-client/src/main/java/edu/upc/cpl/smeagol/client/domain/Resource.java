@@ -2,9 +2,7 @@ package edu.upc.cpl.smeagol.client.domain;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.HashSet;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -44,7 +42,6 @@ public class Resource implements Comparable<Resource> {
 	private Long id;
 	private String description;
 	private String info;
-	private Collection<Tag> tags = new HashSet<Tag>();
 
 	/**
 	 * Check if a string is a valid resource description.
@@ -97,25 +94,6 @@ public class Resource implements Comparable<Resource> {
 		setInfo(info);
 	}
 
-	/**
-	 * Resource constructor.
-	 * 
-	 * @param description
-	 *            the resource description
-	 * @param info
-	 *            the resource additional info
-	 * @param tags
-	 *            the resource tags
-	 * @throws IllegalArgumentException
-	 *             if the provided argumento is <code>null</code> or an empty or
-	 *             blank string.
-	 */
-	public Resource(String description, String info, Collection<Tag> tags) throws IllegalArgumentException {
-		this.setDescription(description);
-		this.setInfo(info);
-		this.setTags(tags);
-	}
-
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -154,14 +132,6 @@ public class Resource implements Comparable<Resource> {
 		return info;
 	}
 
-	public void setTags(Collection<Tag> tags) {
-		this.tags = tags;
-	}
-
-	public Collection<Tag> getTags() {
-		return tags;
-	}
-
 	public int compareTo(Resource other) {
 		if (this == other) {
 			return 0;
@@ -182,9 +152,8 @@ public class Resource implements Comparable<Resource> {
 		}
 		Resource other = (Resource) obj;
 
-		boolean attrEquals = new EqualsBuilder().append(this.id, other.id).append(this.description, other.description)
+		return new EqualsBuilder().append(this.id, other.id).append(this.description, other.description)
 				.append(this.info, other.info).isEquals();
-		return attrEquals && CollectionUtils.isEqualCollection(this.getTags(), other.getTags());
 	}
 
 	@Override
@@ -195,7 +164,7 @@ public class Resource implements Comparable<Resource> {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this).append("id", id).append("description", description).append("info", info)
-				.append("tags", tags).toString();
+				.toString();
 	}
 
 	public String serialize() {
