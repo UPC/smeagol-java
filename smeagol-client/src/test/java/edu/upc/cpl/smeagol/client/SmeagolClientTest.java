@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,11 +35,10 @@ public class SmeagolClientTest extends TestCase {
 	private static final String SERVER_URL = "http://localhost:3000";
 
 	private static final Tag TAG_WITH_NULL_DESCRIPTION = new Tag("tag1", null);
-	private static final Tag NEW_TAG = new Tag("newtag",
-			"description for a new tag with a really really really really really "
-					+ "really really really really really really long description");
-	private static final Tag NON_EXISTENT_TAG = new Tag("nonexistent", "non existent description");
-	private static final Tag PROJECTOR = new Tag("projector", "descr 1");
+	private static final Tag NEW_TAG = new Tag("newtag", "description for a new tag");
+	// private static final Tag NON_EXISTENT_TAG = new Tag("nonexistent",
+	// "non existent description");
+	// private static final Tag PROJECTOR = new Tag("projector", "descr 1");
 
 	// private static final Long EXISTENT_RESOURCE_ID = 2L;
 	// private static final Collection<Tag> EXISTENT_RESOURCE_TAGS = new
@@ -122,8 +122,18 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCreateTagIllegalArgument() throws IllegalArgumentException, AlreadyExistsException {
-		client.createTag(null, null);
+	public void testCreateTagWithNullId() throws IllegalArgumentException, AlreadyExistsException {
+		client.createTag(null, "a description");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateTagWithIdTooLong() throws IllegalArgumentException, AlreadyExistsException {
+		client.createTag(StringUtils.rightPad("a", Tag.ID_MAX_LEN + 1, "a"), "a description");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateTagWithDescriptionTooLong() throws IllegalArgumentException, AlreadyExistsException {
+		client.createTag("a", StringUtils.rightPad("x", Tag.DESCRIPTION_MAX_LEN + 1, "x"));
 	}
 
 	@Test
@@ -134,15 +144,15 @@ public class SmeagolClientTest extends TestCase {
 		client.createTag(aux.getId(), aux.getDescription());
 		Tag g = client.getTag(TAG_WITH_NULL_DESCRIPTION.getId());
 		assertEquals(aux, g);
-		assertEquals(tagsInServer, client.getTags().size());
+		assertEquals(tagsInServer + 1, client.getTags().size());
 	}
 
 	@Test
-	public void testCreateTag() throws IllegalArgumentException, AlreadyExistsException {
+	public void testCreateTag() throws IllegalArgumentException, AlreadyExistsException, NotFoundException {
 		int tagsInServer = client.getTags().size();
-		Tag t = client.createTag(NEW_TAG.getId(), NEW_TAG.getDescription());
-		assertEquals(NEW_TAG, t);
+		client.createTag(NEW_TAG.getId(), NEW_TAG.getDescription());
 		assertEquals(tagsInServer + 1, client.getTags().size());
+		assertEquals(NEW_TAG, client.getTag(NEW_TAG.getId()));
 	}
 
 	/*

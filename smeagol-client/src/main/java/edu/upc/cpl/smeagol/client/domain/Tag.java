@@ -32,7 +32,7 @@ public class Tag implements Comparable<Tag> {
 	/**
 	 * Minimum length for tag identifiers = {@value}
 	 */
-	public transient static final int ID_MIN_LEN = 3;
+	public transient static final int ID_MIN_LEN = 1;
 
 	/**
 	 * Maximum length for tag identifiers = {@value}
@@ -81,8 +81,7 @@ public class Tag implements Comparable<Tag> {
 	 * <code>id</id> and <code>description</code>.
 	 * 
 	 * @param id
-	 *            An identifier for the new tag. Once the Tag is created, the id
-	 *            is immutable.
+	 *            An identifier for the new tag.
 	 * @param description
 	 *            A description for the new tag.
 	 * @throws IllegalArgumentException
