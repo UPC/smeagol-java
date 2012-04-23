@@ -34,11 +34,9 @@ public class SmeagolClientTest extends TestCase {
 	 */
 	private static final String SERVER_URL = "http://localhost:3000";
 
-	private static final Tag TAG_WITH_NULL_DESCRIPTION = new Tag("tag1", null);
-	private static final Tag NEW_TAG = new Tag("newtag", "description for a new tag");
-	// private static final Tag NON_EXISTENT_TAG = new Tag("nonexistent",
-	// "non existent description");
-	// private static final Tag PROJECTOR = new Tag("projector", "descr 1");
+	private static final Tag TAG_WITH_NULL_DESCRIPTION = new Tag("tag", null);
+	private static final Tag TAG_1 = new Tag("tag1", "tag 1 description");
+	private static final Tag TAG_2 = new Tag("tag2", "tag 2 description");
 
 	// private static final Long EXISTENT_RESOURCE_ID = 2L;
 	// private static final Collection<Tag> EXISTENT_RESOURCE_TAGS = new
@@ -70,9 +68,7 @@ public class SmeagolClientTest extends TestCase {
 	static {
 		logger.info("*******************************************************************************");
 		logger.info("NOTE: Before running these tests, check that a compatible Smeagol server       ");
-		logger.info("is running on " + SERVER_URL);
-		logger.info("Anyway, you should use the file src/test/resources/db-test.sql to recreate the ");
-		logger.info("server database before running the test suite.                                 ");
+		logger.info("with an empty database is running on " + SERVER_URL);
 		logger.info("*******************************************************************************");
 	}
 
@@ -115,30 +111,23 @@ public class SmeagolClientTest extends TestCase {
 		assertTrue(tags.isEmpty());
 	}
 
-	@Test(expected = NotFoundException.class)
-	public void testGetTagNotFound() throws NotFoundException {
-		@SuppressWarnings("unused")
-		Tag t = client.getTag("dummy");
-	}
-
 	@Test(expected = IllegalArgumentException.class)
-	public void testCreateTagWithNullId() throws IllegalArgumentException, AlreadyExistsException {
+	public void testCreateTagWithNullId() throws AlreadyExistsException {
 		client.createTag(null, "a description");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCreateTagWithIdTooLong() throws IllegalArgumentException, AlreadyExistsException {
+	public void testCreateTagWithIdTooLong() throws AlreadyExistsException {
 		client.createTag(StringUtils.rightPad("a", Tag.ID_MAX_LEN + 1, "a"), "a description");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCreateTagWithDescriptionTooLong() throws IllegalArgumentException, AlreadyExistsException {
+	public void testCreateTagWithDescriptionTooLong() throws AlreadyExistsException {
 		client.createTag("a", StringUtils.rightPad("x", Tag.DESCRIPTION_MAX_LEN + 1, "x"));
 	}
 
 	@Test
-	public void testCreateTagWithNullDescription() throws IllegalArgumentException, AlreadyExistsException,
-			NotFoundException {
+	public void testCreateTagWithNullDescription() throws AlreadyExistsException, NotFoundException {
 		int tagsInServer = client.getTags().size();
 		Tag aux = TAG_WITH_NULL_DESCRIPTION;
 		client.createTag(aux.getId(), aux.getDescription());
@@ -148,53 +137,69 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test
-	public void testCreateTag() throws IllegalArgumentException, AlreadyExistsException, NotFoundException {
+	public void testCreateTag() throws AlreadyExistsException, NotFoundException {
 		int tagsInServer = client.getTags().size();
-		client.createTag(NEW_TAG.getId(), NEW_TAG.getDescription());
+		client.createTag(TAG_1.getId(), TAG_1.getDescription());
 		assertEquals(tagsInServer + 1, client.getTags().size());
-		assertEquals(NEW_TAG, client.getTag(NEW_TAG.getId()));
+		assertEquals(TAG_1, client.getTag(TAG_1.getId()));
+	}
+
+	@Test(expected = AlreadyExistsException.class)
+	public void testCreateTagAlreadyExists() throws AlreadyExistsException {
+		client.createTag(TAG_1.getId(), null);
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testGetTagNotFound() throws NotFoundException {
+		@SuppressWarnings("unused")
+		Tag t = client.getTag("dummy");
+	}
+
+	public void testGetTags() {
+		Collection<Tag> tags = client.getTags();
+		tags.contains(TAG_1);
+	}
+
+	@Test
+	public void testUpdateTag() throws NotFoundException {
+		String OLD_DESCRIPTION = TAG_1.getDescription();
+		String NEW_DESCRIPTION = "hi! am a new description á é";
+		Collection<Tag> tags = client.getTags();
+
+		assertTrue(tags.contains(TAG_1));
+		client.updateTag(TAG_1.getId(), NEW_DESCRIPTION);
+		Tag updated = client.getTag(TAG_1.getId());
+		assertEquals(TAG_1.getId(), updated.getId());
+		assertEquals(NEW_DESCRIPTION, updated.getDescription());
+		client.updateTag(TAG_1.getId(), OLD_DESCRIPTION);
+		Tag old = client.getTag(TAG_1.getId());
+		assertEquals(TAG_1.getDescription(), old.getDescription());
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testUpdateTagNotFound() throws NotFoundException {
+		Tag NON_EXISTENT_TAG = new Tag("dummy", "dummy description");
+		Collection<Tag> tags = client.getTags();
+		assertFalse(tags.contains(NON_EXISTENT_TAG));
+		client.updateTag("dummy100", "dummy value");
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testDeleteTagNotFound() throws NotFoundException {
+		client.deleteTag("TrulyInexistentTag");
+	}
+
+	@Test
+	public void testDeleteTag() throws NotFoundException {
+		Collection<Tag> before = client.getTags();
+		assertTrue(before.contains(TAG_1));
+		client.deleteTag(TAG_1.getId());
+		Collection<Tag> after = client.getTags();
+		assertEquals(before.size() - 1, after.size());
+		assertFalse(after.contains(TAG_1));
 	}
 
 	/*
-	 * @Test(expected = AlreadyExistsException.class) public void
-	 * testCreateTagAlreadyExists() throws IllegalArgumentException,
-	 * AlreadyExistsException {
-	 * 
-	 * @SuppressWarnings("unused") Tag t =
-	 * client.createTag(EXISTENT_TAG.getId(), null);
-	 * fail("test create existent tag"); }
-	 * 
-	 * 
-	 * 
-	 * @Test(expected = NotFoundException.class) public void
-	 * testDeleteTagNotFound() throws NotFoundException {
-	 * client.deleteTag("TrulyInexistentTag"); fail("delete non existent tag");
-	 * }
-	 * 
-	 * @Test public void testDeleteTag() throws NotFoundException {
-	 * Collection<Tag> before = client.getTags();
-	 * assertTrue(before.contains(PROJECTOR));
-	 * client.deleteTag(PROJECTOR.getId()); Collection<Tag> after =
-	 * client.getTags(); assertEquals(before.size() - 1, after.size());
-	 * TAG_COUNT--; assertFalse(after.contains(PROJECTOR)); }
-	 * 
-	 * @Test public void testUpdateTag() throws NotFoundException { String
-	 * OLD_DESCRIPTION = EXISTENT_TAG.getDescription(); String NEW_DESCRIPTION =
-	 * "hi! am a new description á é"; Collection<Tag> tags = client.getTags();
-	 * 
-	 * assertTrue(tags.contains(EXISTENT_TAG));
-	 * client.updateTag(EXISTENT_TAG.getId(), NEW_DESCRIPTION); Tag updated =
-	 * client.getTag(EXISTENT_TAG.getId()); assertEquals(EXISTENT_TAG.getId(),
-	 * updated.getId()); assertEquals(NEW_DESCRIPTION,
-	 * updated.getDescription()); client.updateTag(EXISTENT_TAG.getId(),
-	 * OLD_DESCRIPTION); Tag old = client.getTag(EXISTENT_TAG.getId());
-	 * assertEquals(EXISTENT_TAG.getDescription(), old.getDescription()); }
-	 * 
-	 * @Test(expected = NotFoundException.class) public void
-	 * testUpdateTagNotFound() throws NotFoundException { Collection<Tag> tags =
-	 * client.getTags(); assertFalse(tags.contains(NON_EXISTENT_TAG));
-	 * client.updateTag("dummy100", "dummy value"); }
-	 * 
 	 * @Test public void testGetResources() { Collection<Resource> resources =
 	 * client.getResources(); assertEquals(RESOURCE_COUNT, resources.size());
 	 * assertTrue(resources.contains(EXISTENT_RESOURCE)); }

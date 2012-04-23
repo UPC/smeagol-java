@@ -132,7 +132,6 @@ public class SmeagolClient {
 	 *            the id of the new tag, not null, not empty
 	 * @param description
 	 *            the description of the new tag
-	 * @return the new <code>Tag</code>
 	 * @throws IllegalArgumentException
 	 *             if the id is null or an empty string, or if the lengths of
 	 *             the provided id or description exceed the maximum length
@@ -167,12 +166,10 @@ public class SmeagolClient {
 	 * @param id
 	 * @param newDescription
 	 *            the new tag description
-	 * @return the updated <code>Tag</code>
 	 * @throws NotFoundException
 	 *             if the tag to be updated does not exist
 	 */
-	public Tag updateTag(String id, String newDescription) throws NotFoundException {
-		Tag result = null;
+	public void updateTag(String id, String newDescription) throws NotFoundException {
 
 		Form f = new Form();
 		f.add(TAG_ID_ATTR_NAME, id);
@@ -184,10 +181,9 @@ public class SmeagolClient {
 		case NOT_FOUND:
 			throw new NotFoundException();
 		case OK:
-			result = Tag.deserialize(response.getEntity(String.class));
+			// tag successfully updated
 			break;
 		}
-		return result;
 	}
 
 	/**
@@ -235,7 +231,7 @@ public class SmeagolClient {
 	 * @param tags
 	 *            a collection of tags to be created
 	 * @return the number of tags actually created (i.e. those which did not
-	 *         exist in server before).
+	 *         exist in server yet).
 	 */
 	public int createTags(Collection<Tag> tags) {
 		if (CollectionUtils.isEmpty(tags)) {
