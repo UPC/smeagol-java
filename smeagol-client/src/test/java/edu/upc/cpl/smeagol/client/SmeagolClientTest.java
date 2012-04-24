@@ -69,6 +69,7 @@ public class SmeagolClientTest extends TestCase {
 		logger.info("*******************************************************************************");
 		logger.info("NOTE: Before running these tests, check that a compatible Smeagol server       ");
 		logger.info("with an empty database is running on " + SERVER_URL);
+		logger.info("WARNING: ALL INFORMATION IN THE DATABASE WILL BE LOST                          ");
 		logger.info("*******************************************************************************");
 	}
 
