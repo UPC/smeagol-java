@@ -8,11 +8,13 @@ import junit.framework.TestCase;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import edu.upc.cpl.smeagol.client.db.DbUtils;
 import edu.upc.cpl.smeagol.client.domain.Resource;
 import edu.upc.cpl.smeagol.client.domain.Tag;
 import edu.upc.cpl.smeagol.client.exception.AlreadyExistsException;
@@ -35,6 +37,8 @@ public class SmeagolClientTest extends TestCase {
 	 * url for test server
 	 */
 	private static final String SERVER_URL = "http://localhost:3000";
+
+	private static final DbUtils dbUtils = new DbUtils();
 
 	private static final Tag TAG_WITH_NULL_DESCRIPTION = new Tag("tag", null);
 	private static final Tag TAG_1 = new Tag("tag1", "tag 1 description");
@@ -66,9 +70,19 @@ public class SmeagolClientTest extends TestCase {
 
 	private static SmeagolClient client;
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeClass
+	public static void onlyOnce() {
+		try {
 		client = new SmeagolClient(SERVER_URL);
+		dbUtils.resetDataBase();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@AfterClass
+	public static void acaba() {
+		//dbUtils.rollback();
 	}
 
 	@Test(expected = MalformedURLException.class)
@@ -189,7 +203,7 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test
-	public void testCreateResource() throws AlreadyExistsException, IllegalArgumentException, NotFoundException {
+	public void testCreateResource() throws AlreadyExistsException, NotFoundException {
 		Collection<Resource> resourcesBefore = client.getResources();
 		int resourceCountBefore = resourcesBefore.size();
 
@@ -209,32 +223,31 @@ public class SmeagolClientTest extends TestCase {
 		assertEquals(RESOURCE_1, r);
 	}
 
+	@Test(expected = AlreadyExistsException.class)
+	public void testCreateDuplicatedResource() throws AlreadyExistsException {
+		Collection<Resource> resources = client.getResources();
+		assertTrue(resources.contains(RESOURCE_1));
+		client.createResource(RESOURCE_1.getDescription(), null);
+	}
+
 	/*
-	 * @Test(expected = AlreadyExistsException.class) public void
-	 * testCreateDuplicatedResource() throws AlreadyExistsException,
-	 * IllegalArgumentException { Collection<Resource> resources =
-	 * client.getResources(); assertTrue(resources.contains(EXISTENT_RESOURCE));
-	 * 
-	 * @SuppressWarnings("unused") Resource r =
-	 * client.createResource(EXISTENT_RESOURCE.getDescription(), null); }
-	 * 
 	 * @Test(expected = IllegalArgumentException.class) public void
-	 * testCreateResourceWithNullDescription() throws AlreadyExistsException,
-	 * IllegalArgumentException { String NULL_STR = null;
+	 * testCreateResourceWithNullDescription() throws AlreadyExistsException {
+	 * String NULL_STR = null;
 	 * 
 	 * @SuppressWarnings("unused") Resource r = client.createResource(NULL_STR,
 	 * null); }
 	 * 
 	 * @Test(expected = IllegalArgumentException.class) public void
-	 * testCreateResourceWithEmptyDescription() throws AlreadyExistsException,
-	 * IllegalArgumentException { String EMPTY_STR = "";
+	 * testCreateResourceWithEmptyDescription() throws AlreadyExistsException {
+	 * String EMPTY_STR = "";
 	 * 
 	 * @SuppressWarnings("unused") Resource r = client.createResource(EMPTY_STR,
 	 * null); }
 	 * 
 	 * @Test(expected = IllegalArgumentException.class) public void
-	 * testCreateResourceWithBlankDescription() throws AlreadyExistsException,
-	 * IllegalArgumentException { String BLANKS_STR = "         ";
+	 * testCreateResourceWithBlankDescription() throws AlreadyExistsException {
+	 * String BLANKS_STR = "         ";
 	 * 
 	 * @SuppressWarnings("unused") Resource r =
 	 * client.createResource(BLANKS_STR, null); }
