@@ -10,6 +10,8 @@ import java.util.Set;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.Interval;
@@ -36,7 +38,7 @@ import edu.upc.cpl.smeagol.client.exception.NotFoundException;
 public class SmeagolClient {
 
 	@SuppressWarnings("unused")
-	Logger logger = Logger.getLogger(SmeagolClient.class);
+	private static final Logger logger = Logger.getLogger(SmeagolClient.class);
 
 	private static final String TAG_PATH = "tag";
 	private static final String RESOURCE_PATH = "resource";
@@ -132,16 +134,18 @@ public class SmeagolClient {
 	 *            the id of the new tag, not null, not empty
 	 * @param description
 	 *            the description of the new tag
+	 * @return the id of the created tag
 	 * @throws IllegalArgumentException
 	 *             if the id is null or an empty string, or if the lengths of
 	 *             the provided id or description exceed the maximum length
 	 *             allowed by the server.
 	 * @throws AlreadyExistsException
 	 *             if the server already contains a tag with the provided id.
+	 * @throws URIException
 	 * @see Tag
 	 * 
 	 */
-	public void createTag(String id, String description) throws IllegalArgumentException, AlreadyExistsException {
+	public String createTag(String id, String description) throws AlreadyExistsException {
 
 		Form f = new Form();
 		f.add(TAG_ID_ATTR_NAME, id);
@@ -155,8 +159,18 @@ public class SmeagolClient {
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
 		case CREATED:
+			// tag was created successfully
 			break;
 		}
+
+		try {
+			URI uri = new URI(response.getHeaders().getFirst("Location"), false);
+			return getUriLastFragment(uri);
+		} catch (URIException e) {
+			// this should never happen: server returns well-formed URIs
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	/**
@@ -304,7 +318,7 @@ public class SmeagolClient {
 	 *            non-blank string.
 	 * @param info
 	 *            additional information of the new resource
-	 * @return the resource just created
+	 * @return the identifier for the resource just created
 	 * @throws AlreadyExistsException
 	 *             if there is already another resource with the same
 	 *             description defined in the server.
@@ -312,14 +326,12 @@ public class SmeagolClient {
 	 *             if the provided description is <code>null</code>, an empty
 	 *             string, or a blank string.
 	 */
-	public Resource createResource(String description, String info) throws AlreadyExistsException {
+	public Long createResource(String description, String info) throws AlreadyExistsException {
 		Form f = new Form();
 		f.add(RESOURCE_DESCRIPTION_ATTR_NAME, description);
 		f.add(RESOURCE_INFO_ATTR_NAME, info);
 
 		ClientResponse response = resourceWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
-
-		Resource result = null;
 
 		switch (response.getClientResponseStatus()) {
 		case CONFLICT:
@@ -327,19 +339,22 @@ public class SmeagolClient {
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
 		case CREATED:
-			result = Resource.deserialize(response.getEntity(String.class));
+			String id;
 			try {
-				result = getResource(result.getId());
-			} catch (NotFoundException e) {
-				/*
-				 * This should not happen, as we are retrieving the resource we
-				 * just created.
-				 */
+				id = getUriLastFragment(new URI(response.getHeaders().getFirst("Location"), false));
+				return Long.parseLong(id);
+			} catch (URIException e) {
+				// this will never happen: the server returns well-formed URIs
 				e.printStackTrace();
 			}
 			break;
 		}
-		return result;
+		return null;
+	}
+
+	private String getUriLastFragment(URI locationHeader) {
+		String[] fragments = StringUtils.split(locationHeader.toString(), "/");
+		return fragments[fragments.length - 1];
 	}
 
 	/**
@@ -423,8 +438,9 @@ public class SmeagolClient {
 	 * @param tags
 	 *            the tags to be applied to the event. Tags not existing in
 	 *            server will be ignored.
+	 * @return the identifier of the new event.
 	 */
-	public Event createEvent(String description, String info, Interval startEnd, Collection<Tag> tags) {
+	public Long createEvent(String description, String info, Interval startEnd, Collection<Tag> tags) {
 		Form f = new Form();
 		f.add(EVENT_DESCRIPTION_ATTR_NAME, description);
 		f.add(EVENT_INFO_ATTR_NAME, info);
@@ -435,31 +451,16 @@ public class SmeagolClient {
 			f.add(EVENT_TAGS_ATTR_NAME, tagsAsFormParameter(tags));
 		}
 
-		logger.debug("Formulari enviat amb createEvent: " + f.toString());
-
 		ClientResponse response = eventWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
-
-		Event result = null;
-
-		logger.debug("Estat del servidor: " + response.getStatus());
 
 		switch (response.getClientResponseStatus()) {
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
 		case CREATED:
-			result = Event.deserialize(response.getEntity(String.class));
-			try {
-				result = getEvent(result.getId());
-			} catch (NotFoundException e) {
-				/*
-				 * This should not happen, as we are retrieving the event we
-				 * just created.
-				 */
-				e.printStackTrace();
-			}
-			break;
+			String id = response.getHeaders().getFirst("Location");
+
 		}
-		return result;
+		return null;
 	}
 
 	/**
@@ -528,8 +529,6 @@ public class SmeagolClient {
 			result = Event.deserialize(response.getEntity(String.class));
 			populateTagAttributes(result.getTags());
 			break;
-		default:
-			logger.debug(response.getClientResponseStatus());
 		}
 		return result;
 	}

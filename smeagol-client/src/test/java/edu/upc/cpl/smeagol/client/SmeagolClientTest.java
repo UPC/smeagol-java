@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.junit.Before;
@@ -12,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import edu.upc.cpl.smeagol.client.domain.Resource;
 import edu.upc.cpl.smeagol.client.domain.Tag;
 import edu.upc.cpl.smeagol.client.exception.AlreadyExistsException;
 import edu.upc.cpl.smeagol.client.exception.NotFoundException;
@@ -38,19 +40,8 @@ public class SmeagolClientTest extends TestCase {
 	private static final Tag TAG_1 = new Tag("tag1", "tag 1 description");
 	private static final Tag TAG_2 = new Tag("tag2", "tag 2 description");
 
-	// private static final Long EXISTENT_RESOURCE_ID = 2L;
-	// private static final Collection<Tag> EXISTENT_RESOURCE_TAGS = new
-	// TreeSet<Tag>();
-	// private static final Resource EXISTENT_RESOURCE = new
-	// Resource("Aula test 2", "Estem de proves");
-	// private static final Resource NEW_RESOURCE = new
-	// Resource("New resource desc", "New resource info");
-	// private static final Collection<Tag> NEW_RESOURCE_TAGS = new
-	// TreeSet<Tag>();
-	// private static final Long NON_EXISTENT_RESOURCE_ID = 2000L;
-	// private static final Resource NON_EXISTENT_RESOURCE = new
-	// Resource("NON EXISTENT RESOURCE",
-	// "NON EXISTENT DESCRIPTION");
+	private static final Resource RESOURCE_1 = new Resource("resource 1", "resource 1 info");
+	private static final Resource RESOURCE_2 = new Resource("resource 2", "resource 2 info");
 
 	// private static final long EXISTENT_EVENT_ID = 5L;
 	// private static Event EXISTENT_EVENT = new
@@ -78,26 +69,6 @@ public class SmeagolClientTest extends TestCase {
 	@Before
 	public void setUp() throws Exception {
 		client = new SmeagolClient(SERVER_URL);
-
-		// EXISTENT_RESOURCE.setId(EXISTENT_RESOURCE_ID);
-		// EXISTENT_RESOURCE_TAGS.clear();
-		// EXISTENT_RESOURCE_TAGS.add(new Tag("pantalla", "descr 2"));
-		// EXISTENT_RESOURCE_TAGS.add(new Tag("wireless", "descr 8"));
-
-		// NEW_RESOURCE_TAGS.clear();
-		// NEW_RESOURCE_TAGS.add(new Tag("isabel", "descr 7"));
-		// NEW_RESOURCE_TAGS.add(new Tag("wireless", "descr 8"));
-
-		// NON_EXISTENT_RESOURCE.setId(NON_EXISTENT_RESOURCE_ID);
-
-		// EXISTENT_EVENT.setId(EXISTENT_EVENT_ID);
-		// EXISTENT_EVENT_TAGS.clear();
-		// EXISTENT_EVENT_TAGS.add(new Tag("isabel", "descr 7"));
-		// EXISTENT_EVENT_TAGS.add(new Tag("videoconferencia", "descr 3"));
-		// EXISTENT_EVENT_TAGS.add(new Tag("microfons inalambrics", "descr 6"));
-		// EXISTENT_EVENT_TAGS.add(new Tag("wireless", "descr 8"));
-
-		// EXISTENT_EVENT.setTags(EXISTENT_EVENT_TAGS);
 	}
 
 	@Test(expected = MalformedURLException.class)
@@ -131,8 +102,9 @@ public class SmeagolClientTest extends TestCase {
 	public void testCreateTagWithNullDescription() throws AlreadyExistsException, NotFoundException {
 		int tagsInServer = client.getTags().size();
 		Tag aux = TAG_WITH_NULL_DESCRIPTION;
-		client.createTag(aux.getId(), aux.getDescription());
-		Tag g = client.getTag(TAG_WITH_NULL_DESCRIPTION.getId());
+		String tagId = client.createTag(aux.getId(), aux.getDescription());
+		assertEquals(TAG_WITH_NULL_DESCRIPTION.getId(), tagId);
+		Tag g = client.getTag(tagId);
 		assertEquals(aux, g);
 		assertEquals(tagsInServer + 1, client.getTags().size());
 	}
@@ -143,6 +115,9 @@ public class SmeagolClientTest extends TestCase {
 		client.createTag(TAG_1.getId(), TAG_1.getDescription());
 		assertEquals(tagsInServer + 1, client.getTags().size());
 		assertEquals(TAG_1, client.getTag(TAG_1.getId()));
+		client.createTag(TAG_2.getId(), TAG_2.getDescription());
+		assertEquals(TAG_2, client.getTag(TAG_2.getId()));
+		assertEquals(tagsInServer + 2, client.getTags().size());
 	}
 
 	@Test(expected = AlreadyExistsException.class)
@@ -200,21 +175,41 @@ public class SmeagolClientTest extends TestCase {
 		assertFalse(after.contains(TAG_1));
 	}
 
+	@Test
+	public void testGetResourcesWithNoResources() {
+		Collection<Resource> resources = client.getResources();
+		assertTrue(CollectionUtils.isEmpty(resources));
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testGetResourceNotFound() throws NotFoundException {
+
+		@SuppressWarnings("unused")
+		Resource r = client.getResource(123456789L);
+	}
+
+	@Test
+	public void testCreateResource() throws AlreadyExistsException, IllegalArgumentException, NotFoundException {
+		Collection<Resource> resourcesBefore = client.getResources();
+		int resourceCountBefore = resourcesBefore.size();
+
+		assertFalse(resourcesBefore.contains(RESOURCE_1));
+		long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
+		Collection<Resource> resourcesAfter = client.getResources();
+		RESOURCE_1.setId(resourceId);
+		assertEquals(RESOURCE_1, client.getResource(resourceId));
+		assertEquals(resourceCountBefore + 1, resourcesAfter.size());
+		assertTrue(resourcesAfter.contains(RESOURCE_1));
+	}
+
+	@Test
+	public void testGetResource() throws NotFoundException {
+		Resource r = client.getResource(RESOURCE_1.getId());
+		assertNotNull(r);
+		assertEquals(RESOURCE_1, r);
+	}
+
 	/*
-	 * @Test public void testGetResources() { Collection<Resource> resources =
-	 * client.getResources(); assertEquals(RESOURCE_COUNT, resources.size());
-	 * assertTrue(resources.contains(EXISTENT_RESOURCE)); }
-	 * 
-	 * @Test(expected = NotFoundException.class) public void
-	 * testGetResourceNotFound() throws NotFoundException {
-	 * 
-	 * @SuppressWarnings("unused") Resource r =
-	 * client.getResource(NON_EXISTENT_RESOURCE.getId()); }
-	 * 
-	 * @Test public void testGetResource() throws NotFoundException { Resource r
-	 * = client.getResource(EXISTENT_RESOURCE.getId()); assertNotNull(r);
-	 * assertEquals(EXISTENT_RESOURCE, r); }
-	 * 
 	 * @Test(expected = AlreadyExistsException.class) public void
 	 * testCreateDuplicatedResource() throws AlreadyExistsException,
 	 * IllegalArgumentException { Collection<Resource> resources =
@@ -244,15 +239,6 @@ public class SmeagolClientTest extends TestCase {
 	 * @SuppressWarnings("unused") Resource r =
 	 * client.createResource(BLANKS_STR, null); }
 	 * 
-	 * @Test public void testCreateResource() throws AlreadyExistsException,
-	 * IllegalArgumentException { Collection<Resource> resources =
-	 * client.getResources(); assertEquals(RESOURCE_COUNT, resources.size());
-	 * assertFalse(resources.contains(NEW_RESOURCE)); Resource r =
-	 * client.createResource(NEW_RESOURCE.getDescription(),
-	 * NEW_RESOURCE.getInfo()); resources = client.getResources();
-	 * NEW_RESOURCE.setId(r.getId()); assertEquals(NEW_RESOURCE, r);
-	 * assertEquals(++RESOURCE_COUNT, resources.size());
-	 * assertTrue(resources.contains(NEW_RESOURCE)); }
 	 * 
 	 * @Test(expected = NotFoundException.class) public void
 	 * testDeleteResourceNotFound() throws NotFoundException {

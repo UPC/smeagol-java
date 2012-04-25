@@ -1,5 +1,6 @@
 package edu.upc.cpl.smeagol.client.domain;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
@@ -39,7 +40,13 @@ import edu.upc.cpl.smeagol.json.DateTimeConverter;
  * 
  * @author angel
  */
-public class Event implements Comparable<Event> {
+public class Event implements Serializable, Comparable<Event> {
+
+	/**
+	 * Required by the {@link Serializable} interface.
+	 */
+	private static final long serialVersionUID = -2616000905726892742L;
+
 	@SuppressWarnings("unused")
 	private static transient Logger logger = Logger.getLogger(Event.class);
 	private static transient Gson gson = new Gson();

@@ -1,5 +1,6 @@
 package edu.upc.cpl.smeagol.client.domain;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
@@ -23,7 +24,12 @@ import com.google.gson.reflect.TypeToken;
  * 
  * @author angel
  */
-public class Tag implements Comparable<Tag> {
+public final class Tag implements Serializable, Comparable<Tag> {
+
+	/**
+	 * Required by the {@link Serializable} interface
+	 */
+	private static final long serialVersionUID = -1779809492328812739L;
 
 	@SuppressWarnings("unused")
 	private transient Logger logger = Logger.getLogger(getClass());
