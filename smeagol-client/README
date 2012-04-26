@@ -36,8 +36,12 @@ Compilar el codi
 
         mvn compile
 
-   o bé
+ * Per executar els tests, cal tenir funcionant un servidor Sméagol de proves.
+   S'han de definir dues variables d'entorn, una amb la URL del servidor, i una
+   altra amb el path absolut a la base de dades utilitzada pel servidor de proves:
 
+        export SMEAGOL_URL=http://localhost:3000
+        export SMEAGOL_DB_PATH=/path/to/smeagol.db
         mvn test
 
  * El fitxer .jar es pot obtenir amb la comanda:
@@ -47,7 +51,7 @@ Compilar el codi
    Els fitxers resultats de la compilació o empaquetat es troben al subdirectori
    ./target.
 
- *  Si es vol crear el .jar encara que fallin els tests:
+ *  Si es vol crear el .jar encara que fallin els tests (per si no tenim un servidor de proves):
 
         mvn package -DskipTests=true
 

@@ -1,15 +1,19 @@
 package edu.upc.cpl.smeagol.client;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.Collection;
+import java.util.Scanner;
 
 import junit.framework.TestCase;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -33,12 +37,8 @@ public class SmeagolClientTest extends TestCase {
 
 	private static Logger logger = Logger.getLogger(SmeagolClientTest.class);
 
-	/**
-	 * url for test server
-	 */
-	private static final String SERVER_URL = "http://localhost:3000";
-
-	private static final DbUtils dbUtils = new DbUtils();
+	@Rule
+	public static final DbUtils dbUtils = new DbUtils();
 
 	private static final Tag TAG_WITH_NULL_DESCRIPTION = new Tag("tag", null);
 	private static final Tag TAG_1 = new Tag("tag1", "tag 1 description");
@@ -60,29 +60,35 @@ public class SmeagolClientTest extends TestCase {
 	// DateTime("2000-01-01T10:00:00")),
 	// new ArrayList<Tag>());
 
-	static {
-		logger.info("*******************************************************************************");
-		logger.info("NOTE: Before running these tests, check that a compatible Smeagol server       ");
-		logger.info("with an empty database is running on " + SERVER_URL);
-		logger.info("WARNING: ALL INFORMATION IN THE DATABASE WILL BE LOST                          ");
-		logger.info("*******************************************************************************");
-	}
-
 	private static SmeagolClient client;
 
 	@BeforeClass
-	public static void onlyOnce() {
-		try {
-		client = new SmeagolClient(SERVER_URL);
-		dbUtils.resetDataBase();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	public static void prepareTestEnvironment() {
 
-	@AfterClass
-	public static void acaba() {
-		//dbUtils.rollback();
+		if (StringUtils.isBlank(dbUtils.getServerUrl())) {
+			logger.error("Please set the " + DbUtils.ENV_SMEAGOL_URL_NAME
+					+ " environment variable with the URL of the Sméagol server you want to run the tests with "
+					+ "(e.g. 'export " + DbUtils.ENV_SMEAGOL_URL_NAME + "=http://localhost:3000').");
+			System.exit(1);
+		}
+		if (StringUtils.isBlank(dbUtils.getDatabasePath())) {
+			logger.error("You must set the " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME
+					+ " environment variable with the path to the Sméagol server database used to run the tests "
+					+ "(e.g. 'export " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME + "=/path/to/smeagol/var/smeagol.db').");
+			System.exit(1);
+		}
+
+		System.out.println("About to run tests with the following parameters: ");
+		System.out.println("");
+		System.out.println("  * " + DbUtils.ENV_SMEAGOL_URL_NAME + " = " + dbUtils.getServerUrl());
+		System.out.println("  * " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME + " = " + dbUtils.getDatabasePath());
+		System.out.println("");
+
+		try {
+			client = new SmeagolClient(dbUtils.getServerUrl());
+		} catch (MalformedURLException ex) {
+			logger.error("error creating SmeagolClient instance", ex);
+		}
 	}
 
 	@Test(expected = MalformedURLException.class)
@@ -136,7 +142,9 @@ public class SmeagolClientTest extends TestCase {
 
 	@Test(expected = AlreadyExistsException.class)
 	public void testCreateTagAlreadyExists() throws AlreadyExistsException {
-		client.createTag(TAG_1.getId(), null);
+		String id = client.createTag(TAG_1.getId(), null);
+		assertNotNull(id);
+		client.createTag(id, "some other description");
 	}
 
 	@Test(expected = NotFoundException.class)
