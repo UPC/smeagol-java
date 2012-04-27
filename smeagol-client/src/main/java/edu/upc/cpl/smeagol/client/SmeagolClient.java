@@ -345,7 +345,7 @@ public class SmeagolClient {
 				return Long.parseLong(id);
 			} catch (URIException e) {
 				// this will never happen: the server returns well-formed URIs
-				e.printStackTrace();
+				logger.error("error parsing Resource location provided by server", e);
 			}
 			break;
 		}
@@ -435,21 +435,16 @@ public class SmeagolClient {
 	 *            optional info for the event.
 	 * @param startEnd
 	 *            the time interval (start, end) at which the event occurs.
-	 * @param tags
-	 *            the tags to be applied to the event. Tags not existing in
-	 *            server will be ignored.
 	 * @return the identifier of the new event.
+	 * @throws NullPointerException
+	 * @throws URIException
 	 */
-	public Long createEvent(String description, String info, Interval startEnd, Collection<Tag> tags) {
+	public Long createEvent(String description, String info, Interval startEnd) {
 		Form f = new Form();
 		f.add(EVENT_DESCRIPTION_ATTR_NAME, description);
 		f.add(EVENT_INFO_ATTR_NAME, info);
 		f.add(EVENT_STARTS_ATTR_NAME, startEnd.getStart().toString());
 		f.add(EVENT_ENDS_ATTR_NAME, startEnd.getEnd().toString());
-
-		if (CollectionUtils.isNotEmpty(tags)) {
-			f.add(EVENT_TAGS_ATTR_NAME, tagsAsFormParameter(tags));
-		}
 
 		ClientResponse response = eventWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
 
@@ -457,8 +452,15 @@ public class SmeagolClient {
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
 		case CREATED:
-			String id = response.getHeaders().getFirst("Location");
-
+			URI locationHeader;
+			try {
+				locationHeader = new URI(response.getHeaders().getFirst("Location"), false);
+				return Long.parseLong(getUriLastFragment(locationHeader));
+			} catch (Exception e) {
+				// This will never happen: server always returns well-formed
+				// URIs
+				logger.error("error parsing Event location provided by server", e);
+			}
 		}
 		return null;
 	}
