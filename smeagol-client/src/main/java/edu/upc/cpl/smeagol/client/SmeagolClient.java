@@ -5,7 +5,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
 
@@ -15,6 +14,8 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.Interval;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -56,7 +57,6 @@ public class SmeagolClient {
 	public static final String EVENT_INFO_ATTR_NAME = "info";
 	public static final String EVENT_STARTS_ATTR_NAME = "starts";
 	public static final String EVENT_ENDS_ATTR_NAME = "ends";
-	public static final String EVENT_TAGS_ATTR_NAME = "tags";
 
 	private Client client;
 
@@ -82,9 +82,11 @@ public class SmeagolClient {
 
 		try {
 			tagWr = client.resource(new URL(serverUrl, TAG_PATH).toURI());
-			resourceWr = client.resource(new URL(serverUrl, RESOURCE_PATH).toURI());
+			resourceWr = client.resource(new URL(serverUrl, RESOURCE_PATH)
+					.toURI());
 			eventWr = client.resource(new URL(serverUrl, EVENT_PATH).toURI());
-			bookingWr = client.resource(new URL(serverUrl, BOOKING_PATH).toURI());
+			bookingWr = client.resource(new URL(serverUrl, BOOKING_PATH)
+					.toURI());
 		} catch (URISyntaxException e) {
 			/*
 			 * this should never happen, since we have been provided a valid url
@@ -102,7 +104,8 @@ public class SmeagolClient {
 	 *         server.
 	 */
 	public Collection<Tag> getTags() {
-		String tagJsonArray = tagWr.accept(MediaType.APPLICATION_JSON).get(String.class);
+		String tagJsonArray = tagWr.accept(MediaType.APPLICATION_JSON).get(
+				String.class);
 		return Tag.deserializeCollection(tagJsonArray);
 	}
 
@@ -117,7 +120,8 @@ public class SmeagolClient {
 	 *             provided id.
 	 */
 	public Tag getTag(String id) throws NotFoundException {
-		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+		ClientResponse response = tagWr.path(id)
+				.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
 			throw new NotFoundException();
@@ -145,13 +149,15 @@ public class SmeagolClient {
 	 * @see Tag
 	 * 
 	 */
-	public String createTag(String id, String description) throws AlreadyExistsException {
+	public String createTag(String id, String description)
+			throws AlreadyExistsException {
 
 		Form f = new Form();
 		f.add(TAG_ID_ATTR_NAME, id);
 		f.add(TAG_DESCRIPTION_ATTR_NAME, description);
 
-		ClientResponse response = tagWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
+		ClientResponse response = tagWr.accept(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {
 		case CONFLICT:
@@ -183,13 +189,16 @@ public class SmeagolClient {
 	 * @throws NotFoundException
 	 *             if the tag to be updated does not exist
 	 */
-	public void updateTag(String id, String newDescription) throws NotFoundException {
+	public void updateTag(String id, String newDescription)
+			throws NotFoundException {
 
 		Form f = new Form();
 		f.add(TAG_ID_ATTR_NAME, id);
 		f.add(TAG_DESCRIPTION_ATTR_NAME, newDescription);
 
-		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).put(ClientResponse.class, f);
+		ClientResponse response = tagWr.path(id)
+				.accept(MediaType.APPLICATION_JSON)
+				.put(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {
 		case NOT_FOUND:
@@ -208,7 +217,9 @@ public class SmeagolClient {
 	 * @throws NotFoundException
 	 */
 	public void deleteTag(String id) throws NotFoundException {
-		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).delete(ClientResponse.class);
+		ClientResponse response = tagWr.path(id)
+				.accept(MediaType.APPLICATION_JSON)
+				.delete(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
 			throw new NotFoundException();
@@ -284,7 +295,8 @@ public class SmeagolClient {
 	 *         server.
 	 */
 	public Collection<Resource> getResources() {
-		String resourceJsonArray = resourceWr.accept(MediaType.APPLICATION_JSON).get(String.class);
+		String resourceJsonArray = resourceWr
+				.accept(MediaType.APPLICATION_JSON).get(String.class);
 
 		return Resource.deserializeCollection(resourceJsonArray);
 	}
@@ -299,8 +311,8 @@ public class SmeagolClient {
 	 *             if there is no resource with such identifier.
 	 */
 	public Resource getResource(Long id) throws NotFoundException {
-		ClientResponse response = resourceWr.path(id.toString()).accept(MediaType.APPLICATION_JSON)
-				.get(ClientResponse.class);
+		ClientResponse response = resourceWr.path(id.toString())
+				.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
 			throw new NotFoundException();
@@ -326,12 +338,14 @@ public class SmeagolClient {
 	 *             if the provided description is <code>null</code>, an empty
 	 *             string, or a blank string.
 	 */
-	public Long createResource(String description, String info) throws AlreadyExistsException {
+	public Long createResource(String description, String info)
+			throws AlreadyExistsException {
 		Form f = new Form();
 		f.add(RESOURCE_DESCRIPTION_ATTR_NAME, description);
 		f.add(RESOURCE_INFO_ATTR_NAME, info);
 
-		ClientResponse response = resourceWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
+		ClientResponse response = resourceWr.accept(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {
 		case CONFLICT:
@@ -341,11 +355,13 @@ public class SmeagolClient {
 		case CREATED:
 			String id;
 			try {
-				id = getUriLastFragment(new URI(response.getHeaders().getFirst("Location"), false));
+				id = getUriLastFragment(new URI(response.getHeaders().getFirst(
+						"Location"), false));
 				return Long.parseLong(id);
 			} catch (URIException e) {
 				// this will never happen: the server returns well-formed URIs
-				logger.error("error parsing Resource location provided by server", e);
+				logger.error(
+						"error parsing Resource location provided by server", e);
 			}
 			break;
 		}
@@ -366,7 +382,8 @@ public class SmeagolClient {
 	 *             if there is no such resource with the provided identifier.
 	 */
 	public void deleteResource(Long id) throws NotFoundException {
-		ClientResponse response = resourceWr.path(id.toString()).accept(MediaType.APPLICATION_JSON)
+		ClientResponse response = resourceWr.path(id.toString())
+				.accept(MediaType.APPLICATION_JSON)
 				.delete(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
@@ -377,23 +394,14 @@ public class SmeagolClient {
 	/**
 	 * Retrieve all {@code Event}s in server
 	 * 
-	 * @return a (possibly empty) collection containing all the Events defined
-	 *         in the Smeagol server
+	 * @return a (possibly empty) collection containing all Events defined in
+	 *         the Sméagol server.
 	 */
 	public Collection<Event> getEvents() {
-		String eventJsonArray = eventWr.accept(MediaType.APPLICATION_JSON).get(String.class);
+		String eventJsonArray = eventWr.accept(MediaType.APPLICATION_JSON).get(
+				String.class);
 
-		Collection<Event> events = Event.deserializeCollection(eventJsonArray);
-
-		// In a Event list, the server only returns the tag identifiers
-		// instead of the full tag tag list for every event. For each
-		// identifier, we must retrieve the full tag attributes and repopulate
-		// the Resource tags.
-
-		for (Event e : events) {
-			populateTagAttributes(e.getTags());
-		}
-		return events;
+		return Event.deserializeCollection(eventJsonArray);
 	}
 
 	/**
@@ -407,11 +415,12 @@ public class SmeagolClient {
 	 */
 	public Event getEvent(Long id) throws NotFoundException {
 		if (id == null) {
-			throw new IllegalArgumentException("getEvent requires a non null argument");
+			throw new IllegalArgumentException(
+					"getEvent requires a non null argument");
 		}
 
-		ClientResponse response = eventWr.path(id.toString()).accept(MediaType.APPLICATION_JSON)
-				.get(ClientResponse.class);
+		ClientResponse response = eventWr.path(id.toString())
+				.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
 			throw new NotFoundException();
@@ -420,9 +429,6 @@ public class SmeagolClient {
 		String json = response.getEntity(String.class);
 		Event result = Event.deserialize(json);
 
-		// Populate tag descriptions before returning the event to the user
-		populateTagAttributes(result.getTags());
-
 		return result;
 	}
 
@@ -430,78 +436,49 @@ public class SmeagolClient {
 	 * Creates a new {@code Event} in the server
 	 * 
 	 * @param description
-	 *            the event description. Cannot be null.
+	 *            the event description. Required, not blank.
 	 * @param info
-	 *            optional info for the event.
+	 *            Event info. Optional.
 	 * @param startEnd
 	 *            the time interval (start, end) at which the event occurs.
+	 *            Required.
 	 * @return the identifier of the new event.
 	 * @throws NullPointerException
 	 * @throws URIException
 	 */
 	public Long createEvent(String description, String info, Interval startEnd) {
+		if (startEnd == null) {
+			throw new IllegalArgumentException(
+					"startEnd interval cannot be null");
+		}
 		Form f = new Form();
 		f.add(EVENT_DESCRIPTION_ATTR_NAME, description);
 		f.add(EVENT_INFO_ATTR_NAME, info);
-		f.add(EVENT_STARTS_ATTR_NAME, startEnd.getStart().toString());
-		f.add(EVENT_ENDS_ATTR_NAME, startEnd.getEnd().toString());
+		f.add(EVENT_STARTS_ATTR_NAME, ISODateTimeFormat.dateTimeNoMillis()
+				.print(new LocalDateTime(startEnd.getStart())));
+		f.add(EVENT_ENDS_ATTR_NAME,
+				ISODateTimeFormat.dateTimeNoMillis().print(
+						new LocalDateTime(startEnd.getEnd())));
 
-		ClientResponse response = eventWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
+		ClientResponse response = eventWr.accept(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
 		case CREATED:
-			URI locationHeader;
 			try {
-				locationHeader = new URI(response.getHeaders().getFirst("Location"), false);
+				URI locationHeader = new URI(response.getHeaders().getFirst(
+						"Location"), false);
 				return Long.parseLong(getUriLastFragment(locationHeader));
 			} catch (Exception e) {
 				// This will never happen: server always returns well-formed
 				// URIs
-				logger.error("error parsing Event location provided by server", e);
+				logger.error("error parsing Event location provided by server",
+						e);
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Converts a {@code Tag} collection into a String containing their
-	 * identifiers separated by commas. This is a utility method to prepare
-	 * {@code Form} parameters.
-	 * 
-	 * @param tags
-	 * @return
-	 */
-	private String tagsAsFormParameter(Collection<Tag> tags) {
-		if (CollectionUtils.isEmpty(tags)) {
-			return "";
-		}
-		Set<String> tagIds = new HashSet<String>();
-		for (Tag t : tags) {
-			tagIds.add(t.getId());
-		}
-		return StringUtils.join(tagIds, ",");
-	}
-
-	/**
-	 * Retrieve and populate {@code Tag} descriptions for a collection of Tags.
-	 * Tag descriptions will be retrieved from the server. Tags which don't
-	 * exist in server will be ignored (their descriptions will not be
-	 * modified).
-	 * 
-	 * @param tagsToPopulate
-	 *            a collection of tags with possibly empty descriptions.
-	 */
-	private void populateTagAttributes(Collection<Tag> tagsToPopulate) {
-		for (Tag t : tagsToPopulate) {
-			try {
-				Tag aux = getTag(t.getId());
-				t.setDescription(aux.getDescription());
-			} catch (NotFoundException e) {
-				// This tag does not exist in server. Just ignore it.
-			}
-		}
 	}
 
 	/**
@@ -512,27 +489,23 @@ public class SmeagolClient {
 	 * @param newEvent
 	 *            the Event which will be used to update the old Event.
 	 */
-	public Event updateEvent(long id, Event newEvent) throws NotFoundException {
-		Event result = null;
-
+	public void updateEvent(long id, Event newEvent) throws NotFoundException {
 		Form f = new Form();
 		f.add(EVENT_DESCRIPTION_ATTR_NAME, newEvent.getDescription());
 		f.add(EVENT_INFO_ATTR_NAME, newEvent.getInfo());
 		f.add(EVENT_STARTS_ATTR_NAME, newEvent.getInterval().getStart());
 		f.add(EVENT_ENDS_ATTR_NAME, newEvent.getInterval().getEnd());
-		f.add(EVENT_TAGS_ATTR_NAME, tagsAsFormParameter(newEvent.getTags()));
 
-		ClientResponse response = eventWr.path("" + id).accept(MediaType.APPLICATION_JSON).put(ClientResponse.class, f);
+		ClientResponse response = eventWr.path("" + id)
+				.accept(MediaType.APPLICATION_JSON)
+				.put(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {
 		case NOT_FOUND:
 			throw new NotFoundException();
 		case OK:
-			result = Event.deserialize(response.getEntity(String.class));
-			populateTagAttributes(result.getTags());
 			break;
 		}
-		return result;
 	}
 
 	/**
@@ -544,7 +517,9 @@ public class SmeagolClient {
 	 *             if there is no event with the provided id in the server.
 	 */
 	public void deleteEvent(long id) throws NotFoundException {
-		ClientResponse response = eventWr.path("" + id).accept(MediaType.APPLICATION_JSON).delete(ClientResponse.class);
+		ClientResponse response = eventWr.path("" + id)
+				.accept(MediaType.APPLICATION_JSON)
+				.delete(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
 			throw new NotFoundException();

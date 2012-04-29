@@ -3,9 +3,7 @@ package edu.upc.cpl.smeagol.client.domain;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.HashSet;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -76,7 +74,6 @@ public class Event implements Serializable, Comparable<Event> {
 	private String info;
 	private DateTime starts;
 	private DateTime ends;
-	private Collection<Tag> tags = new HashSet<Tag>();
 
 	/**
 	 * Check if parameter is a valid event description
@@ -87,12 +84,13 @@ public class Event implements Serializable, Comparable<Event> {
 	 *         {@link Event#DESCRIPTION_MAX_LEN}, {@code false} otherwise.
 	 */
 	public static boolean validateDescription(String candidate) {
-		return (candidate != null && StringUtils.isNotBlank(candidate) && GenericValidator.maxLength(candidate,
-				DESCRIPTION_MAX_LEN));
+		return (candidate != null && StringUtils.isNotBlank(candidate) && GenericValidator
+				.maxLength(candidate, DESCRIPTION_MAX_LEN));
 	}
 
 	public static boolean validateInfo(String candidate) {
-		return (candidate == null || GenericValidator.maxLength(candidate, INFO_MAX_LEN));
+		return (candidate == null || GenericValidator.maxLength(candidate,
+				INFO_MAX_LEN));
 	}
 
 	/**
@@ -109,25 +107,6 @@ public class Event implements Serializable, Comparable<Event> {
 		setDescription(description);
 		setInfo(info);
 		setInterval(startEnd);
-	}
-
-	/**
-	 * Create a new Event with the provided attributes
-	 * 
-	 * @param description
-	 *            non-empty, unique description
-	 * @param info
-	 *            additional, optional info
-	 * @param startEnd
-	 *            the {@link Interval} (start, end) at which the event occurs
-	 * @param tags
-	 *            the event tags
-	 */
-	public Event(String description, String info, Interval startEnd, Collection<Tag> tags) {
-		setDescription(description);
-		setInfo(info);
-		setInterval(startEnd);
-		setTags(tags);
 	}
 
 	public Long getId() {
@@ -151,7 +130,8 @@ public class Event implements Serializable, Comparable<Event> {
 	 *             if {@code description} is not a valid description as required
 	 *             by {@link Event#validateDescription(String)}
 	 */
-	public void setDescription(String description) throws IllegalArgumentException {
+	public void setDescription(String description)
+			throws IllegalArgumentException {
 		if (!validateDescription(description)) {
 			throw new IllegalArgumentException("invalid event description");
 		}
@@ -191,19 +171,12 @@ public class Event implements Serializable, Comparable<Event> {
 	 * @return the interval
 	 */
 	public Interval getInterval() {
-		return new Interval(starts, ends);
-	}
-
-	public void setTags(Collection<Tag> tags) {
-		this.tags = tags;
-	}
-
-	public Collection<Tag> getTags() {
-		return tags;
+		return new Interval(starts.toDateTime(), ends.toDateTime());
 	}
 
 	public int compareTo(Event other) {
-		return new CompareToBuilder().append(this.description, other.description).toComparison();
+		return new CompareToBuilder().append(this.description,
+				other.description).toComparison();
 	}
 
 	@Override
@@ -219,20 +192,22 @@ public class Event implements Serializable, Comparable<Event> {
 		}
 		Event other = (Event) obj;
 
-		return new EqualsBuilder().append(this.id, other.id).append(this.description, other.description)
-				.append(this.info, other.info)
-				.appendSuper(CollectionUtils.isEqualCollection(this.getTags(), other.getTags())).isEquals();
+		return new EqualsBuilder().append(this.id, other.id)
+				.append(this.description, other.description)
+				.append(this.info, other.info).isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder().append(id).append(description).append(info).append(tags).toHashCode();
+		return new HashCodeBuilder().append(id).append(description)
+				.append(info).toHashCode();
 	}
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("id", id).append("description", description).append("info", info)
-				.append("tags", tags).toString();
+		return new ToStringBuilder(this).append("id", id)
+				.append("description", description).append("info", info)
+				.toString();
 	}
 
 	public String serialize() {
@@ -247,7 +222,8 @@ public class Event implements Serializable, Comparable<Event> {
 		return gson.fromJson(json, Event.class);
 	}
 
-	public static Collection<Event> deserializeCollection(String json) throws JsonParseException {
+	public static Collection<Event> deserializeCollection(String json)
+			throws JsonParseException {
 		Type collectionType = new TypeToken<Collection<Event>>() {
 		}.getType();
 		return gson.fromJson(json, collectionType);

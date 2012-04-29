@@ -3,6 +3,7 @@ package edu.upc.cpl.smeagol.json;
 import java.lang.reflect.Type;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -25,13 +26,16 @@ import com.google.gson.JsonSerializer;
  * @author angel
  * 
  */
-public class DateTimeConverter implements JsonSerializer<DateTime>, JsonDeserializer<DateTime> {
-	public JsonElement serialize(DateTime src, Type typeOfSrc, JsonSerializationContext context) {
-		return new JsonPrimitive(src.toString());
+public class DateTimeConverter implements JsonSerializer<DateTime>,
+		JsonDeserializer<DateTime> {
+	public JsonElement serialize(DateTime src, Type typeOfSrc,
+			JsonSerializationContext context) {
+		return new JsonPrimitive(ISODateTimeFormat.dateTimeNoMillis()
+				.print(src));
 	}
 
-	public DateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-			throws JsonParseException {
+	public DateTime deserialize(JsonElement json, Type typeOfT,
+			JsonDeserializationContext context) throws JsonParseException {
 		return new DateTime(json.getAsJsonPrimitive().getAsString());
 	}
 }
