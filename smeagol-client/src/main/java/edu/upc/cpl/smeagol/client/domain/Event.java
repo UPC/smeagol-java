@@ -84,13 +84,12 @@ public class Event implements Serializable, Comparable<Event> {
 	 *         {@link Event#DESCRIPTION_MAX_LEN}, {@code false} otherwise.
 	 */
 	public static boolean validateDescription(String candidate) {
-		return (candidate != null && StringUtils.isNotBlank(candidate) && GenericValidator
-				.maxLength(candidate, DESCRIPTION_MAX_LEN));
+		return (candidate != null && StringUtils.isNotBlank(candidate) && GenericValidator.maxLength(candidate,
+				DESCRIPTION_MAX_LEN));
 	}
 
 	public static boolean validateInfo(String candidate) {
-		return (candidate == null || GenericValidator.maxLength(candidate,
-				INFO_MAX_LEN));
+		return (candidate == null || GenericValidator.maxLength(candidate, INFO_MAX_LEN));
 	}
 
 	/**
@@ -130,8 +129,7 @@ public class Event implements Serializable, Comparable<Event> {
 	 *             if {@code description} is not a valid description as required
 	 *             by {@link Event#validateDescription(String)}
 	 */
-	public void setDescription(String description)
-			throws IllegalArgumentException {
+	public void setDescription(String description) throws IllegalArgumentException {
 		if (!validateDescription(description)) {
 			throw new IllegalArgumentException("invalid event description");
 		}
@@ -175,8 +173,7 @@ public class Event implements Serializable, Comparable<Event> {
 	}
 
 	public int compareTo(Event other) {
-		return new CompareToBuilder().append(this.description,
-				other.description).toComparison();
+		return new CompareToBuilder().append(this.description, other.description).toComparison();
 	}
 
 	@Override
@@ -192,21 +189,18 @@ public class Event implements Serializable, Comparable<Event> {
 		}
 		Event other = (Event) obj;
 
-		return new EqualsBuilder().append(this.id, other.id)
-				.append(this.description, other.description)
-				.append(this.info, other.info).isEquals();
+		return new EqualsBuilder().append(this.id, other.id).append(this.description, other.description)
+				.append(this.info, other.info).append(this.getInterval(), other.getInterval()).isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder().append(id).append(description)
-				.append(info).toHashCode();
+		return new HashCodeBuilder().append(id).append(description).append(info).toHashCode();
 	}
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("id", id)
-				.append("description", description).append("info", info)
+		return new ToStringBuilder(this).append("id", id).append("description", description).append("info", info)
 				.toString();
 	}
 
@@ -222,8 +216,7 @@ public class Event implements Serializable, Comparable<Event> {
 		return gson.fromJson(json, Event.class);
 	}
 
-	public static Collection<Event> deserializeCollection(String json)
-			throws JsonParseException {
+	public static Collection<Event> deserializeCollection(String json) throws JsonParseException {
 		Type collectionType = new TypeToken<Collection<Event>>() {
 		}.getType();
 		return gson.fromJson(json, collectionType);
