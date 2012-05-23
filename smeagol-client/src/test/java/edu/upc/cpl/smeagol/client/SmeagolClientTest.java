@@ -323,6 +323,18 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test
+	public void testCreateEventWithInfoMaxLength() {
+		String LONG_INFO = StringUtils.rightPad("a", Event.INFO_MAX_LEN, 'a');
+		client.createEvent(EVENT_1.getDescription(), LONG_INFO, EVENT_1.getInterval());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateEventWithInfoTooLong() {
+		String TOO_LONG_INFO = StringUtils.rightPad("a", Event.INFO_MAX_LEN + 1, 'a');
+		client.createEvent(EVENT_1.getDescription(), TOO_LONG_INFO, EVENT_1.getInterval());
+	}
+
+	@Test
 	public void testCreateEvent() {
 		Collection<Event> events = client.getEvents();
 		int eventCountBefore = events.size();
