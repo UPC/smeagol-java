@@ -8,6 +8,17 @@ import java.sql.Statement;
 import org.apache.log4j.Logger;
 import org.junit.rules.ExternalResource;
 
+/**
+ * Defines the Sméagol database as an external resource to be used by
+ * {@link edu.upc.cpl.smeagol.client.SmeagolClientTest}.
+ * 
+ * <p>
+ * When used as a JUnit rule (see {@link org.junit.Rule}), this class defines
+ * methods to set the Sméagol database to a well-known status before each test
+ * is run.
+ * 
+ * @author angel
+ */
 public class DbUtils extends ExternalResource {
 
 	private static final Logger logger = Logger.getLogger(DbUtils.class);
@@ -43,7 +54,6 @@ public class DbUtils extends ExternalResource {
 	 * @return
 	 */
 	public String getDatabasePath() {
-		// return "/home/angel/smeagol/var/smeagol.db";
 		return System.getenv(ENV_SMEAGOL_DB_PATH_NAME);
 	}
 
@@ -53,12 +63,11 @@ public class DbUtils extends ExternalResource {
 	 * @return
 	 */
 	public String getServerUrl() {
-		// return "http://localhost:3000";
 		return System.getenv(ENV_SMEAGOL_URL_NAME);
 	}
 
 	/**
-	 * Method invoked automatically by jUnit, before each Test
+	 * Method invoked automatically by JUnit, before each Test
 	 */
 	@Override
 	protected void before() throws Throwable {
@@ -73,7 +82,7 @@ public class DbUtils extends ExternalResource {
 	}
 
 	/**
-	 * Method invoked automatically by jUnit, after each Test
+	 * Method invoked automatically by JUnit, after each Test
 	 */
 	@Override
 	protected void after() {
@@ -81,8 +90,8 @@ public class DbUtils extends ExternalResource {
 	}
 
 	/**
-	 * Set the Sméagol database contents to a known initial state, ready for
-	 * tests.
+	 * Set the Sméagol database contents to a well-known initial status, ready
+	 * for tests.
 	 */
 	private void initDB() {
 		try {

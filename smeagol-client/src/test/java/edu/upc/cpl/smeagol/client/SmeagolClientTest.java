@@ -25,8 +25,6 @@ import edu.upc.cpl.smeagol.client.exception.NotFoundException;
 
 /**
  * <code>SmeagolClient</code> tests.
- * <p>
- * WARNING: Before running these tests
  * 
  * @author angel
  * 
@@ -36,6 +34,14 @@ public class SmeagolClientTest extends TestCase {
 
 	private static Logger logger = Logger.getLogger(SmeagolClientTest.class);
 
+	/**
+	 * JUnit rule to perform actions before and after each test. This rule wipes
+	 * out all data from the sméagol database so each test begins with an empty
+	 * database, thus each test is independent from each other.
+	 * 
+	 * <p>
+	 * See {@link #DbUtils}.
+	 */
 	@Rule
 	public static final DbUtils dbUtils = new DbUtils();
 
@@ -52,6 +58,13 @@ public class SmeagolClientTest extends TestCase {
 
 	private static SmeagolClient client;
 
+	/**
+	 * Checks for the required environment variables are properly set, and
+	 * creates a Smeagol client to be used by all the tests.
+	 * 
+	 * <p>
+	 * This method is run only once (see {@link #BeforeClass} docs).
+	 */
 	@BeforeClass
 	public static void prepareTestEnvironment() {
 
