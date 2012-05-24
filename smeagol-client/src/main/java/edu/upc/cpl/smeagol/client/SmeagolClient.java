@@ -46,6 +46,11 @@ public class SmeagolClient {
 	private static final String EVENT_PATH = "event";
 	private static final String BOOKING_PATH = "booking";
 
+	/*
+	 * The following constants are the names of the parameters to be used in
+	 * Form objects in PUTs and POSTs.
+	 */
+
 	public static final String TAG_ID_ATTR_NAME = "id";
 	public static final String TAG_DESCRIPTION_ATTR_NAME = "description";
 
@@ -335,8 +340,8 @@ public class SmeagolClient {
 	 *             if there is already another resource with the same
 	 *             description defined in the server.
 	 * @throws IllegalArgumentException
-	 *             if the provided description is <code>null</code>, an empty
-	 *             string, or a blank string.
+	 *             if the provided description is not a valid Resource
+	 *             description.
 	 */
 	public Long createResource(String description, String info)
 			throws AlreadyExistsException {
@@ -388,6 +393,37 @@ public class SmeagolClient {
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
 			throw new NotFoundException();
+		}
+	}
+
+	/**
+	 * Replace the Resource identified by {@code id} with a new Resource.
+	 * 
+	 * @param id
+	 *            the identifier of the Resource to be updated.
+	 * @param newResource
+	 *            the Resource which will be used to update the old one.
+	 * @throws AlreadyExistsException 
+	 */
+	public void updateResource(long id, Resource newResource)
+			throws NotFoundException, AlreadyExistsException {
+		Form f = new Form();
+		f.add(RESOURCE_DESCRIPTION_ATTR_NAME, newResource.getDescription());
+		f.add(RESOURCE_INFO_ATTR_NAME, newResource.getInfo());
+
+		ClientResponse response = resourceWr.path("" + id)
+				.accept(MediaType.APPLICATION_JSON)
+				.put(ClientResponse.class, f);
+
+		switch (response.getClientResponseStatus()) {
+		case NOT_FOUND:
+			throw new NotFoundException();
+		case CONFLICT:
+			throw new AlreadyExistsException();
+		case BAD_REQUEST:
+			throw new IllegalArgumentException();
+		case OK:
+			break;
 		}
 	}
 
