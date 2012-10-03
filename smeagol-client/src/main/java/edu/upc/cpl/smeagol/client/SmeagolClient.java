@@ -87,11 +87,9 @@ public class SmeagolClient {
 
 		try {
 			tagWr = client.resource(new URL(serverUrl, TAG_PATH).toURI());
-			resourceWr = client.resource(new URL(serverUrl, RESOURCE_PATH)
-					.toURI());
+			resourceWr = client.resource(new URL(serverUrl, RESOURCE_PATH).toURI());
 			eventWr = client.resource(new URL(serverUrl, EVENT_PATH).toURI());
-			bookingWr = client.resource(new URL(serverUrl, BOOKING_PATH)
-					.toURI());
+			bookingWr = client.resource(new URL(serverUrl, BOOKING_PATH).toURI());
 		} catch (URISyntaxException e) {
 			/*
 			 * this should never happen, since we have been provided a valid url
@@ -109,8 +107,7 @@ public class SmeagolClient {
 	 *         server.
 	 */
 	public Collection<Tag> getTags() {
-		String tagJsonArray = tagWr.accept(MediaType.APPLICATION_JSON).get(
-				String.class);
+		String tagJsonArray = tagWr.accept(MediaType.APPLICATION_JSON).get(String.class);
 		return Tag.deserializeCollection(tagJsonArray);
 	}
 
@@ -124,9 +121,8 @@ public class SmeagolClient {
 	 *             when there is not a <code>Tag</code> in server with the
 	 *             provided id.
 	 */
-	public Tag getTag(String id) throws NotFoundException {
-		ClientResponse response = tagWr.path(id)
-				.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+	public Tag getTag(String id) {
+		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
 			throw new NotFoundException();
@@ -154,15 +150,13 @@ public class SmeagolClient {
 	 * @see Tag
 	 * 
 	 */
-	public String createTag(String id, String description)
-			throws AlreadyExistsException {
+	public String createTag(String id, String description) {
 
 		Form f = new Form();
 		f.add(TAG_ID_ATTR_NAME, id);
 		f.add(TAG_DESCRIPTION_ATTR_NAME, description);
 
-		ClientResponse response = tagWr.accept(MediaType.APPLICATION_JSON)
-				.post(ClientResponse.class, f);
+		ClientResponse response = tagWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {
 		case CONFLICT:
@@ -194,16 +188,13 @@ public class SmeagolClient {
 	 * @throws NotFoundException
 	 *             if the tag to be updated does not exist
 	 */
-	public void updateTag(String id, String newDescription)
-			throws NotFoundException {
+	public void updateTag(String id, String newDescription) {
 
 		Form f = new Form();
 		f.add(TAG_ID_ATTR_NAME, id);
 		f.add(TAG_DESCRIPTION_ATTR_NAME, newDescription);
 
-		ClientResponse response = tagWr.path(id)
-				.accept(MediaType.APPLICATION_JSON)
-				.put(ClientResponse.class, f);
+		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).put(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {
 		case NOT_FOUND:
@@ -221,10 +212,8 @@ public class SmeagolClient {
 	 *            the identifier of the tag to be removed
 	 * @throws NotFoundException
 	 */
-	public void deleteTag(String id) throws NotFoundException {
-		ClientResponse response = tagWr.path(id)
-				.accept(MediaType.APPLICATION_JSON)
-				.delete(ClientResponse.class);
+	public void deleteTag(String id) {
+		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).delete(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
 			throw new NotFoundException();
@@ -271,6 +260,8 @@ public class SmeagolClient {
 		int count = 0;
 
 		/*
+		 * FIXME: Optimització precoç. BAD PRACTICE!
+		 * 
 		 * To save expensive network operations, we check locally wether they
 		 * exist or not.
 		 */
@@ -300,8 +291,7 @@ public class SmeagolClient {
 	 *         server.
 	 */
 	public Collection<Resource> getResources() {
-		String resourceJsonArray = resourceWr
-				.accept(MediaType.APPLICATION_JSON).get(String.class);
+		String resourceJsonArray = resourceWr.accept(MediaType.APPLICATION_JSON).get(String.class);
 
 		return Resource.deserializeCollection(resourceJsonArray);
 	}
@@ -315,9 +305,9 @@ public class SmeagolClient {
 	 * @throws NotFoundException
 	 *             if there is no resource with such identifier.
 	 */
-	public Resource getResource(Long id) throws NotFoundException {
-		ClientResponse response = resourceWr.path(id.toString())
-				.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+	public Resource getResource(Long id) {
+		ClientResponse response = resourceWr.path(id.toString()).accept(MediaType.APPLICATION_JSON)
+				.get(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
 			throw new NotFoundException();
@@ -343,14 +333,12 @@ public class SmeagolClient {
 	 *             if the provided description is not a valid Resource
 	 *             description.
 	 */
-	public Long createResource(String description, String info)
-			throws AlreadyExistsException {
+	public Long createResource(String description, String info) {
 		Form f = new Form();
 		f.add(RESOURCE_DESCRIPTION_ATTR_NAME, description);
 		f.add(RESOURCE_INFO_ATTR_NAME, info);
 
-		ClientResponse response = resourceWr.accept(MediaType.APPLICATION_JSON)
-				.post(ClientResponse.class, f);
+		ClientResponse response = resourceWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {
 		case CONFLICT:
@@ -360,13 +348,11 @@ public class SmeagolClient {
 		case CREATED:
 			String id;
 			try {
-				id = getUriLastFragment(new URI(response.getHeaders().getFirst(
-						"Location"), false));
+				id = getUriLastFragment(new URI(response.getHeaders().getFirst("Location"), false));
 				return Long.parseLong(id);
 			} catch (URIException e) {
 				// this will never happen: the server returns well-formed URIs
-				logger.error(
-						"error parsing Resource location provided by server", e);
+				logger.error("error parsing Resource location provided by server", e);
 			}
 			break;
 		}
@@ -386,9 +372,8 @@ public class SmeagolClient {
 	 * @throws NotFoundException
 	 *             if there is no such resource with the provided identifier.
 	 */
-	public void deleteResource(Long id) throws NotFoundException {
-		ClientResponse response = resourceWr.path(id.toString())
-				.accept(MediaType.APPLICATION_JSON)
+	public void deleteResource(Long id) {
+		ClientResponse response = resourceWr.path(id.toString()).accept(MediaType.APPLICATION_JSON)
 				.delete(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
@@ -434,8 +419,7 @@ public class SmeagolClient {
 	 *         the Sméagol server.
 	 */
 	public Collection<Event> getEvents() {
-		String eventJsonArray = eventWr.accept(MediaType.APPLICATION_JSON).get(
-				String.class);
+		String eventJsonArray = eventWr.accept(MediaType.APPLICATION_JSON).get(String.class);
 
 		return Event.deserializeCollection(eventJsonArray);
 	}
@@ -449,14 +433,13 @@ public class SmeagolClient {
 	 * @throws NotFoundException
 	 *             if there is no {@code Event} in the server with such id
 	 */
-	public Event getEvent(Long id) throws NotFoundException {
+	public Event getEvent(Long id) {
 		if (id == null) {
-			throw new IllegalArgumentException(
-					"getEvent requires a non null argument");
+			throw new IllegalArgumentException("getEvent requires a non null argument");
 		}
 
-		ClientResponse response = eventWr.path(id.toString())
-				.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+		ClientResponse response = eventWr.path(id.toString()).accept(MediaType.APPLICATION_JSON)
+				.get(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
 			throw new NotFoundException();
@@ -479,39 +462,33 @@ public class SmeagolClient {
 	 *            the time interval (start, end) at which the event occurs.
 	 *            Required.
 	 * @return the identifier of the new event.
-	 * @throws NullPointerException
+	 * 
 	 * @throws URIException
 	 */
 	public Long createEvent(String description, String info, Interval startEnd) {
 		if (startEnd == null) {
-			throw new IllegalArgumentException(
-					"startEnd interval cannot be null");
+			throw new IllegalArgumentException("startEnd interval cannot be null");
 		}
 		Form f = new Form();
 		f.add(EVENT_DESCRIPTION_ATTR_NAME, description);
 		f.add(EVENT_INFO_ATTR_NAME, info);
 		f.add(EVENT_STARTS_ATTR_NAME, ISODateTimeFormat.dateTimeNoMillis()
 				.print(new LocalDateTime(startEnd.getStart())));
-		f.add(EVENT_ENDS_ATTR_NAME,
-				ISODateTimeFormat.dateTimeNoMillis().print(
-						new LocalDateTime(startEnd.getEnd())));
+		f.add(EVENT_ENDS_ATTR_NAME, ISODateTimeFormat.dateTimeNoMillis().print(new LocalDateTime(startEnd.getEnd())));
 
-		ClientResponse response = eventWr.accept(MediaType.APPLICATION_JSON)
-				.post(ClientResponse.class, f);
+		ClientResponse response = eventWr.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
 		case CREATED:
 			try {
-				URI locationHeader = new URI(response.getHeaders().getFirst(
-						"Location"), false);
+				URI locationHeader = new URI(response.getHeaders().getFirst("Location"), false);
 				return Long.parseLong(getUriLastFragment(locationHeader));
 			} catch (Exception e) {
 				// This will never happen: server always returns well-formed
 				// URIs
-				logger.error("error parsing Event location provided by server",
-						e);
+				logger.error("error parsing Event location provided by server", e);
 			}
 		}
 		return null;
@@ -524,17 +501,17 @@ public class SmeagolClient {
 	 *            the identifier of the Event to update.
 	 * @param newEvent
 	 *            the Event which will be used to update the old Event.
+	 * 
+	 * @throws NotFoundException
 	 */
-	public void updateEvent(long id, Event newEvent) throws NotFoundException {
+	public void updateEvent(long id, Event newEvent) {
 		Form f = new Form();
 		f.add(EVENT_DESCRIPTION_ATTR_NAME, newEvent.getDescription());
 		f.add(EVENT_INFO_ATTR_NAME, newEvent.getInfo());
 		f.add(EVENT_STARTS_ATTR_NAME, newEvent.getInterval().getStart());
 		f.add(EVENT_ENDS_ATTR_NAME, newEvent.getInterval().getEnd());
 
-		ClientResponse response = eventWr.path("" + id)
-				.accept(MediaType.APPLICATION_JSON)
-				.put(ClientResponse.class, f);
+		ClientResponse response = eventWr.path("" + id).accept(MediaType.APPLICATION_JSON).put(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {
 		case NOT_FOUND:
@@ -552,10 +529,8 @@ public class SmeagolClient {
 	 * @throws NotFoundException
 	 *             if there is no event with the provided id in the server.
 	 */
-	public void deleteEvent(long id) throws NotFoundException {
-		ClientResponse response = eventWr.path("" + id)
-				.accept(MediaType.APPLICATION_JSON)
-				.delete(ClientResponse.class);
+	public void deleteEvent(long id) {
+		ClientResponse response = eventWr.path("" + id).accept(MediaType.APPLICATION_JSON).delete(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
 			throw new NotFoundException();

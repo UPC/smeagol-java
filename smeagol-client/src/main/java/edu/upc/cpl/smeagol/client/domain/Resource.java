@@ -13,7 +13,6 @@ import org.apache.commons.validator.GenericValidator;
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -83,7 +82,7 @@ public class Resource implements Serializable, Comparable<Resource> {
 	 *             if the provided description is not a valid resource
 	 *             description
 	 */
-	public Resource(String description) throws IllegalArgumentException {
+	public Resource(String description) {
 		setDescription(description);
 	}
 
@@ -96,7 +95,7 @@ public class Resource implements Serializable, Comparable<Resource> {
 	 *             if the provided description is <code>null</code> or an empty
 	 *             or blank string.
 	 */
-	public Resource(String description, String info) throws IllegalArgumentException {
+	public Resource(String description, String info) {
 		setDescription(description);
 		setInfo(info);
 	}
@@ -117,7 +116,7 @@ public class Resource implements Serializable, Comparable<Resource> {
 	 * @throws IllegalArgumentException
 	 *             if the description is not a valid resource description
 	 */
-	public void setDescription(String description) throws IllegalArgumentException {
+	public void setDescription(String description) {
 		if (!validateDescription(description)) {
 			throw new IllegalArgumentException("invalid resource description");
 		}
@@ -182,11 +181,11 @@ public class Resource implements Serializable, Comparable<Resource> {
 		return gson.toJson(resources);
 	}
 
-	public static Resource deserialize(String json) throws JsonParseException {
+	public static Resource deserialize(String json) {
 		return gson.fromJson(json, Resource.class);
 	}
 
-	public static Collection<Resource> deserializeCollection(String json) throws JsonParseException {
+	public static Collection<Resource> deserializeCollection(String json) {
 		Type collectionType = new TypeToken<Collection<Resource>>() {
 		}.getType();
 		return gson.fromJson(json, collectionType);

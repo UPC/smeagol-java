@@ -49,12 +49,10 @@ public class SmeagolClientTest extends TestCase {
 	private static final Tag TAG_1 = new Tag("tag1", "tag 1 description");
 	private static final Tag TAG_2 = new Tag("tag2", "tag 2 description");
 
-	private static final Resource RESOURCE_1 = new Resource("resource 1",
-			"resource 1 info");
+	private static final Resource RESOURCE_1 = new Resource("resource 1", "resource 1 info");
 
-	private static final Event EVENT_1 = new Event("event 1", "event 1 info",
-			new Interval(new DateTime("2011-04-20T08:00:00"), new DateTime(
-					"2011-04-25T14:00:00")));
+	private static final Event EVENT_1 = new Event("event 1", "event 1 info", new Interval(new DateTime(
+			"2011-04-20T08:00:00"), new DateTime("2011-04-25T14:00:00")));
 
 	private static SmeagolClient client;
 
@@ -69,29 +67,23 @@ public class SmeagolClientTest extends TestCase {
 	public static void prepareTestEnvironment() {
 
 		if (StringUtils.isBlank(dbUtils.getServerUrl())) {
-			logger.error("Please set the "
-					+ DbUtils.ENV_SMEAGOL_URL_NAME
+			logger.error("Please set the " + DbUtils.ENV_SMEAGOL_URL_NAME
 					+ " environment variable with the URL of the Sméagol server you want to run the tests with "
-					+ "(e.g. 'export " + DbUtils.ENV_SMEAGOL_URL_NAME
-					+ "=http://localhost:3000').");
+					+ "(e.g. 'export " + DbUtils.ENV_SMEAGOL_URL_NAME + "=http://localhost:3000').");
 			System.exit(1);
 		}
 		if (StringUtils.isBlank(dbUtils.getDatabasePath())) {
-			logger.error("You must set the "
-					+ DbUtils.ENV_SMEAGOL_DB_PATH_NAME
+			logger.error("You must set the " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME
 					+ " environment variable with the path to the Sméagol server database used to run the tests "
-					+ "(e.g. 'export " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME
-					+ "=/path/to/smeagol/var/smeagol.db').");
+					+ "(e.g. 'export " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME + "=/path/to/smeagol/var/smeagol.db').");
 			System.exit(1);
 		}
 
 		System.out.println("Running " + SmeagolClient.class.getCanonicalName()
 				+ " tests with the following configuration: ");
 		System.out.println("");
-		System.out.println("  * " + DbUtils.ENV_SMEAGOL_URL_NAME + " = "
-				+ dbUtils.getServerUrl());
-		System.out.println("  * " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME + " = "
-				+ dbUtils.getDatabasePath());
+		System.out.println("  * " + DbUtils.ENV_SMEAGOL_URL_NAME + " = " + dbUtils.getServerUrl());
+		System.out.println("  * " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME + " = " + dbUtils.getDatabasePath());
 		System.out.println("");
 
 		try {
@@ -114,26 +106,22 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCreateTagWithNullId() throws AlreadyExistsException {
+	public void testCreateTagWithNullId() {
 		client.createTag(null, "a description");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCreateTagWithIdTooLong() throws AlreadyExistsException {
-		client.createTag(StringUtils.rightPad("a", Tag.ID_MAX_LEN + 1, "a"),
-				"a description");
+	public void testCreateTagWithIdTooLong() {
+		client.createTag(StringUtils.rightPad("a", Tag.ID_MAX_LEN + 1, "a"), "a description");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCreateTagWithDescriptionTooLong()
-			throws AlreadyExistsException {
-		client.createTag("a",
-				StringUtils.rightPad("x", Tag.DESCRIPTION_MAX_LEN + 1, "x"));
+	public void testCreateTagWithDescriptionTooLong() throws AlreadyExistsException {
+		client.createTag("a", StringUtils.rightPad("x", Tag.DESCRIPTION_MAX_LEN + 1, "x"));
 	}
 
 	@Test
-	public void testCreateTagWithNullDescription()
-			throws AlreadyExistsException, NotFoundException {
+	public void testCreateTagWithNullDescription() {
 		int tagsInServer = client.getTags().size();
 		Tag aux = TAG_WITH_NULL_DESCRIPTION;
 		String tagId = client.createTag(aux.getId(), aux.getDescription());
@@ -144,8 +132,7 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test
-	public void testCreateTag() throws AlreadyExistsException,
-			NotFoundException {
+	public void testCreateTag() {
 		int tagsInServer = client.getTags().size();
 		client.createTag(TAG_1.getId(), TAG_1.getDescription());
 		assertEquals(tagsInServer + 1, client.getTags().size());
@@ -156,14 +143,14 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test(expected = AlreadyExistsException.class)
-	public void testCreateTagAlreadyExists() throws AlreadyExistsException {
+	public void testCreateTagAlreadyExists() {
 		String id = client.createTag(TAG_1.getId(), null);
 		assertNotNull(id);
 		client.createTag(id, "some other description");
 	}
 
 	@Test(expected = NotFoundException.class)
-	public void testGetTagNotFound() throws NotFoundException {
+	public void testGetTagNotFound() {
 		@SuppressWarnings("unused")
 		Tag t = client.getTag("dummy");
 	}
@@ -174,8 +161,7 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test
-	public void testUpdateTag() throws NotFoundException,
-			AlreadyExistsException {
+	public void testUpdateTag() {
 		String NEW_DESCRIPTION = "hi! am a new description á é";
 		String id = client.createTag(TAG_1.getId(), TAG_1.getDescription());
 		client.updateTag(id, NEW_DESCRIPTION);
@@ -185,7 +171,7 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test(expected = NotFoundException.class)
-	public void testUpdateTagNotFound() throws NotFoundException {
+	public void testUpdateTagNotFound() {
 		Tag NON_EXISTENT_TAG = new Tag("dummy", "dummy description");
 		Collection<Tag> tags = client.getTags();
 		assertFalse(tags.contains(NON_EXISTENT_TAG));
@@ -193,13 +179,12 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test(expected = NotFoundException.class)
-	public void testDeleteTagNotFound() throws NotFoundException {
+	public void testDeleteTagNotFound() {
 		client.deleteTag("TrulyInexistentTag");
 	}
 
 	@Test
-	public void testDeleteTag() throws NotFoundException,
-			AlreadyExistsException {
+	public void testDeleteTag() {
 		client.createTag(TAG_1.getId(), TAG_1.getDescription());
 		client.createTag(TAG_2.getId(), TAG_2.getDescription());
 		Collection<Tag> tags = client.getTags();
@@ -222,21 +207,19 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test(expected = NotFoundException.class)
-	public void testGetResourceNotFound() throws NotFoundException {
+	public void testGetResourceNotFound() {
 
 		@SuppressWarnings("unused")
 		Resource r = client.getResource(123456789L);
 	}
 
 	@Test
-	public void testCreateResource() throws AlreadyExistsException,
-			NotFoundException {
+	public void testCreateResource() {
 		Collection<Resource> resourcesBefore = client.getResources();
 		int resourceCountBefore = resourcesBefore.size();
 
 		assertFalse(resourcesBefore.contains(RESOURCE_1));
-		long resourceId = client.createResource(RESOURCE_1.getDescription(),
-				RESOURCE_1.getInfo());
+		long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
 		Collection<Resource> resourcesAfter = client.getResources();
 		RESOURCE_1.setId(resourceId);
 		assertEquals(RESOURCE_1, client.getResource(resourceId));
@@ -245,11 +228,9 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test
-	public void testGetResource() throws NotFoundException,
-			AlreadyExistsException {
+	public void testGetResource() {
 		assertFalse(client.getResources().contains(RESOURCE_1));
-		Long id = client.createResource(RESOURCE_1.getDescription(),
-				RESOURCE_1.getInfo());
+		Long id = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
 		Resource r = client.getResource(id);
 		assertNotNull(r);
 		RESOURCE_1.setId(id);
@@ -257,11 +238,10 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test(expected = AlreadyExistsException.class)
-	public void testCreateDuplicatedResource() throws AlreadyExistsException {
+	public void testCreateDuplicatedResource() {
 		Collection<Resource> resources = client.getResources();
 		assertFalse(resources.contains(RESOURCE_1));
-		Long id = client.createResource(RESOURCE_1.getDescription(),
-				RESOURCE_1.getInfo());
+		Long id = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
 		RESOURCE_1.setId(id);
 		assertTrue(client.getResources().contains(RESOURCE_1));
 		// this should throw AlreadyExistsException:
@@ -269,33 +249,28 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCreateResourceWithNullDescription()
-			throws AlreadyExistsException {
+	public void testCreateResourceWithNullDescription() {
 		client.createResource(null, "some info");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCreateResourceWithEmptyDescription()
-			throws AlreadyExistsException {
+	public void testCreateResourceWithEmptyDescription() {
 		client.createResource("", null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCreateResourceWithBlankDescription()
-			throws AlreadyExistsException {
+	public void testCreateResourceWithBlankDescription() {
 		client.createResource("               ", null);
 	}
 
 	@Test(expected = NotFoundException.class)
-	public void testDeleteResourceNotFound() throws NotFoundException {
+	public void testDeleteResourceNotFound() {
 		client.deleteResource(12345678L);
 	}
 
 	@Test
-	public void testDeleteResource() throws AlreadyExistsException,
-			NotFoundException {
-		Long id = client.createResource(RESOURCE_1.getDescription(),
-				RESOURCE_1.getInfo());
+	public void testDeleteResource() {
+		Long id = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
 		RESOURCE_1.setId(id);
 		assertTrue(client.getResources().contains(RESOURCE_1));
 		client.deleteResource(id);
@@ -303,10 +278,8 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test
-	public void testUpdateResource() throws AlreadyExistsException,
-			NotFoundException {
-		Long id = client.createResource(RESOURCE_1.getDescription(),
-				RESOURCE_1.getInfo());
+	public void testUpdateResource() {
+		Long id = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
 		assertNotNull(id);
 		String newDesc = "new description";
 		String newInfo = "new info";
@@ -317,74 +290,58 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testUpdateResourceNullDescription()
-			throws AlreadyExistsException, NotFoundException {
-		Long id = client.createResource(RESOURCE_1.getDescription(),
-				RESOURCE_1.getInfo());
+	public void testUpdateResourceNullDescription() {
+		Long id = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
 		assertNotNull(id);
 		client.updateResource(id, new Resource(null, "new info"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testUpdateResourceDescriptionTooLong()
-			throws AlreadyExistsException, NotFoundException {
-		Long id = client.createResource(RESOURCE_1.getDescription(),
-				RESOURCE_1.getInfo());
+	public void testUpdateResourceDescriptionTooLong() {
+		Long id = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
 		assertNotNull(id);
-		String TOO_LONG_DESC = StringUtils.rightPad("a",
-				Resource.DESCRIPTION_MAX_LEN + 1, 'a');
+		String TOO_LONG_DESC = StringUtils.rightPad("a", Resource.DESCRIPTION_MAX_LEN + 1, 'a');
 		client.updateResource(id, new Resource(TOO_LONG_DESC, "new info"));
 	}
 
 	@Test
-	public void testUpdateResourceSameDescription()
-			throws AlreadyExistsException, NotFoundException {
-		Long id = client.createResource(RESOURCE_1.getDescription(),
-				RESOURCE_1.getInfo());
+	public void testUpdateResourceSameDescription() {
+		Long id = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
 		assertNotNull(id);
 		String newInfo = "new info";
-		client.updateResource(id, new Resource(RESOURCE_1.getDescription(),
-				newInfo));
+		client.updateResource(id, new Resource(RESOURCE_1.getDescription(), newInfo));
 		Resource updated = client.getResource(id);
 		assertEquals(RESOURCE_1.getDescription(), updated.getDescription());
 		assertEquals(newInfo, updated.getInfo());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testUpdateResourceInfoTooLong() throws AlreadyExistsException,
-			NotFoundException {
-		Long id = client.createResource(RESOURCE_1.getDescription(),
-				RESOURCE_1.getInfo());
+	public void testUpdateResourceInfoTooLong() {
+		Long id = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
 		assertNotNull(id);
-		String TOO_LONG_INFO = StringUtils.rightPad("a",
-				Resource.INFO_MAX_LEN + 1, 'a');
+		String TOO_LONG_INFO = StringUtils.rightPad("a", Resource.INFO_MAX_LEN + 1, 'a');
 		client.updateResource(id, new Resource("some desc", TOO_LONG_INFO));
 	}
 
 	@Test(expected = AlreadyExistsException.class)
-	public void testUpdateResourceDuplicatedDesc()
-			throws AlreadyExistsException, NotFoundException {
-		Long id1 = client.createResource(RESOURCE_1.getDescription(),
-				RESOURCE_1.getInfo());
+	public void testUpdateResourceDuplicatedDesc() {
+		Long id1 = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
 		Resource RESOURCE_2 = new Resource("resource 2 desc", "resource 2 info");
-		Long id2 = client.createResource(RESOURCE_2.getDescription(),
-				RESOURCE_2.getInfo());
+		Long id2 = client.createResource(RESOURCE_2.getDescription(), RESOURCE_2.getInfo());
 
 		assertNotNull(id1);
 		assertNotNull(id2);
-		client.updateResource(id2, new Resource(RESOURCE_1.getDescription(),
-				"whatever"));
+		client.updateResource(id2, new Resource(RESOURCE_1.getDescription(), "whatever"));
 	}
 
 	@Test(expected = NotFoundException.class)
-	public void testGetEventNotFound() throws NotFoundException {
+	public void testGetEventNotFound() {
 		client.getEvent(12345678L);
 	}
 
 	@Test
-	public void testCreateEventWithNullDescription() throws NotFoundException {
-		Long eventId = client.createEvent(null, EVENT_1.getInfo(),
-				EVENT_1.getInterval());
+	public void testCreateEventWithNullDescription() {
+		Long eventId = client.createEvent(null, EVENT_1.getInfo(), EVENT_1.getInterval());
 		assertNotNull(eventId);
 		Event evt = client.getEvent(eventId);
 		assertNotNull(evt);
@@ -394,9 +351,8 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test
-	public void testCreateEventWithEmptyDescription() throws NotFoundException {
-		Long eventId = client.createEvent("", EVENT_1.getInfo(),
-				EVENT_1.getInterval());
+	public void testCreateEventWithEmptyDescription() {
+		Long eventId = client.createEvent("", EVENT_1.getInfo(), EVENT_1.getInterval());
 		assertNotNull(eventId);
 		Event evt = client.getEvent(eventId);
 		assertNotNull(evt);
@@ -406,10 +362,9 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test
-	public void testCreateEventWithBlankDescription() throws NotFoundException {
+	public void testCreateEventWithBlankDescription() {
 		String BLANK_DESC = "           ";
-		Long eventId = client.createEvent(BLANK_DESC, EVENT_1.getInfo(),
-				EVENT_1.getInterval());
+		Long eventId = client.createEvent(BLANK_DESC, EVENT_1.getInfo(), EVENT_1.getInterval());
 		assertNotNull(eventId);
 		Event evt = client.getEvent(eventId);
 		assertNotNull(evt);
@@ -419,35 +374,28 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCreateEventWithDescriptionTooLong()
-			throws NotFoundException {
-		String TOO_LONG_DESCRIPTION = StringUtils.rightPad("a",
-				Event.DESCRIPTION_MAX_LEN + 1, 'a');
-		client.createEvent(TOO_LONG_DESCRIPTION, EVENT_1.getInfo(),
-				EVENT_1.getInterval());
+	public void testCreateEventWithDescriptionTooLong() {
+		String TOO_LONG_DESCRIPTION = StringUtils.rightPad("a", Event.DESCRIPTION_MAX_LEN + 1, 'a');
+		client.createEvent(TOO_LONG_DESCRIPTION, EVENT_1.getInfo(), EVENT_1.getInterval());
 	}
 
 	@Test
 	public void testCreateEventWithInfoMaxLength() {
 		String LONG_INFO = StringUtils.rightPad("a", Event.INFO_MAX_LEN, 'a');
-		client.createEvent(EVENT_1.getDescription(), LONG_INFO,
-				EVENT_1.getInterval());
+		client.createEvent(EVENT_1.getDescription(), LONG_INFO, EVENT_1.getInterval());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateEventWithInfoTooLong() {
-		String TOO_LONG_INFO = StringUtils.rightPad("a",
-				Event.INFO_MAX_LEN + 1, 'a');
-		client.createEvent(EVENT_1.getDescription(), TOO_LONG_INFO,
-				EVENT_1.getInterval());
+		String TOO_LONG_INFO = StringUtils.rightPad("a", Event.INFO_MAX_LEN + 1, 'a');
+		client.createEvent(EVENT_1.getDescription(), TOO_LONG_INFO, EVENT_1.getInterval());
 	}
 
 	@Test
 	public void testCreateEvent() {
 		Collection<Event> events = client.getEvents();
 		int eventCountBefore = events.size();
-		Long id = client.createEvent(EVENT_1.getDescription(),
-				EVENT_1.getInfo(), EVENT_1.getInterval());
+		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
 		EVENT_1.setId(id);
 		events = client.getEvents();
 		assertEquals(eventCountBefore + 1, client.getEvents().size());
@@ -472,13 +420,13 @@ public class SmeagolClientTest extends TestCase {
 	 * 
 	 * 
 	 * 
-	 * @Test public void testUpdateEvent() throws NotFoundException { long
-	 * EVENT_ID = 5L; String NOVADESC = "NovaDesc"; String NOVAINFO =
-	 * "Nova informació"; Interval NOUINTERVAL = new Interval(new
-	 * DateTime("2011-06-07T08:00:00"), new DateTime("2011-06-10T18:00:00"));
-	 * Collection<Tag> NOVESTAGS = new HashSet<Tag>(); NOVESTAGS.add(new
-	 * Tag("isabel", "descr 7")); NOVESTAGS.add(new Tag("wireless", "descr 8"));
-	 * NOVESTAGS.add(new Tag("pantalla", "descr 2"));
+	 * @Test public void testUpdateEvent() { long EVENT_ID = 5L; String NOVADESC
+	 * = "NovaDesc"; String NOVAINFO = "Nova informació"; Interval NOUINTERVAL =
+	 * new Interval(new DateTime("2011-06-07T08:00:00"), new
+	 * DateTime("2011-06-10T18:00:00")); Collection<Tag> NOVESTAGS = new
+	 * HashSet<Tag>(); NOVESTAGS.add(new Tag("isabel", "descr 7"));
+	 * NOVESTAGS.add(new Tag("wireless", "descr 8")); NOVESTAGS.add(new
+	 * Tag("pantalla", "descr 2"));
 	 * 
 	 * Event e = client.getEvent(EVENT_ID); assertEquals(EXISTENT_EVENT, e);
 	 * Event newEvent = new Event(NOVADESC, NOVAINFO, NOUINTERVAL, NOVESTAGS);
@@ -489,22 +437,20 @@ public class SmeagolClientTest extends TestCase {
 	 * updated.getTags())); }
 	 * 
 	 * @Test(expected = NotFoundException.class) public void
-	 * testUpdateEventNotFound() throws NotFoundException { Event e = new
-	 * Event("dummy desc", "dummy info", new Interval(new DateTime(), new
-	 * DateTime()));
+	 * testUpdateEventNotFound() { Event e = new Event("dummy desc",
+	 * "dummy info", new Interval(new DateTime(), new DateTime()));
 	 * 
 	 * @SuppressWarnings("unused") Event updated =
 	 * client.updateEvent(NON_EXISTENT_EVENT_ID, e); }
 	 * 
 	 * @Test(expected = NotFoundException.class) public void
-	 * testDeleteEventNotFound() throws NotFoundException { // this should raise
-	 * a NotFoundException client.deleteEvent(NON_EXISTENT_EVENT_ID); }
+	 * testDeleteEventNotFound() { // this should raise a NotFoundException
+	 * client.deleteEvent(NON_EXISTENT_EVENT_ID); }
 	 * 
-	 * @Test public void testDeleteEvent() throws NotFoundException {
-	 * Collection<Event> eventsBefore = client.getEvents();
-	 * client.deleteEvent(EXISTENT_EVENT.getId()); Collection<Event> eventsAfter
-	 * = client.getEvents(); assertEquals(eventsBefore.size()-1,
-	 * eventsAfter.size()); assertFalse(eventsAfter.contains(EXISTENT_EVENT));
-	 * EVENT_COUNT--; }
+	 * @Test public void testDeleteEvent() { Collection<Event> eventsBefore =
+	 * client.getEvents(); client.deleteEvent(EXISTENT_EVENT.getId());
+	 * Collection<Event> eventsAfter = client.getEvents();
+	 * assertEquals(eventsBefore.size()-1, eventsAfter.size());
+	 * assertFalse(eventsAfter.contains(EXISTENT_EVENT)); EVENT_COUNT--; }
 	 */
 }

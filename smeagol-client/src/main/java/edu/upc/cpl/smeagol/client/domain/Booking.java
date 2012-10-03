@@ -167,20 +167,21 @@ public class Booking implements Comparable<Booking> {
 	 * @return a new RecurrentBooking for the specified daily recurrence.
 	 * 
 	 * @throws IllegalArgumentException
+	 * 
 	 */
 	public static Booking asDailyRecurrence(Long idResource, Long idEvent, DateTime start, DateTime end,
-			Short interval, DateTime until) throws IllegalArgumentException {
+			Short interval, DateTime until) {
 
 		// TODO: Check that end - start <= 24 hours (???)
 
 		Interval i = new Interval(start, end);
 		if (i.toDuration().isLongerThan(MAX_SPAN_DURATION_FOR_DAILY_RECURRENCE)) {
 			throw new IllegalArgumentException(
-					"time span defined by [start,end] is too wide (should last at most one day for daily recurrences)");
+					"time span defined by [start,end] is too wide (should last at most one day long for daily recurrences)");
 		}
 
 		if (until != null && until.isBefore(start)) {
-			throw new IllegalArgumentException("until DateTime should be after start DateTime");
+			throw new IllegalArgumentException("*until* DateTime should be after *start* DateTime");
 		}
 
 		Booking b = new Booking();
@@ -249,7 +250,7 @@ public class Booking implements Comparable<Booking> {
 	 * @throws IllegalArgumentException
 	 */
 	public static Booking asWeeklyRecurrence(Long idResource, Long idEvent, DateTime start, DateTime end,
-			Short interval, DateTime until, Set<DayOfWeek> byDay) throws IllegalArgumentException {
+			Short interval, DateTime until, Set<DayOfWeek> byDay) {
 
 		// TODO: Check that end - start <= 24 hours (???)
 
@@ -323,9 +324,11 @@ public class Booking implements Comparable<Booking> {
 	 *            <code>IllegalArgumentException</code> will be thrown).
 	 * 
 	 * @return a new RecurrentBooking for the specified daily recurrence.
+	 * 
+	 * @throws IllegalArgumentException
 	 */
 	public static Booking asMonthlyRecurrence(Long idResource, Long idEvent, DateTime start, DateTime end,
-			Short interval, DateTime until, Set<Short> byMonthDay) throws IllegalArgumentException {
+			Short interval, DateTime until, Set<Short> byMonthDay) {
 
 		// TODO: Check that end - start <= 1 month (???)
 
@@ -397,6 +400,8 @@ public class Booking implements Comparable<Booking> {
 	 *            Valid months are numbers in the range [1..12].
 	 * 
 	 * @return a new RecurrentBooking for the specified daily recurrence.
+	 * 
+	 * @throws IllegalArgumentException
 	 */
 	public static Booking asYearlyRecurrence(Long idResource, Long idEvent, DateTime start, DateTime end,
 			Short interval, DateTime until, Set<Short> byMonthDay, Set<Short> byMonth) {
@@ -475,7 +480,7 @@ public class Booking implements Comparable<Booking> {
 	 * @throws IllegalArgumentException
 	 *             if byDayOfMonth contains any illegal value
 	 */
-	public void setByDayOfMonth(Set<Short> byDayOfMonth) throws IllegalArgumentException {
+	public void setByDayOfMonth(Set<Short> byDayOfMonth) {
 		if (byDayOfMonth == null) {
 			this.by_day_month = new TreeSet<Short>();
 		} else {
@@ -499,7 +504,7 @@ public class Booking implements Comparable<Booking> {
 	 * @param byMonth
 	 *            set of integer values in the range [1 .. 12]
 	 */
-	public void setByMonth(Set<Short> byMonth) throws IllegalArgumentException {
+	public void setByMonth(Set<Short> byMonth) {
 		if (byMonth == null) {
 			this.by_month = new TreeSet<Short>();
 		} else {
@@ -593,7 +598,7 @@ public class Booking implements Comparable<Booking> {
 	 * @param until
 	 *            the <code>DateTime</code> where the recurrence ends.
 	 */
-	public void setUntil(DateTime until) throws IllegalArgumentException {
+	public void setUntil(DateTime until) {
 		if (until != null && until.isBefore(getDtStart())) {
 			throw new IllegalArgumentException("until cannot be before dtStart");
 		}

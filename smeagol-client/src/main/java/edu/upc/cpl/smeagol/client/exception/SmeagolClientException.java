@@ -6,7 +6,7 @@ package edu.upc.cpl.smeagol.client.exception;
  * @author angel
  * 
  */
-public class SmeagolClientException extends Exception {
+public class SmeagolClientException extends RuntimeException {
 
 	private static final long serialVersionUID = -4590153559415781644L;
 

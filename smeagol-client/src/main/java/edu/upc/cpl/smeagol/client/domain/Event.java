@@ -16,7 +16,6 @@ import org.joda.time.Interval;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 import edu.upc.cpl.smeagol.json.DateTimeConverter;
@@ -129,7 +128,7 @@ public class Event implements Serializable, Comparable<Event> {
 	 *             if {@code description} is not a valid description as required
 	 *             by {@link Event#validateDescription(String)}
 	 */
-	public void setDescription(String description) throws IllegalArgumentException {
+	public void setDescription(String description) {
 		if (!validateDescription(description)) {
 			throw new IllegalArgumentException("invalid event description");
 		}
@@ -140,7 +139,7 @@ public class Event implements Serializable, Comparable<Event> {
 		return info;
 	}
 
-	public void setInfo(String info) throws IllegalArgumentException {
+	public void setInfo(String info) {
 		if (!validateInfo(info)) {
 			throw new IllegalArgumentException("invalid event info");
 		}
@@ -212,11 +211,11 @@ public class Event implements Serializable, Comparable<Event> {
 		return gson.toJson(events);
 	}
 
-	public static Event deserialize(String json) throws JsonParseException {
+	public static Event deserialize(String json) {
 		return gson.fromJson(json, Event.class);
 	}
 
-	public static Collection<Event> deserializeCollection(String json) throws JsonParseException {
+	public static Collection<Event> deserializeCollection(String json) {
 		Type collectionType = new TypeToken<Collection<Event>>() {
 		}.getType();
 		return gson.fromJson(json, collectionType);

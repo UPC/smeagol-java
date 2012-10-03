@@ -57,7 +57,7 @@ public class DayOfWeek implements Comparable<DayOfWeek> {
 
 	private String dayOfWeek;
 
-	public DayOfWeek(String dayOfWeek) throws IllegalArgumentException {
+	public DayOfWeek(String dayOfWeek) {
 		if (!validate(dayOfWeek)) {
 			throw new IllegalArgumentException("invalid day of week");
 		}
@@ -113,9 +113,9 @@ public class DayOfWeek implements Comparable<DayOfWeek> {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17,37).append(this.dayOfWeek).toHashCode();
+		return new HashCodeBuilder(17, 37).append(this.dayOfWeek).toHashCode();
 	};
-	
+
 	@Override
 	public boolean equals(Object other) {
 		if (other == null) {

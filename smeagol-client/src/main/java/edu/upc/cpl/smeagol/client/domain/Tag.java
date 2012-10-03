@@ -13,7 +13,6 @@ import org.apache.commons.validator.GenericValidator;
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -162,11 +161,11 @@ public final class Tag implements Serializable, Comparable<Tag> {
 		return gson.toJson(c);
 	}
 
-	public static Tag deserialize(String json) throws JsonParseException {
+	public static Tag deserialize(String json) {
 		return gson.fromJson(json, Tag.class);
 	}
 
-	public static Collection<Tag> deserializeCollection(String json) throws JsonParseException {
+	public static Collection<Tag> deserializeCollection(String json) {
 		Type tagCollection = new TypeToken<Collection<Tag>>() {
 		}.getType();
 		return gson.fromJson(json, tagCollection);
