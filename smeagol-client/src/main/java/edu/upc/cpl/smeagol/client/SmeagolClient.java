@@ -388,16 +388,14 @@ public class SmeagolClient {
 	 *            the identifier of the Resource to be updated.
 	 * @param newResource
 	 *            the Resource which will be used to update the old one.
-	 * @throws AlreadyExistsException 
+	 * @throws AlreadyExistsException
 	 */
-	public void updateResource(long id, Resource newResource)
-			throws NotFoundException, AlreadyExistsException {
+	public void updateResource(long id, Resource newResource) throws NotFoundException, AlreadyExistsException {
 		Form f = new Form();
 		f.add(RESOURCE_DESCRIPTION_ATTR_NAME, newResource.getDescription());
 		f.add(RESOURCE_INFO_ATTR_NAME, newResource.getInfo());
 
-		ClientResponse response = resourceWr.path("" + id)
-				.accept(MediaType.APPLICATION_JSON)
+		ClientResponse response = resourceWr.path("" + id).accept(MediaType.APPLICATION_JSON)
 				.put(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {
@@ -433,12 +431,8 @@ public class SmeagolClient {
 	 * @throws NotFoundException
 	 *             if there is no {@code Event} in the server with such id
 	 */
-	public Event getEvent(Long id) {
-		if (id == null) {
-			throw new IllegalArgumentException("getEvent requires a non null argument");
-		}
-
-		ClientResponse response = eventWr.path(id.toString()).accept(MediaType.APPLICATION_JSON)
+	public Event getEvent(long id) {
+		ClientResponse response = eventWr.path(String.valueOf(id)).accept(MediaType.APPLICATION_JSON)
 				.get(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {

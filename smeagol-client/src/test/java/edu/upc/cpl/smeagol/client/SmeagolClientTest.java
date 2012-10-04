@@ -334,6 +334,12 @@ public class SmeagolClientTest extends TestCase {
 		client.updateResource(id2, new Resource(RESOURCE_1.getDescription(), "whatever"));
 	}
 
+	@Test
+	public void testGetEventsWhenNoEventsOnServer() {
+		Collection<Event> events = client.getEvents();
+		assertTrue(events.isEmpty());
+	}
+
 	@Test(expected = NotFoundException.class)
 	public void testGetEventNotFound() {
 		client.getEvent(12345678L);
@@ -402,20 +408,30 @@ public class SmeagolClientTest extends TestCase {
 		assertTrue(events.contains(EVENT_1));
 	}
 
+	@Test
+	public void testGetEvent() {
+		long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+		Event e = client.getEvent(id);
+		assertNotNull(e);
+		e.setId(id);
+		logger.debug(e);
+		logger.debug(EVENT_1);
+		assertEquals(EVENT_1, e);
+	}
+
+	@Test
+	public void testGetEventsWithOneEvent() {
+		long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+		Collection<Event> events = client.getEvents();
+		assertFalse(events.isEmpty());
+		assertTrue(events.size() == 1);
+		assertTrue(events.contains(client.getEvent(id)));
+	}
+
 	/*
-	 * @Test public void testGetEvents() { ArrayList<Event> events = new
-	 * ArrayList<Event>(client.getEvents());
-	 * 
-	 * assertEquals(EVENT_COUNT, events.size()); for (Event e : events) {
-	 * logger.debug(e); } assertEquals(EXISTENT_EVENT, events.get(4));
-	 * assertEquals(EVENT_COUNT, events.size());
-	 * assertTrue(events.contains(EXISTENT_EVENT)); }
 	 * 
 	 * // FIXME: This test will fail until the #306 bug gets fixed.
 	 * 
-	 * @Test public void testGetEvent() { Event e; try { e =
-	 * client.getEvent(EXISTENT_EVENT_ID); assertEquals(EXISTENT_EVENT, e); }
-	 * catch (NotFoundException e1) { fail("get event"); } }
 	 * 
 	 * 
 	 * 
