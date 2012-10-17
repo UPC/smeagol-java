@@ -200,7 +200,7 @@ public class Event implements Serializable, Comparable<Event> {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this).append("id", id).append("description", description).append("info", info)
-				.toString();
+				.append("interval", getInterval()).toString();
 	}
 
 	public String serialize() {

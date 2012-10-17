@@ -413,9 +413,7 @@ public class SmeagolClientTest extends TestCase {
 		long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
 		Event e = client.getEvent(id);
 		assertNotNull(e);
-		e.setId(id);
-		logger.debug(e);
-		logger.debug(EVENT_1);
+		EVENT_1.setId(id);
 		assertEquals(EVENT_1, e);
 	}
 
