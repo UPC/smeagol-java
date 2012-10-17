@@ -426,30 +426,23 @@ public class SmeagolClientTest extends TestCase {
 		assertTrue(events.contains(client.getEvent(id)));
 	}
 
+	@Test
+	public void testUpdateEvent() {
+		String NOVADESC = "NovaDesc";
+		String NOVAINFO = "Nova informació";
+		Interval NOUINTERVAL = new Interval(new DateTime("2011-06-07T08:00:00"), new DateTime("2011-06-10T18:00:00"));
+
+		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+		
+		Event newEvt = new Event(NOVADESC, NOVAINFO, NOUINTERVAL);
+		newEvt.setId(id);
+		client.updateEvent(id, newEvt);
+		Event updated = client.getEvent(id);
+		
+		assertEquals(newEvt, updated);
+	}
+
 	/*
-	 * 
-	 * // FIXME: This test will fail until the #306 bug gets fixed.
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * @Test public void testUpdateEvent() { long EVENT_ID = 5L; String NOVADESC
-	 * = "NovaDesc"; String NOVAINFO = "Nova informació"; Interval NOUINTERVAL =
-	 * new Interval(new DateTime("2011-06-07T08:00:00"), new
-	 * DateTime("2011-06-10T18:00:00")); Collection<Tag> NOVESTAGS = new
-	 * HashSet<Tag>(); NOVESTAGS.add(new Tag("isabel", "descr 7"));
-	 * NOVESTAGS.add(new Tag("wireless", "descr 8")); NOVESTAGS.add(new
-	 * Tag("pantalla", "descr 2"));
-	 * 
-	 * Event e = client.getEvent(EVENT_ID); assertEquals(EXISTENT_EVENT, e);
-	 * Event newEvent = new Event(NOVADESC, NOVAINFO, NOUINTERVAL, NOVESTAGS);
-	 * Event updated = client.updateEvent(EVENT_ID, newEvent);
-	 * assertEquals(NOVADESC, updated.getDescription()); assertEquals(NOVAINFO,
-	 * updated.getInfo()); assertEquals(NOUINTERVAL, updated.getInterval());
-	 * assertTrue(CollectionUtils.isEqualCollection(NOVESTAGS,
-	 * updated.getTags())); }
-	 * 
 	 * @Test(expected = NotFoundException.class) public void
 	 * testUpdateEventNotFound() { Event e = new Event("dummy desc",
 	 * "dummy info", new Interval(new DateTime(), new DateTime()));

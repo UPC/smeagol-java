@@ -28,6 +28,7 @@ import edu.upc.cpl.smeagol.client.domain.Resource;
 import edu.upc.cpl.smeagol.client.domain.Tag;
 import edu.upc.cpl.smeagol.client.exception.AlreadyExistsException;
 import edu.upc.cpl.smeagol.client.exception.NotFoundException;
+import edu.upc.cpl.smeagol.json.DateTimeConverter;
 
 /**
  * This class implements a basic Sméagol client conforming to server API version
@@ -502,14 +503,16 @@ public class SmeagolClient {
 		Form f = new Form();
 		f.add(EVENT_DESCRIPTION_ATTR_NAME, newEvent.getDescription());
 		f.add(EVENT_INFO_ATTR_NAME, newEvent.getInfo());
-		f.add(EVENT_STARTS_ATTR_NAME, newEvent.getInterval().getStart());
-		f.add(EVENT_ENDS_ATTR_NAME, newEvent.getInterval().getEnd());
+		f.add(EVENT_STARTS_ATTR_NAME, DateTimeConverter.toSmeagolDateTime(newEvent.getInterval().getStart()));
+		f.add(EVENT_ENDS_ATTR_NAME, DateTimeConverter.toSmeagolDateTime(newEvent.getInterval().getEnd()));
 
 		ClientResponse response = eventWr.path("" + id).accept(MediaType.APPLICATION_JSON).put(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {
 		case NOT_FOUND:
 			throw new NotFoundException();
+		case BAD_REQUEST:
+			throw new IllegalArgumentException();
 		case OK:
 			break;
 		}
@@ -530,4 +533,5 @@ public class SmeagolClient {
 			throw new NotFoundException();
 		}
 	}
+
 }

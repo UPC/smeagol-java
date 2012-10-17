@@ -26,16 +26,18 @@ import com.google.gson.JsonSerializer;
  * @author angel
  * 
  */
-public class DateTimeConverter implements JsonSerializer<DateTime>,
-		JsonDeserializer<DateTime> {
-	public JsonElement serialize(DateTime src, Type typeOfSrc,
-			JsonSerializationContext context) {
-		return new JsonPrimitive(ISODateTimeFormat.dateTimeNoMillis()
-				.print(src));
+public class DateTimeConverter implements JsonSerializer<DateTime>, JsonDeserializer<DateTime> {
+	public static String toSmeagolDateTime(DateTime d) {
+		return ISODateTimeFormat.dateHourMinuteSecond().print(d);
 	}
 
-	public DateTime deserialize(JsonElement json, Type typeOfT,
-			JsonDeserializationContext context) throws JsonParseException {
+	public JsonElement serialize(DateTime src, Type typeOfSrc, JsonSerializationContext context) {
+		return new JsonPrimitive(toSmeagolDateTime(src));
+	}
+
+	public DateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+			throws JsonParseException {
 		return new DateTime(json.getAsJsonPrimitive().getAsString());
 	}
+
 }
