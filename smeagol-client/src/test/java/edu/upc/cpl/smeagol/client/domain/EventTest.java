@@ -14,6 +14,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import edu.upc.cpl.smeagol.json.DateTimeConverter;
+
 @RunWith(JUnit4.class)
 public class EventTest extends TestCase {
 
@@ -50,10 +52,10 @@ public class EventTest extends TestCase {
 				+ "\",\"info\":\""
 				+ e1.getInfo()
 				+ "\",\"starts\":\""
-				+ ISODateTimeFormat.dateTimeNoMillis().print(
+				+ DateTimeConverter.toSmeagolDateTime(
 						e1.getInterval().getStart())
 				+ "\",\"ends\":\""
-				+ ISODateTimeFormat.dateTimeNoMillis().print(
+				+ DateTimeConverter.toSmeagolDateTime(
 						e1.getInterval().getEnd()) + "\"}";
 
 		E2_JSON = "{\"id\":"
@@ -63,10 +65,10 @@ public class EventTest extends TestCase {
 				+ "\",\"info\":\""
 				+ e2.getInfo()
 				+ "\",\"starts\":\""
-				+ ISODateTimeFormat.dateTimeNoMillis().print(
+				+ DateTimeConverter.toSmeagolDateTime(
 						e2.getInterval().getStart())
 				+ "\",\"ends\":\""
-				+ ISODateTimeFormat.dateTimeNoMillis().print(
+				+ DateTimeConverter.toSmeagolDateTime(
 						e2.getInterval().getEnd()) + "\"}";
 
 		/*

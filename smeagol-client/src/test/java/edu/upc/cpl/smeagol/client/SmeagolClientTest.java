@@ -433,13 +433,46 @@ public class SmeagolClientTest extends TestCase {
 		Interval NOUINTERVAL = new Interval(new DateTime("2011-06-07T08:00:00"), new DateTime("2011-06-10T18:00:00"));
 
 		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
-		
+
 		Event newEvt = new Event(NOVADESC, NOVAINFO, NOUINTERVAL);
 		newEvt.setId(id);
 		client.updateEvent(id, newEvt);
 		Event updated = client.getEvent(id);
-		
+
 		assertEquals(newEvt, updated);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testUpdateEventWithNullDescription() {
+		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+
+		Event newEvt = new Event(null, EVENT_1.getInfo(), EVENT_1.getInterval());
+		client.updateEvent(id, newEvt);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testUpdateEventWithEmptyDescription() {
+		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+
+		Event newEvt = new Event("", EVENT_1.getInfo(), EVENT_1.getInterval());
+		client.updateEvent(id, newEvt);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testUpdateEventWithBlankDescription() {
+		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+
+		Event newEvt = new Event("            ", EVENT_1.getInfo(), EVENT_1.getInterval());
+		client.updateEvent(id, newEvt);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testUpdateEventWithDescriptionTooLong() {
+		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+
+		Event newEvt = new Event(StringUtils.rightPad("x", Event.DESCRIPTION_MAX_LEN + 1, "x"), EVENT_1.getInfo(),
+				EVENT_1.getInterval());
+		client.updateEvent(id, newEvt);
 	}
 
 	/*
