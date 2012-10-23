@@ -188,8 +188,14 @@ public class Event implements Serializable, Comparable<Event> {
 		}
 		Event other = (Event) obj;
 
-		return new EqualsBuilder().append(this.id, other.id).append(this.description, other.description)
-				.append(this.info, other.info).append(this.getInterval(), other.getInterval()).isEquals();
+		return new EqualsBuilder()
+				.append(this.id, other.id)
+				.append(this.description, other.description)
+				.append(this.info, other.info)
+				.append(DateTimeConverter.toSmeagolDateTime(this.getInterval().getStart()),
+						DateTimeConverter.toSmeagolDateTime(other.getInterval().getStart()))
+				.append(DateTimeConverter.toSmeagolDateTime(this.getInterval().getEnd()),
+						DateTimeConverter.toSmeagolDateTime(other.getInterval().getEnd())).isEquals();
 	}
 
 	@Override

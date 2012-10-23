@@ -475,22 +475,56 @@ public class SmeagolClientTest extends TestCase {
 		client.updateEvent(id, newEvt);
 	}
 
-	/*
-	 * @Test(expected = NotFoundException.class) public void
-	 * testUpdateEventNotFound() { Event e = new Event("dummy desc",
-	 * "dummy info", new Interval(new DateTime(), new DateTime()));
-	 * 
-	 * @SuppressWarnings("unused") Event updated =
-	 * client.updateEvent(NON_EXISTENT_EVENT_ID, e); }
-	 * 
-	 * @Test(expected = NotFoundException.class) public void
-	 * testDeleteEventNotFound() { // this should raise a NotFoundException
-	 * client.deleteEvent(NON_EXISTENT_EVENT_ID); }
-	 * 
-	 * @Test public void testDeleteEvent() { Collection<Event> eventsBefore =
-	 * client.getEvents(); client.deleteEvent(EXISTENT_EVENT.getId());
-	 * Collection<Event> eventsAfter = client.getEvents();
-	 * assertEquals(eventsBefore.size()-1, eventsAfter.size());
-	 * assertFalse(eventsAfter.contains(EXISTENT_EVENT)); EVENT_COUNT--; }
-	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testUpdateEventWithInfoTooLong() {
+		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+
+		Event newEvt = new Event(EVENT_1.getDescription(), StringUtils.rightPad("x", Event.INFO_MAX_LEN + 1, "x"),
+				EVENT_1.getInterval());
+		client.updateEvent(id, newEvt);
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testUpdateEventNotFound() {
+		long NON_EXISTENT_EVENT_ID = Long.MAX_VALUE;
+		Event e = new Event("dummy desc", "dummy info", new Interval(new DateTime(), new DateTime()));
+
+		client.updateEvent(NON_EXISTENT_EVENT_ID, e);
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testDeleteEventNotFound() {
+		long NON_EXISTENT_EVENT_ID = Long.MAX_VALUE;
+		client.deleteEvent(NON_EXISTENT_EVENT_ID);
+	}
+
+	@Test
+	public void testDeleteEvent() {
+		Event e1 = new Event("desc1", "info1", new Interval(new DateTime(), new DateTime().plusDays(1)));
+		Event e2 = new Event("desc2", "info2", new Interval(new DateTime(), new DateTime().plusDays(2)));
+		Event e3 = new Event("desc3", "info3", new Interval(new DateTime(), new DateTime().plusDays(3)));
+
+		long id1 = client.createEvent(e1.getDescription(), e1.getInfo(), e1.getInterval());
+		long id2 = client.createEvent(e2.getDescription(), e2.getInfo(), e2.getInterval());
+		long id3 = client.createEvent(e3.getDescription(), e3.getInfo(), e3.getInterval());
+
+		e1.setId(id1);
+		e2.setId(id2);
+		e3.setId(id3);
+
+		Collection<Event> eventsBefore = client.getEvents();
+		assertEquals(3, eventsBefore.size());
+		assertTrue(eventsBefore.contains(e1));
+		assertTrue(eventsBefore.contains(e2));
+		assertTrue(eventsBefore.contains(e3));
+
+		client.deleteEvent(id2);
+
+		Collection<Event> eventsAfter = client.getEvents();
+		assertEquals(2, eventsAfter.size());
+		assertTrue(eventsAfter.contains(e1));
+		assertFalse(eventsAfter.contains(e2));
+		assertTrue(eventsAfter.contains(e3));
+	}
+
 }
