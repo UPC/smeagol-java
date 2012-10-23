@@ -1,7 +1,7 @@
 package edu.upc.cpl.smeagol.client.domain;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,7 +16,6 @@ import org.joda.time.Interval;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 import edu.upc.cpl.smeagol.json.DateTimeConverter;
@@ -38,7 +37,13 @@ import edu.upc.cpl.smeagol.json.DateTimeConverter;
  * 
  * @author angel
  */
-public class Event implements Comparable<Event> {
+public class Event implements Serializable, Comparable<Event> {
+
+	/**
+	 * Required by the {@link Serializable} interface.
+	 */
+	private static final long serialVersionUID = -2616000905726892742L;
+
 	@SuppressWarnings("unused")
 	private static transient Logger logger = Logger.getLogger(Event.class);
 	private static transient Gson gson = new Gson();
@@ -55,24 +60,19 @@ public class Event implements Comparable<Event> {
 
 	/**
 	 * Maximum length for event descriptions = {@value}
-	 * <p>
-	 * TODO: check the maximum value allowed by the server
 	 */
-	public static transient final int DESCRIPTION_MAX_LEN = 50;
+	public static transient final int DESCRIPTION_MAX_LEN = 128;
 
 	/**
 	 * Maximum length for event info = {@value}
-	 * <p>
-	 * TODO: check the current maximum value allowed by the server
 	 */
-	public static transient final int INFO_MAX_LEN = 20;
+	public static transient final int INFO_MAX_LEN = 256;
 
 	private Long id;
 	private String description;
 	private String info;
 	private DateTime starts;
 	private DateTime ends;
-	private Collection<Tag> tags = new ArrayList<Tag>();
 
 	/**
 	 * Check if parameter is a valid event description
@@ -91,9 +91,6 @@ public class Event implements Comparable<Event> {
 		return (candidate == null || GenericValidator.maxLength(candidate, INFO_MAX_LEN));
 	}
 
-	protected Event() {
-	}
-
 	/**
 	 * Create a new Event with the provided attributes
 	 * 
@@ -102,7 +99,7 @@ public class Event implements Comparable<Event> {
 	 * @param info
 	 *            additional, optional info
 	 * @param startEnd
-	 *            the DateTime interval (start, end) at which the event occurs
+	 *            the {@link Interval} (start, end) at which the event occurs
 	 */
 	public Event(String description, String info, Interval startEnd) {
 		setDescription(description);
@@ -131,7 +128,7 @@ public class Event implements Comparable<Event> {
 	 *             if {@code description} is not a valid description as required
 	 *             by {@link Event#validateDescription(String)}
 	 */
-	public void setDescription(String description) throws IllegalArgumentException {
+	public void setDescription(String description) {
 		if (!validateDescription(description)) {
 			throw new IllegalArgumentException("invalid event description");
 		}
@@ -142,7 +139,7 @@ public class Event implements Comparable<Event> {
 		return info;
 	}
 
-	public void setInfo(String info) throws IllegalArgumentException {
+	public void setInfo(String info) {
 		if (!validateInfo(info)) {
 			throw new IllegalArgumentException("invalid event info");
 		}
@@ -171,15 +168,7 @@ public class Event implements Comparable<Event> {
 	 * @return the interval
 	 */
 	public Interval getInterval() {
-		return new Interval(starts, ends);
-	}
-
-	public void setTags(Collection<Tag> tags) {
-		this.tags = tags;
-	}
-
-	public Collection<Tag> getTags() {
-		return tags;
+		return new Interval(starts.toDateTime(), ends.toDateTime());
 	}
 
 	public int compareTo(Event other) {
@@ -199,19 +188,25 @@ public class Event implements Comparable<Event> {
 		}
 		Event other = (Event) obj;
 
-		return new EqualsBuilder().append(this.id, other.id).append(this.description, other.description)
-				.append(this.info, other.info).isEquals();
+		return new EqualsBuilder()
+				.append(this.id, other.id)
+				.append(this.description, other.description)
+				.append(this.info, other.info)
+				.append(DateTimeConverter.toSmeagolDateTime(this.getInterval().getStart()),
+						DateTimeConverter.toSmeagolDateTime(other.getInterval().getStart()))
+				.append(DateTimeConverter.toSmeagolDateTime(this.getInterval().getEnd()),
+						DateTimeConverter.toSmeagolDateTime(other.getInterval().getEnd())).isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder().append(id).toHashCode();
+		return new HashCodeBuilder().append(id).append(description).append(info).toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this).append("id", id).append("description", description).append("info", info)
-				.append("tags", tags).toString();
+				.append("interval", getInterval()).toString();
 	}
 
 	public String serialize() {
@@ -222,11 +217,11 @@ public class Event implements Comparable<Event> {
 		return gson.toJson(events);
 	}
 
-	public static Event deserialize(String json) throws JsonParseException {
+	public static Event deserialize(String json) {
 		return gson.fromJson(json, Event.class);
 	}
 
-	public static Collection<Event> deserializeCollection(String json) throws JsonParseException {
+	public static Collection<Event> deserializeCollection(String json) {
 		Type collectionType = new TypeToken<Collection<Event>>() {
 		}.getType();
 		return gson.fromJson(json, collectionType);

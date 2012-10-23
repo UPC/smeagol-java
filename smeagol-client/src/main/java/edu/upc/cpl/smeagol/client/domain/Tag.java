@@ -1,5 +1,6 @@
 package edu.upc.cpl.smeagol.client.domain;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
@@ -12,18 +13,22 @@ import org.apache.commons.validator.GenericValidator;
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 /**
  * Tags are used to add semantic information to resources, events and bookings.
  * <p>
- * Tags are identified by a case-insensitive description, and may have an
- * optional description.
+ * Tags are identified by a case-insensitive id, and may have an optional
+ * description.
  * 
  * @author angel
  */
-public class Tag implements Comparable<Tag> {
+public final class Tag implements Serializable, Comparable<Tag> {
+
+	/**
+	 * Required by the {@link Serializable} interface
+	 */
+	private static final long serialVersionUID = -1779809492328812739L;
 
 	@SuppressWarnings("unused")
 	private transient Logger logger = Logger.getLogger(getClass());
@@ -32,7 +37,7 @@ public class Tag implements Comparable<Tag> {
 	/**
 	 * Minimum length for tag identifiers = {@value}
 	 */
-	public transient static final int ID_MIN_LEN = 3;
+	public transient static final int ID_MIN_LEN = 1;
 
 	/**
 	 * Maximum length for tag identifiers = {@value}
@@ -48,12 +53,6 @@ public class Tag implements Comparable<Tag> {
 	private String description;
 
 	/**
-	 * This constructor should only be used during deserialization.
-	 */
-	protected Tag() {
-	}
-
-	/**
 	 * Validate if a string is a valid Tag identifier.
 	 * 
 	 * @param candidate
@@ -61,12 +60,12 @@ public class Tag implements Comparable<Tag> {
 	 * @return {@code true} if {@code id} is a valid identifier. Otherwise
 	 *         returns false.
 	 */
-	private static boolean validateId(String candidate) {
-		return (candidate != null && StringUtils.isNotBlank(candidate) && GenericValidator.isInRange(
-				candidate.length(), ID_MIN_LEN, ID_MAX_LEN));
+	private static boolean isValidId(String candidate) {
+		return (!StringUtils.isBlank(candidate) && GenericValidator.isInRange(candidate.length(), ID_MIN_LEN,
+				ID_MAX_LEN));
 	}
 
-	private static boolean validateDescription(String candidate) {
+	private static boolean isValidDescription(String candidate) {
 		return (candidate == null || GenericValidator.maxLength(candidate, DESCRIPTION_MAX_LEN));
 	}
 
@@ -78,7 +77,7 @@ public class Tag implements Comparable<Tag> {
 	 * @throws IllegalArgumentException
 	 *             if the provided id is null or an empty string ("").
 	 */
-	public Tag(String id) throws IllegalArgumentException {
+	public Tag(String id) {
 		setId(id);
 	}
 
@@ -87,21 +86,20 @@ public class Tag implements Comparable<Tag> {
 	 * <code>id</id> and <code>description</code>.
 	 * 
 	 * @param id
-	 *            An identifier for the new tag. Once the Tag is created, the id
-	 *            is immutable.
+	 *            An identifier for the new tag.
 	 * @param description
 	 *            A description for the new tag.
 	 * @throws IllegalArgumentException
 	 *             if the provided arguments are not valid tag id and
 	 *             description.
 	 */
-	public Tag(String id, String description) throws IllegalArgumentException {
+	public Tag(String id, String description) {
 		setId(id);
 		setDescription(description);
 	}
 
 	public void setId(String id) {
-		if (!validateId(id)) {
+		if (!isValidId(id)) {
 			throw new IllegalArgumentException("invalid tag id");
 		}
 		this.id = id;
@@ -112,8 +110,8 @@ public class Tag implements Comparable<Tag> {
 	}
 
 	public void setDescription(String description) {
-		if (!validateDescription(description)) {
-			throw new IllegalArgumentException("invalid description id");
+		if (!isValidDescription(description)) {
+			throw new IllegalArgumentException("invalid tag description");
 		}
 		this.description = description;
 	}
@@ -163,11 +161,11 @@ public class Tag implements Comparable<Tag> {
 		return gson.toJson(c);
 	}
 
-	public static Tag deserialize(String json) throws JsonParseException {
+	public static Tag deserialize(String json) {
 		return gson.fromJson(json, Tag.class);
 	}
 
-	public static Collection<Tag> deserializeCollection(String json) throws JsonParseException {
+	public static Collection<Tag> deserializeCollection(String json) {
 		Type tagCollection = new TypeToken<Collection<Tag>>() {
 		}.getType();
 		return gson.fromJson(json, tagCollection);
