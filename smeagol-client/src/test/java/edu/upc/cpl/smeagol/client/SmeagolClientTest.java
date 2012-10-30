@@ -527,4 +527,28 @@ public class SmeagolClientTest extends TestCase {
 		assertTrue(eventsAfter.contains(e3));
 	}
 
+	@Test(expected = NotFoundException.class)
+	public void testTagResourceWithTagNotFound() {
+		String NON_EXISTENT_TAG_ID = "dummy";
+		Long id = client.createResource("desc", "info");
+
+		assertNotNull(id);
+
+		client.tagResource(NON_EXISTENT_TAG_ID, id);
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testTagResourceWithResourceNotFound() {
+		Long NON_EXISTENT_RESOURCE_ID = Long.MAX_VALUE;
+		String TAG_ID = "newtag";
+
+		assertEquals(TAG_ID, client.createTag(TAG_ID, ""));
+
+		client.tagResource(TAG_ID, NON_EXISTENT_RESOURCE_ID);
+	}
+
+	/*
+	 * @Test public void testTagResource() { // TODO }
+	 */
+
 }

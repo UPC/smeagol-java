@@ -28,6 +28,7 @@ import edu.upc.cpl.smeagol.client.domain.Resource;
 import edu.upc.cpl.smeagol.client.domain.Tag;
 import edu.upc.cpl.smeagol.client.exception.AlreadyExistsException;
 import edu.upc.cpl.smeagol.client.exception.NotFoundException;
+import edu.upc.cpl.smeagol.client.exception.SmeagolClientException;
 import edu.upc.cpl.smeagol.json.DateTimeConverter;
 
 /**
@@ -126,7 +127,7 @@ public class SmeagolClient {
 		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
-			throw new NotFoundException();
+			throw new NotFoundException("tag not found");
 		}
 
 		String json = response.getEntity(String.class);
@@ -167,6 +168,8 @@ public class SmeagolClient {
 		case CREATED:
 			// tag was created successfully
 			break;
+		default:
+			throw new SmeagolClientException("unexpected server status: " + response.getClientResponseStatus());
 		}
 
 		try {
@@ -198,11 +201,13 @@ public class SmeagolClient {
 		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).put(ClientResponse.class, f);
 
 		switch (response.getClientResponseStatus()) {
-		case NOT_FOUND:
-			throw new NotFoundException();
 		case OK:
 			// tag successfully updated
 			break;
+		case NOT_FOUND:
+			throw new NotFoundException("tag not found");
+		default:
+			throw new SmeagolClientException("unexpected server status: " + response.getClientResponseStatus());
 		}
 	}
 
@@ -217,7 +222,7 @@ public class SmeagolClient {
 		ClientResponse response = tagWr.path(id).accept(MediaType.APPLICATION_JSON).delete(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
-			throw new NotFoundException();
+			throw new NotFoundException("tag not found");
 		}
 	}
 
@@ -276,7 +281,7 @@ public class SmeagolClient {
 				} catch (IllegalArgumentException e) {
 					// tag ignored, counter not incremented
 				} catch (AlreadyExistsException e) {
-					// this should never happen, as this is checked the "if"
+					// this should never happen, as this is checked by the "if"
 					// condition
 					e.printStackTrace();
 				}
@@ -311,7 +316,7 @@ public class SmeagolClient {
 				.get(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
-			throw new NotFoundException();
+			throw new NotFoundException("resource not found");
 		}
 
 		String json = response.getEntity(String.class);
@@ -343,7 +348,7 @@ public class SmeagolClient {
 
 		switch (response.getClientResponseStatus()) {
 		case CONFLICT:
-			throw new AlreadyExistsException();
+			throw new AlreadyExistsException("resource already exists");
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
 		case CREATED:
@@ -356,6 +361,8 @@ public class SmeagolClient {
 				logger.error("error parsing Resource location provided by server", e);
 			}
 			break;
+		default:
+			throw new SmeagolClientException("unexpected server status: " + response.getClientResponseStatus());
 		}
 		return null;
 	}
@@ -378,7 +385,7 @@ public class SmeagolClient {
 				.delete(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
-			throw new NotFoundException();
+			throw new NotFoundException("resource not found");
 		}
 	}
 
@@ -401,13 +408,15 @@ public class SmeagolClient {
 
 		switch (response.getClientResponseStatus()) {
 		case NOT_FOUND:
-			throw new NotFoundException();
+			throw new NotFoundException("resource not found");
 		case CONFLICT:
-			throw new AlreadyExistsException();
+			throw new AlreadyExistsException("resource already exists");
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
 		case OK:
 			break;
+		default:
+			throw new SmeagolClientException("unexpected server status: " + response.getClientResponseStatus());
 		}
 	}
 
@@ -437,7 +446,7 @@ public class SmeagolClient {
 				.get(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
-			throw new NotFoundException();
+			throw new NotFoundException("event not found");
 		}
 
 		String json = response.getEntity(String.class);
@@ -485,8 +494,9 @@ public class SmeagolClient {
 				// URIs
 				logger.error("error parsing Event location provided by server", e);
 			}
+		default:
+			throw new SmeagolClientException("unexpected server status: " + response.getClientResponseStatus());
 		}
-		return null;
 	}
 
 	/**
@@ -510,11 +520,13 @@ public class SmeagolClient {
 
 		switch (response.getClientResponseStatus()) {
 		case NOT_FOUND:
-			throw new NotFoundException();
+			throw new NotFoundException("event not found");
 		case BAD_REQUEST:
 			throw new IllegalArgumentException();
 		case OK:
 			break;
+		default:
+			throw new SmeagolClientException("unexpected server status: " + response.getClientResponseStatus());
 		}
 	}
 
@@ -530,8 +542,34 @@ public class SmeagolClient {
 		ClientResponse response = eventWr.path("" + id).accept(MediaType.APPLICATION_JSON).delete(ClientResponse.class);
 
 		if (response.getClientResponseStatus().equals(Status.NOT_FOUND)) {
-			throw new NotFoundException();
+			throw new NotFoundException("event not found");
 		}
 	}
 
+	/**
+	 * Apply a {@link Tag} to a {@link Resource}.
+	 * 
+	 * If the tag was already applied to the resource, this method does nothing.
+	 * 
+	 * @param tagId
+	 *            the tag id. The tag must exist in the Sméagol server.
+	 * @param resourceId
+	 *            the resource id. The resource must exist in the Sméagol
+	 *            server.
+	 * 
+	 * @throws NotFoundException
+	 *             if the tag or the resource do not exist in the Sméagol
+	 *             server.
+	 */
+	public void tagResource(String tagId, long resourceId) {
+		ClientResponse response = resourceWr.path("" + resourceId).path("tag").path(tagId)
+				.accept(MediaType.APPLICATION_JSON).put(ClientResponse.class);
+
+		switch (response.getClientResponseStatus()) {
+		case NOT_FOUND:
+			throw new NotFoundException("tag or resource not found");
+		default:
+			break;
+		}
+	}
 }
