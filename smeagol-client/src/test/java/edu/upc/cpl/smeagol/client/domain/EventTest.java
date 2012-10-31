@@ -51,11 +51,11 @@ public class EventTest extends TestCase {
 				+ "\",\"info\":\""
 				+ e1.getInfo()
 				+ "\",\"starts\":\""
-				+ DateTimeConverter.toSmeagolDateTime(
-						e1.getInterval().getStart())
+				+ DateTimeConverter.toSmeagolDateTime(e1.getInterval()
+						.getStart())
 				+ "\",\"ends\":\""
-				+ DateTimeConverter.toSmeagolDateTime(
-						e1.getInterval().getEnd()) + "\"}";
+				+ DateTimeConverter
+						.toSmeagolDateTime(e1.getInterval().getEnd()) + "\"}";
 
 		E2_JSON = "{\"id\":"
 				+ e2.getId()
@@ -64,11 +64,11 @@ public class EventTest extends TestCase {
 				+ "\",\"info\":\""
 				+ e2.getInfo()
 				+ "\",\"starts\":\""
-				+ DateTimeConverter.toSmeagolDateTime(
-						e2.getInterval().getStart())
+				+ DateTimeConverter.toSmeagolDateTime(e2.getInterval()
+						.getStart())
 				+ "\",\"ends\":\""
-				+ DateTimeConverter.toSmeagolDateTime(
-						e2.getInterval().getEnd()) + "\"}";
+				+ DateTimeConverter
+						.toSmeagolDateTime(e2.getInterval().getEnd()) + "\"}";
 
 		/*
 		 * e1 and e1Copy will have the same attributes, so e1.equals(e1Copy)
