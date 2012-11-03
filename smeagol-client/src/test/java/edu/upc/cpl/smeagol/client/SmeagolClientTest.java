@@ -584,4 +584,61 @@ public class SmeagolClientTest extends TestCase {
 		assertTrue(tags.contains(TAG_2));
 	}
 
+	@Test
+	public void testTagResourceWithDuplicatedTag() {
+		Long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+		String t2 = client.createTag(TAG_2.getId(), TAG_2.getDescription());
+
+		client.tagResource(t1, resourceId);
+		client.tagResource(t2, resourceId);
+		client.tagResource(t1, resourceId); // apply t1 again
+
+		Collection<Tag> tags = client.getResourceTags(resourceId);
+		assertEquals(2, tags.size());
+		assertTrue(tags.contains(TAG_1));
+		assertTrue(tags.contains(TAG_2));
+	}
+
+	@Test
+	public void testUntagResource() {
+		Long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+		String t2 = client.createTag(TAG_2.getId(), TAG_2.getDescription());
+		Collection<Tag> tags;
+
+		client.tagResource(t1, resourceId);
+		client.tagResource(t2, resourceId);
+		tags = client.getResourceTags(resourceId);
+
+		assertEquals(2, tags.size());
+		assertTrue(tags.contains(TAG_1));
+		assertTrue(tags.contains(TAG_2));
+
+		client.untagResource(t1, resourceId);
+		tags = client.getResourceTags(resourceId);
+		assertEquals(1, tags.size());
+		assertFalse(tags.contains(TAG_1));
+		assertTrue(tags.contains(TAG_2));
+
+		client.untagResource(t2, resourceId);
+		tags = client.getResourceTags(resourceId);
+		assertTrue(tags.isEmpty());
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testUntagResourceWithNonExistentTag() {
+
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testUntagResourceWithNonExistentResource() {
+
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testUntagResourceWhenTagIsNotAppliedToResource() {
+
+	}
+
 }

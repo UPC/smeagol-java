@@ -519,6 +519,7 @@ public class SmeagolClient {
 	 * 
 	 * @param tagId
 	 *            the tag id. The tag must exist in the Sméagol server.
+	 * 
 	 * @param resourceId
 	 *            the resource id. The resource must exist in the Sméagol
 	 *            server.
@@ -542,6 +543,19 @@ public class SmeagolClient {
 		}
 	}
 
+	/**
+	 * Get the {@link Tag}s currently applied to a {@link Resource}.
+	 * 
+	 * @param resourceId
+	 *            the resource identifier. The resource must exist in the
+	 *            Sméagol server.
+	 * 
+	 * @return the tags applied to the resource. Returns an empty collection if
+	 *         no tags are applied to that resource.
+	 * 
+	 * @throws NotFoundException
+	 *             if there is no resource with such id in the Sméagol server.
+	 */
 	public Collection<Tag> getResourceTags(long resourceId) {
 		ClientResponse response = tagWr.queryParam("resource", String.valueOf(resourceId))
 				.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
@@ -557,5 +571,38 @@ public class SmeagolClient {
 					+ response.getClientResponseStatus());
 		}
 
+	}
+
+	/**
+	 * Makes a tag to be unapplied to a resource.
+	 * 
+	 * 
+	 * @param tagId
+	 *            the tag identifier. The tag must exist in the Sméagol server.
+	 * 
+	 * @param resourceId
+	 *            the resource identifier. The resource must exist in the
+	 *            Sméagol server.
+	 * 
+	 * @throws NotFoundException
+	 *             if the tag or the resource do not exist in the Sméagol
+	 *             server, or if the tag is not currently applied to that
+	 *             resource.
+	 */
+	public void untagResource(String tagId, Long resourceId) {
+		ClientResponse response = resourceWr.path("" + resourceId).path("tag").path(tagId)
+				.accept(MediaType.APPLICATION_JSON).delete(ClientResponse.class);
+
+		switch (response.getClientResponseStatus()) {
+		case OK:
+			// done
+			break;
+		case NOT_FOUND:
+			throw new NotFoundException(
+					"resource or tag not found; or tag is not currently applied to the resource");
+		default:
+			throw new SmeagolClientException("unexpected server status: "
+					+ response.getClientResponseStatus());
+		}
 	}
 }
