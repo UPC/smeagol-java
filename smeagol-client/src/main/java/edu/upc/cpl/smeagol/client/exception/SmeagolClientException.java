@@ -10,4 +10,12 @@ public class SmeagolClientException extends RuntimeException {
 
 	private static final long serialVersionUID = -4590153559415781644L;
 
+	public SmeagolClientException() {
+		super();
+	}
+
+	public SmeagolClientException(String message) {
+		super(message);
+	}
+
 }

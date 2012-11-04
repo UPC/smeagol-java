@@ -67,15 +67,18 @@ public class SmeagolClientTest extends TestCase {
 	public static void prepareTestEnvironment() {
 
 		if (StringUtils.isBlank(dbUtils.getServerUrl())) {
-			logger.error("Please set the " + DbUtils.ENV_SMEAGOL_URL_NAME
+			logger.error("Please set the "
+					+ DbUtils.ENV_SMEAGOL_URL_NAME
 					+ " environment variable with the URL of the Sméagol server you want to run the tests with "
 					+ "(e.g. 'export " + DbUtils.ENV_SMEAGOL_URL_NAME + "=http://localhost:3000').");
 			System.exit(1);
 		}
 		if (StringUtils.isBlank(dbUtils.getDatabasePath())) {
-			logger.error("You must set the " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME
+			logger.error("You must set the "
+					+ DbUtils.ENV_SMEAGOL_DB_PATH_NAME
 					+ " environment variable with the path to the Sméagol server database used to run the tests "
-					+ "(e.g. 'export " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME + "=/path/to/smeagol/var/smeagol.db').");
+					+ "(e.g. 'export " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME
+					+ "=/path/to/smeagol/var/smeagol.db').");
 			System.exit(1);
 		}
 
@@ -430,7 +433,8 @@ public class SmeagolClientTest extends TestCase {
 	public void testUpdateEvent() {
 		String NOVADESC = "NovaDesc";
 		String NOVAINFO = "Nova informació";
-		Interval NOUINTERVAL = new Interval(new DateTime("2011-06-07T08:00:00"), new DateTime("2011-06-10T18:00:00"));
+		Interval NOUINTERVAL = new Interval(new DateTime("2011-06-07T08:00:00"), new DateTime(
+				"2011-06-10T18:00:00"));
 
 		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
 
@@ -470,8 +474,8 @@ public class SmeagolClientTest extends TestCase {
 	public void testUpdateEventWithDescriptionTooLong() {
 		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
 
-		Event newEvt = new Event(StringUtils.rightPad("x", Event.DESCRIPTION_MAX_LEN + 1, "x"), EVENT_1.getInfo(),
-				EVENT_1.getInterval());
+		Event newEvt = new Event(StringUtils.rightPad("x", Event.DESCRIPTION_MAX_LEN + 1, "x"),
+				EVENT_1.getInfo(), EVENT_1.getInterval());
 		client.updateEvent(id, newEvt);
 	}
 
@@ -479,8 +483,8 @@ public class SmeagolClientTest extends TestCase {
 	public void testUpdateEventWithInfoTooLong() {
 		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
 
-		Event newEvt = new Event(EVENT_1.getDescription(), StringUtils.rightPad("x", Event.INFO_MAX_LEN + 1, "x"),
-				EVENT_1.getInterval());
+		Event newEvt = new Event(EVENT_1.getDescription(), StringUtils.rightPad("x", Event.INFO_MAX_LEN + 1,
+				"x"), EVENT_1.getInterval());
 		client.updateEvent(id, newEvt);
 	}
 
@@ -525,6 +529,124 @@ public class SmeagolClientTest extends TestCase {
 		assertTrue(eventsAfter.contains(e1));
 		assertFalse(eventsAfter.contains(e2));
 		assertTrue(eventsAfter.contains(e3));
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testTagResourceWithTagNotFound() {
+		String NON_EXISTENT_TAG_ID = "dummy";
+		Long id = client.createResource("desc", "info");
+
+		assertNotNull(id);
+
+		client.tagResource(NON_EXISTENT_TAG_ID, id);
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testTagResourceWithResourceNotFound() {
+		Long NON_EXISTENT_RESOURCE_ID = Long.MAX_VALUE;
+		String TAG_ID = "newtag";
+
+		assertEquals(TAG_ID, client.createTag(TAG_ID, ""));
+
+		client.tagResource(TAG_ID, NON_EXISTENT_RESOURCE_ID);
+	}
+
+	@Test
+	public void testTagResource() {
+		Long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
+		String tagId = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+
+		assertNotNull(resourceId);
+		assertEquals(TAG_1.getId(), tagId);
+		client.tagResource(tagId, resourceId);
+	}
+
+	@Test
+	public void testGetTagsOfResourceWithoutTags() {
+		Long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
+		Collection<Tag> tags = client.getResourceTags(resourceId);
+		assertNotNull(tags);
+		assertTrue(tags.isEmpty());
+	}
+
+	@Test
+	public void testGetTagsOfResourceWithTags() {
+		Long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+		String t2 = client.createTag(TAG_2.getId(), TAG_2.getDescription());
+
+		client.tagResource(t1, resourceId);
+		client.tagResource(t2, resourceId);
+
+		Collection<Tag> tags = client.getResourceTags(resourceId);
+		assertEquals(2, tags.size());
+		assertTrue(tags.contains(TAG_1));
+		assertTrue(tags.contains(TAG_2));
+	}
+
+	@Test
+	public void testTagResourceWithDuplicatedTag() {
+		Long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+		String t2 = client.createTag(TAG_2.getId(), TAG_2.getDescription());
+
+		client.tagResource(t1, resourceId);
+		client.tagResource(t2, resourceId);
+		client.tagResource(t1, resourceId); // apply t1 again
+
+		Collection<Tag> tags = client.getResourceTags(resourceId);
+		assertEquals(2, tags.size());
+		assertTrue(tags.contains(TAG_1));
+		assertTrue(tags.contains(TAG_2));
+	}
+
+	@Test
+	public void testUntagResource() {
+		Long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+		String t2 = client.createTag(TAG_2.getId(), TAG_2.getDescription());
+		Collection<Tag> tags;
+
+		client.tagResource(t1, resourceId);
+		client.tagResource(t2, resourceId);
+		tags = client.getResourceTags(resourceId);
+
+		assertEquals(2, tags.size());
+		assertTrue(tags.contains(TAG_1));
+		assertTrue(tags.contains(TAG_2));
+
+		client.untagResource(t1, resourceId);
+		tags = client.getResourceTags(resourceId);
+		assertEquals(1, tags.size());
+		assertFalse(tags.contains(TAG_1));
+		assertTrue(tags.contains(TAG_2));
+
+		client.untagResource(t2, resourceId);
+		tags = client.getResourceTags(resourceId);
+		assertTrue(tags.isEmpty());
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testUntagResourceWithNonExistentTag() {
+		Long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
+
+		assertNotNull(resourceId);
+		client.untagResource("dummy", resourceId);
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testUntagResourceWithNonExistentResource() {
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+
+		client.untagResource(t1, Long.MAX_VALUE);
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testUntagResourceWhenTagIsNotAppliedToResource() {
+		Long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+
+		client.untagResource(t1, resourceId);
 	}
 
 }

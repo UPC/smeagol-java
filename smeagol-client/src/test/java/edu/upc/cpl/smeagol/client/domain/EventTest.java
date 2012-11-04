@@ -8,7 +8,6 @@ import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,11 +51,11 @@ public class EventTest extends TestCase {
 				+ "\",\"info\":\""
 				+ e1.getInfo()
 				+ "\",\"starts\":\""
-				+ DateTimeConverter.toSmeagolDateTime(
-						e1.getInterval().getStart())
+				+ DateTimeConverter.toSmeagolDateTime(e1.getInterval()
+						.getStart())
 				+ "\",\"ends\":\""
-				+ DateTimeConverter.toSmeagolDateTime(
-						e1.getInterval().getEnd()) + "\"}";
+				+ DateTimeConverter
+						.toSmeagolDateTime(e1.getInterval().getEnd()) + "\"}";
 
 		E2_JSON = "{\"id\":"
 				+ e2.getId()
@@ -65,11 +64,11 @@ public class EventTest extends TestCase {
 				+ "\",\"info\":\""
 				+ e2.getInfo()
 				+ "\",\"starts\":\""
-				+ DateTimeConverter.toSmeagolDateTime(
-						e2.getInterval().getStart())
+				+ DateTimeConverter.toSmeagolDateTime(e2.getInterval()
+						.getStart())
 				+ "\",\"ends\":\""
-				+ DateTimeConverter.toSmeagolDateTime(
-						e2.getInterval().getEnd()) + "\"}";
+				+ DateTimeConverter
+						.toSmeagolDateTime(e2.getInterval().getEnd()) + "\"}";
 
 		/*
 		 * e1 and e1Copy will have the same attributes, so e1.equals(e1Copy)
