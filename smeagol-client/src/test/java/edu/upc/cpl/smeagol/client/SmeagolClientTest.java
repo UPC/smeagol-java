@@ -628,17 +628,25 @@ public class SmeagolClientTest extends TestCase {
 
 	@Test(expected = NotFoundException.class)
 	public void testUntagResourceWithNonExistentTag() {
+		Long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
 
+		assertNotNull(resourceId);
+		client.untagResource("dummy", resourceId);
 	}
 
 	@Test(expected = NotFoundException.class)
 	public void testUntagResourceWithNonExistentResource() {
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
 
+		client.untagResource(t1, Long.MAX_VALUE);
 	}
 
 	@Test(expected = NotFoundException.class)
 	public void testUntagResourceWhenTagIsNotAppliedToResource() {
+		Long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
 
+		client.untagResource(t1, resourceId);
 	}
 
 }

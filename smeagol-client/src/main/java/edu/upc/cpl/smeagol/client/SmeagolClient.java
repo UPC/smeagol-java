@@ -533,10 +533,11 @@ public class SmeagolClient {
 				.accept(MediaType.APPLICATION_JSON).put(ClientResponse.class);
 
 		switch (response.getClientResponseStatus()) {
+		case OK:
+			// done
+			break;
 		case NOT_FOUND:
 			throw new NotFoundException("tag or resource not found");
-		case OK:
-			break;
 		default:
 			throw new SmeagolClientException("unexpected server status: "
 					+ response.getClientResponseStatus());
@@ -589,7 +590,7 @@ public class SmeagolClient {
 	 *             server, or if the tag is not currently applied to that
 	 *             resource.
 	 */
-	public void untagResource(String tagId, Long resourceId) {
+	public void untagResource(String tagId, long resourceId) {
 		ClientResponse response = resourceWr.path("" + resourceId).path("tag").path(tagId)
 				.accept(MediaType.APPLICATION_JSON).delete(ClientResponse.class);
 
