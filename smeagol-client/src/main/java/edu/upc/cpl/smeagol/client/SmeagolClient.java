@@ -606,4 +606,61 @@ public class SmeagolClient {
 					+ response.getClientResponseStatus());
 		}
 	}
+
+	/**
+	 * Apply a {@link Tag} to an {@link Event}.
+	 * 
+	 * If the tag was already applied to that event, this method does nothing.
+	 * 
+	 * @param tagId
+	 *            the tag id. The tag must exist in the Sméagol server.
+	 * @param eventId
+	 *            the event id. The event must exist in the Sméagol server.
+	 * 
+	 * @throws NotFoundException
+	 *             whether the tag or the event are not defined in the Sméagol
+	 *             server.
+	 */
+	public void tagEvent(String tagId, long eventId) {
+		ClientResponse response = eventWr.path("" + eventId).path("tag").path(tagId)
+				.accept(MediaType.APPLICATION_JSON).put(ClientResponse.class);
+
+		switch (response.getClientResponseStatus()) {
+		case OK:
+			// done
+			break;
+		case NOT_FOUND:
+			throw new NotFoundException("tag or event not found");
+		default:
+			throw new SmeagolClientException("unexpected server status: "
+					+ response.getClientResponseStatus());
+		}
+	}
+
+	/**
+	 * Get the tags applied to an event.
+	 * 
+	 * @return a (possibly empty) collection containing all the tags applied to
+	 *         the event identified by {@code eventId}.
+	 * 
+	 * @throws NotFoundException
+	 *             if there is no event in the Sméagol server with such
+	 *             identifier.
+	 */
+	public Collection<Tag> getEventTags(long eventId) {
+		ClientResponse response = tagWr.queryParam("event", String.valueOf(eventId))
+				.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+
+		switch (response.getClientResponseStatus()) {
+		case OK:
+			String json = response.getEntity(String.class);
+			return Tag.deserializeCollection(json);
+		case NOT_FOUND:
+			throw new NotFoundException("event not found");
+		default:
+			throw new SmeagolClientException("unexpected server status: "
+					+ response.getClientResponseStatus());
+		}
+	}
+
 }

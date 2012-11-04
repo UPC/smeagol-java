@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -562,15 +563,21 @@ public class SmeagolClientTest extends TestCase {
 	}
 
 	@Test
-	public void testGetTagsOfResourceWithoutTags() {
+	public void testGetResourceTagsWithoutTags() {
 		Long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
 		Collection<Tag> tags = client.getResourceTags(resourceId);
 		assertNotNull(tags);
 		assertTrue(tags.isEmpty());
 	}
 
+	@Test(expected = NotFoundException.class)
+	public void testGetResourceTagsWithResourceNotFound() {
+		@SuppressWarnings("unused")
+		Collection<Tag> tags = client.getResourceTags(Long.MAX_VALUE);
+	}
+
 	@Test
-	public void testGetTagsOfResourceWithTags() {
+	public void testGetResourceTags() {
 		Long resourceId = client.createResource(RESOURCE_1.getDescription(), RESOURCE_1.getInfo());
 		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
 		String t2 = client.createTag(TAG_2.getId(), TAG_2.getDescription());
@@ -649,4 +656,92 @@ public class SmeagolClientTest extends TestCase {
 		client.untagResource(t1, resourceId);
 	}
 
+	@Test(expected = NotFoundException.class)
+	public void testTagEventWithTagNotFound() {
+		Long eventId = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+
+		assertNotNull(eventId);
+		client.tagEvent("dummy", eventId);
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testTagEventWithEventNotFound() {
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+
+		assertNotNull(t1);
+		client.tagEvent(t1, Long.MAX_VALUE);
+	}
+
+	@Test
+	public void testTagEvent() {
+		Long eventId = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+		String t2 = client.createTag(TAG_2.getId(), TAG_2.getDescription());
+
+		client.tagEvent(t1, eventId);
+	}
+
+	@Test
+	public void testGetEventTagsWithNoTags() {
+		Long eventId = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+
+		Collection<Tag> tags = client.getEventTags(eventId);
+		assertTrue(tags.isEmpty());
+	}
+
+	@Test
+	public void testGetEventTags() {
+		Long eventId = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+		String t2 = client.createTag(TAG_2.getId(), TAG_2.getDescription());
+		Collection<Tag> tags;
+
+		client.tagEvent(t1, eventId);
+		tags = client.getEventTags(eventId);
+		assertEquals(1, tags.size());
+		assertTrue(tags.contains(TAG_1));
+
+		client.tagEvent(t2, eventId);
+		tags = client.getEventTags(eventId);
+		assertEquals(2, tags.size());
+		assertTrue(tags.contains(TAG_1));
+		assertTrue(tags.contains(TAG_2));
+	}
+
+	@Test
+	public void testTagEventDuplicateTag() {
+		Long eventId = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+		Collection<Tag> tags;
+
+		client.tagEvent(t1, eventId);
+		tags = client.getEventTags(eventId);
+		assertEquals(1, tags.size());
+		assertTrue(tags.contains(TAG_1));
+		// if we apply the same tag, nothing changes
+		client.tagEvent(t1, eventId);
+		tags = client.getEventTags(eventId);
+		assertEquals(1, tags.size());
+		assertTrue(tags.contains(TAG_1));
+	}
+
+	@Ignore
+	@Test
+	public void testUntagEvent() {
+	}
+
+	@Ignore
+	@Test
+	public void testUntagEventWhenTagIsNotApplied() {
+	}
+
+	@Ignore
+	@Test
+	public void testUntagEventWithNonExistentTag() {
+	}
+
+	@Ignore
+	@Test
+	public void testUntagEventWithNonExistentEvent() {
+	}
 }
