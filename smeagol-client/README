@@ -36,7 +36,20 @@ Compilar el codi
 
         mvn compile
 
- * Per executar els tests, cal tenir funcionant un servidor Sméagol de proves.
+ * Per executar els tests, cal tenir servidor Sméagol de proves funcionant localment.
+   
+   ****************************************************************************
+   ****************************************************************************
+   
+   ATENCIO!! ATENCIO !! ATENCIO !! ATENCIO !! ATENCIO !! ATENCIO !! ATENCIO !!
+
+   durant els tests s'esborren totes les dades del servidor de proves, per tant 
+   
+            NO EXECUTEU ELS TESTS CONTRA UN SERVIDOR EN PRODUCCIÓ
+
+   ****************************************************************************
+   ****************************************************************************
+
    S'han de definir dues variables d'entorn, una amb la URL del servidor, i una
    altra amb el path absolut a la base de dades utilitzada pel servidor de proves:
 
