@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,18 +67,15 @@ public class SmeagolClientTest extends TestCase {
 	public static void prepareTestEnvironment() {
 
 		if (StringUtils.isBlank(dbUtils.getServerUrl())) {
-			logger.error("Please set the "
-					+ DbUtils.ENV_SMEAGOL_URL_NAME
+			logger.error("Please set the " + DbUtils.ENV_SMEAGOL_URL_NAME
 					+ " environment variable with the URL of the Sméagol server you want to run the tests with "
 					+ "(e.g. 'export " + DbUtils.ENV_SMEAGOL_URL_NAME + "=http://localhost:3000').");
 			System.exit(1);
 		}
 		if (StringUtils.isBlank(dbUtils.getDatabasePath())) {
-			logger.error("You must set the "
-					+ DbUtils.ENV_SMEAGOL_DB_PATH_NAME
+			logger.error("You must set the " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME
 					+ " environment variable with the path to the Sméagol server database used to run the tests "
-					+ "(e.g. 'export " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME
-					+ "=/path/to/smeagol/var/smeagol.db').");
+					+ "(e.g. 'export " + DbUtils.ENV_SMEAGOL_DB_PATH_NAME + "=/path/to/smeagol/var/smeagol.db').");
 			System.exit(1);
 		}
 
@@ -434,8 +430,7 @@ public class SmeagolClientTest extends TestCase {
 	public void testUpdateEvent() {
 		String NOVADESC = "NovaDesc";
 		String NOVAINFO = "Nova informació";
-		Interval NOUINTERVAL = new Interval(new DateTime("2011-06-07T08:00:00"), new DateTime(
-				"2011-06-10T18:00:00"));
+		Interval NOUINTERVAL = new Interval(new DateTime("2011-06-07T08:00:00"), new DateTime("2011-06-10T18:00:00"));
 
 		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
 
@@ -475,8 +470,8 @@ public class SmeagolClientTest extends TestCase {
 	public void testUpdateEventWithDescriptionTooLong() {
 		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
 
-		Event newEvt = new Event(StringUtils.rightPad("x", Event.DESCRIPTION_MAX_LEN + 1, "x"),
-				EVENT_1.getInfo(), EVENT_1.getInterval());
+		Event newEvt = new Event(StringUtils.rightPad("x", Event.DESCRIPTION_MAX_LEN + 1, "x"), EVENT_1.getInfo(),
+				EVENT_1.getInterval());
 		client.updateEvent(id, newEvt);
 	}
 
@@ -484,8 +479,8 @@ public class SmeagolClientTest extends TestCase {
 	public void testUpdateEventWithInfoTooLong() {
 		Long id = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
 
-		Event newEvt = new Event(EVENT_1.getDescription(), StringUtils.rightPad("x", Event.INFO_MAX_LEN + 1,
-				"x"), EVENT_1.getInterval());
+		Event newEvt = new Event(EVENT_1.getDescription(), StringUtils.rightPad("x", Event.INFO_MAX_LEN + 1, "x"),
+				EVENT_1.getInterval());
 		client.updateEvent(id, newEvt);
 	}
 
@@ -676,7 +671,6 @@ public class SmeagolClientTest extends TestCase {
 	public void testTagEvent() {
 		Long eventId = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
 		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
-		String t2 = client.createTag(TAG_2.getId(), TAG_2.getDescription());
 
 		client.tagEvent(t1, eventId);
 	}
@@ -725,23 +719,52 @@ public class SmeagolClientTest extends TestCase {
 		assertTrue(tags.contains(TAG_1));
 	}
 
-	@Ignore
+	@Test(expected = NotFoundException.class)
+	public void testUntagEventWithNonExistentTag() {
+		Long eventId = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+		assertNotNull(eventId);
+		client.untagEvent("dummy", eventId);
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testUntagEventWithNonExistentEvent() {
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+		client.untagEvent(t1, Long.MAX_VALUE);
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void testUntagEventWhenTagIsNotApplied() {
+		Long eventId = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+
+		client.untagEvent(t1, eventId);
+	}
+
 	@Test
 	public void testUntagEvent() {
+		Long eventId = client.createEvent(EVENT_1.getDescription(), EVENT_1.getInfo(), EVENT_1.getInterval());
+		String t1 = client.createTag(TAG_1.getId(), TAG_1.getDescription());
+		String t2 = client.createTag(TAG_2.getId(), TAG_2.getDescription());
+		Collection<Tag> tags;
+
+		client.tagEvent(t1, eventId);
+		client.tagEvent(t2, eventId);
+		tags = client.getEventTags(eventId);
+
+		assertEquals(2, tags.size());
+		assertTrue(tags.contains(TAG_1));
+		assertTrue(tags.contains(TAG_2));
+
+		client.untagEvent(t1, eventId);
+		tags = client.getEventTags(eventId);
+
+		assertEquals(1, tags.size());
+		assertFalse(tags.contains(TAG_1));
+		assertTrue(tags.contains(TAG_2));
+
+		client.untagEvent(t2, eventId);
+		tags = client.getEventTags(eventId);
+		assertTrue(tags.isEmpty());
 	}
 
-	@Ignore
-	@Test
-	public void testUntagEventWhenTagIsNotApplied() {
-	}
-
-	@Ignore
-	@Test
-	public void testUntagEventWithNonExistentTag() {
-	}
-
-	@Ignore
-	@Test
-	public void testUntagEventWithNonExistentEvent() {
-	}
 }
