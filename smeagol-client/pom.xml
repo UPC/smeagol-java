@@ -104,7 +104,7 @@
 		<dependency>
 			<groupId>com.sun.jersey.contribs</groupId>
 			<artifactId>jersey-apache-client</artifactId>
-			<version>1.4</version>
+			<version>1.15</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xerial</groupId>
