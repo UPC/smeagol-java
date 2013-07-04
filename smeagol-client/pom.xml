@@ -135,7 +135,7 @@
 		</mailingList>
 	</mailingLists>
 	<scm>
-		<url>http://devel.cpl.upc.edu/recursos/browser/smeagol/java</url>
+		<url>http://github.com/smeagol-upc/smeagol-java</url>
 	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
