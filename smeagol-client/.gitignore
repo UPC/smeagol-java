@@ -1,9 +1,0 @@
-target/
-*~
-
-# Eclipse artifacts
-.classpath
-.factorypath
-.project
-.settings/
-
